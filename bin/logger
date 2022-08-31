@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function logInfo() {
+  if [ "$debug" = true ]; then
+    local msg="$1"
+    echo -e "[vidhop|info] $msg" >>"$log_file"
+    echo -e "[vidhop|info] $msg"
+  fi
+}
+
+function logJq() {
+  if [ "$debug" = true ]; then
+    msg="[logjq] $1"
+    [ -n "$msg" ] && echo "$msg" >>"$log_json_file"
+    jq <<<"$json" >>"$log_json_file"
+    echo -e "\n\n" >>"$log_json_file"
+    logInfo "$msg"
+  fi
+}
+
+function logError() {
+  if [ "$debug" = true ]; then
+    msg="$1"
+    echo -e "[vidhop|warning] $msg" >>"$log_file"
+    echo -e "[vidhop|warning] $msg"
+  fi
+}

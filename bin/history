@@ -1,0 +1,273 @@
+#!/bin/bash
+
+function history_help() {
+  echo " Title: history"
+  echo " Description: Show history of actions in VidHop."
+  echo " Commands:"
+  echo "    vhistory => shows the history of the videos you or metadata download"
+  echo "    chistory => shows the history of the channels you or metadata download"
+  echo "    ahistory => shows the history of the audio you or metadata download"
+  echo "    phistory => shows the history of the podcasts you or metadata download"
+  echo "    thistory => shows the history of the thumbnails you or metadata download"
+  return 0
+}
+
+function clear_history_vars() {
+  unset title channel_name channel_url media_file meta_file thumb_file vh_downloaded vh_fetch_date upload_date \
+    channel_dir avatar_file podcast_dir
+}
+
+function create_if_not_exists() {
+  history_file="$1"
+  ! [ -f "$history_file" ] && echo "[]" >"$history_file"
+  ! [ -s "$history_file" ] && echo "[]" >"$history_file"
+  ! [ "$(head -c 1 "$history_file")" = '[' ] &&
+    echo -e "history file has wrong format\ncreating backup and generating new history file..." &&
+    cp "$history_file" "$history_file.bkp" &&
+    echo "[]" >"$history_file"
+}
+
+function add_to_vhistory() {
+  clear_history_vars
+  create_if_not_exists "$vhistory_file"
+
+  title="$name"
+  channel_name="$(channel_name_from_obj)"
+  channel_url="$(channel_url_from_obj)"
+  media_file="$vids_dir/$platform/$name.mp4"
+  meta_file="$vids_meta_dir/$platform/$name.json"
+  thumb_file="$(find "$vids_meta_dir" -iname "*$name*.jpg" -o -iname "*$name*.png" -o -iname "*$name*.webp")"
+  vh_downloaded="$([ "$function" = "dlv" ] && echo true || echo false)"
+  vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
+  upload_date="$(jq '.upload_date' <<<"$json")"
+
+  history_entry=$(
+    cat <<JSON
+{
+    "title": "$title",
+    "url": "$url",
+    "channel_name": "$channel_name",
+    "channel_url": "$channel_url",
+    "media_file": "$media_file",
+    "meta_file": "$meta_file",
+    "thumb_file": "$thumb_file",
+    "vh_downloaded": "$vh_downloaded",
+    "vh_fetch_date": "$vh_fetch_date",
+    "upload_date": $upload_date
+}
+JSON
+  )
+
+  new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$vhistory_file")
+  jq <<<"$new_history" >"$vhistory_file"
+  echo "$title" >>"$titles_file"
+}
+
+function add_to_chistory() {
+  clear_history_vars
+  create_if_not_exists "$chistory_file"
+
+  channel_name="$name"
+  url="$url"
+  channel_dir="$(echo "$channels_dir/$name/$platform")"
+  meta_file="$(echo "$channels_meta_dir/$name/$platform/$name.json")"
+  avatar_file="$(echo "$channels_meta_dir/$name/$platform/avatar_data.json")"
+  vh_downloaded="$([ "$function" = "dlc" ] && echo true || echo false)"
+  vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
+
+  history_entry=$(
+    cat <<JSON
+{
+    "channel_name": "$name",
+    "url": "$url",
+    "channel_dir": "$channel_dir",
+    "meta_file": "$meta_file",
+    "avatar_file": "$avatar_file",
+    "vh_downloaded": "$vh_downloaded",
+    "vh_fetch_date": "$vh_fetch_date"
+}
+JSON
+  )
+
+  new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$chistory_file")
+  jq <<<"$new_history" >"$chistory_file"
+  echo "$title" >>"$titles_file"
+}
+
+function add_to_ahistory() {
+  clear_history_vars
+  create_if_not_exists "$ahistory_file"
+
+  title="$name"
+  url="$url"
+  channel_name="$(channel_name_from_obj)"
+  channel_url="$(channel_url_from_obj)"
+  media_file="$music_dir/$name.mp3"
+  meta_file="$music_meta_dir/$name.json"
+  thumb_file="$(find "$music_meta_dir" -iname "*$name*.jpg" -o -iname "*$name*.png" -o -iname "*$name*.webp")"
+  vh_downloaded="$([ "$function" = "dla" ] && echo true || echo false)"
+  vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
+  upload_date="$(jq '.upload_date' <<<"$json")"
+
+  history_entry=$(
+    cat <<JSON
+{
+    "title": "$title",
+    "url": "$url",
+    "channel_name": "$channel_name",
+    "channel_url": "$channel_url",
+    "media_file": "$media_file",
+    "meta_file": "$meta_file",
+    "thumb_file": "$thumb_file",
+    "vh_downloaded": "$vh_downloaded",
+    "vh_fetch_date": "$vh_fetch_date",
+    "upload_date": $upload_date
+}
+JSON
+  )
+
+  new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$ahistory_file")
+  jq <<<"$new_history" >"$ahistory_file"
+  echo "$title" >>"$titles_file"
+}
+
+function add_to_thistory() {
+  clear_history_vars
+  create_if_not_exists "$thistory_file"
+
+  title="$name"
+  url="$url"
+  channel_name="$(channel_name_from_obj)"
+  channel_url="$(channel_url_from_obj)"
+  meta_file="$thumbnails_dir/$platform/$name.json"
+  [ -f "$thumbnails_dir/$platform/$name.jpg" ] && media_file="$thumbnails_dir/$platform/$name.jpg"
+  [ -f "$thumbnails_dir/$platform/$name.png" ] && media_file="$thumbnails_dir/$platform/$name.png"
+  [ -f "$thumbnails_dir/$platform/$name.webp" ] && media_file="$thumbnails_dir/$platform/$name.webp"
+  thumb_file="$media_file"
+  vh_downloaded="$([ "$function" = "dla" ] && echo true || echo false)"
+  vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
+  upload_date="$(jq '.upload_date' <<<"$json")"
+
+  history_entry=$(
+    cat <<JSON
+{
+    "title": "$title",
+    "url": "$url",
+    "channel_name": "$channel_name",
+    "channel_url": "$channel_url",
+    "media_file": "$media_file",
+    "meta_file": "$meta_file",
+    "thumb_file": "$thumb_file",
+    "vh_downloaded": "$vh_downloaded",
+    "vh_fetch_date": "$vh_fetch_date",
+    "upload_date": $upload_date
+}
+JSON
+  )
+
+  new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$thistory_file")
+  jq <<<"$new_history" >"$thistory_file"
+  echo "$title" >>"$titles_file"
+}
+
+function add_to_phistory() {
+  clear_history_vars
+  create_if_not_exists "$phistory_file"
+
+  title="$name"
+  url="$url"
+  podcast_dir="$(echo "$podcasts_dir/$name/$platform")"
+  meta_file="$(echo "$podcasts_meta_dir/$name/$platform/$name.json")"
+  avatar_file="$(echo "$podcasts_meta_dir/$name/$platform/avatar_data.json")"
+  vh_downloaded="$([ "$function" = "dlpod" ] && echo true || echo false)"
+  vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
+
+  history_entry=$(
+    cat <<JSON
+{
+    "title": "$name",
+    "url": "$url",
+    "podcast_dir": "$podcast_dir",
+    "meta_file": "$meta_file",
+    "avatar_file": "$avatar_file",
+    "vh_downloaded": "$vh_downloaded",
+    "vh_fetch_date": "$vh_fetch_date"
+}
+JSON
+  )
+
+  new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$phistory_file")
+  jq <<<"$new_history" >"$phistory_file"
+  echo "$title" >>"$titles_file"
+}
+
+function format_oneliner_history() {
+  mode="$1" file="$2"
+  if [ "$mode" = -c ]; then
+    echo -e "${GREEN}$(jq '.[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
+  else
+    echo -e "${GREEN}$(
+      jq '.[] | ""
+     + "> " + .channel_name + ": "
+     + .title + " | "
+     + .url + " | "
+     + .upload_date' "$file" | tr -d '"'
+    )"
+  fi
+}
+
+function vhistory() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && history_help && return
+  [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$vhistory_file" && return
+  format_oneliner_history -v "$vhistory_file"
+}
+
+function chistory() {
+  [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$chistory_file" && return
+  format_oneliner_history -c "$chistory_file"
+}
+
+function ahistory() {
+  [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$ahistory_file" && return
+  format_oneliner_history -a "$ahistory_file"
+}
+
+function phistory() {
+  [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$phistory_file" && return
+  format_oneliner_history -p "$phistory_file"
+}
+
+function thistory() {
+  [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$thistory_file" && return
+  format_oneliner_history -t "$thistory_file"
+}
+
+function lasttitle() {
+  [ -n "$name" ] && echo "$name" && return
+  [ -f "$titles_file" ] && tail -n 1 "$titles_file"
+}
+
+function lastfiles() {
+  [ -n "$title" ] && echo "title      : $title"
+  [ -n "$url" ] && echo "url         : $url"
+  [ -n "$channel_url" ] && [ -z "$media_file" ] && echo "channel_url: $channel_url"
+  [ -n "$channel_dir" ] && echo "channel_dir: $channel_dir"
+  [ -n "$media_file" ] && echo "media_file : $media_file"
+  [ -n "$meta_file" ] && echo "meta_file  : $meta_file"
+  [ -n "$thumb_file" ] && echo "thumb_file : $thumb_file"
+  [ -n "$podcast_dir" ] && echo "podcast_dir: $podcast_dir"
+  [ -n "$avatar_file" ] && echo "avatar_file: $avatar_file"
+}
+
+function lastmeta() {
+  found="$(find "$vidhop_dir" -iname "$(lasttitle).json")"
+  [ -n "$found" ] && echo "$found" && "$text_app" "$found" || echo "$(lasttitle).json not found"
+}
+
+function rm_duplicate_titles() {
+  if [ -f "$titles_file" ]; then
+    echo "removing dupliacates from titles.log at $titles.log"
+    filtered=$(uniq "$titles_file")
+    echo "$filtered" >"$titles_file"
+  fi
+}

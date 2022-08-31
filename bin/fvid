@@ -1,0 +1,466 @@
+#!/bin/bash
+
+function fvid_help() {
+  echo " Title: fvid"
+  echo " Description: Searches for <SEARCH_WORD> in all videos and channels metadata."
+  echo " Commands:"
+  echo "    fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata"
+  echo "    fvidv <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all videos metadata (shorter search time)"
+  echo "    fvidf <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all video files on disk"
+  echo "    fvidc <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all channels metadata"
+  echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata"
+  echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata for <PLATFORM> e.g youtube"
+  echo "    chani <CHANNEL_NAME> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME>"
+  echo "    chani <CHANNEL_NAME> <PLATFORM> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME> with platform matching <PLATFORM>"
+  echo "    chancount <CHANNEL_NAME> => show the amount of videos for channel"
+  echo "    chancount <CHANNEL_NAME> <PLATFORM> => show the amount of videos for channel from platform (e.g. youtube)"
+  echo "    chanmeta <CHANNEL_NAME> => show channel metadata for channel"
+  echo "    chanmeta <CHANNEL_NAME> <PLATFORM> => show channel metadata for channel from platform"
+  return 0
+  #  echo "    merge_fvid_exports => merge_fvid_exports <EXPORT_FILE_NAME>"  => merge all fvid results into one file"
+  #  echo "    wp_convert_fvid_merge  => compound function, does fvid merge AND wp_converts the fvid merge (using 'oneliners' exports)"
+  #  echo "    wp_convert_fvid_oneliner_file  => converts one fvid export file to one wp_convert file"
+}
+
+function clear_vars_fvid() {
+  unset name text pwd json json_file json_files quiet more
+}
+
+# Helper methods - start.
+function init_vars() {
+  [ -z "$1" ] && echo "init_vars function received no args" && return 1
+  clear_vars_fvid
+
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    fvid_help
+    return 2
+  elif [ "$1" = '--quiet' ] || [ "$1" = '-q' ]; then
+    quiet="true"
+    text=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+    platform="$3"
+  elif [ "$1" = '--reverse' ]; then
+    reverse=true
+    text=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+    platform="$3"
+  else
+    more=false && reverse=false
+    text=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+    platform="$2"
+  fi
+
+  pwd=$(pwd)
+}
+
+function format_oneliner() {
+  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
+          | "> " +
+            (if .uploader == null then .channel else .uploader end) + ": " +
+            .title + " | " +
+            .webpage_url + " | " +
+            .upload_date' <<<"$json" | tr -d '"'
+}
+
+function format_oneliner_reverse() { # reverse means ascending which suits 'newest first' in the console
+  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | reverse | .[]
+          | "> " +
+            (if .uploader == null then .channel else .uploader end) + ": " +
+            .title + " | " +
+            .webpage_url + " | " +
+            .upload_date' <<<"$json" | tr -d '"'
+}
+
+function format_more_reverse() {
+  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | reverse | .[] |
+            {
+              title: .title,
+              description: .description,
+              url: .webpage_url,
+              thumbnail: .thumbnail,
+              upload_date: .upload_date,
+              channel: (if .uploader == null then .channel else .uploader end),
+              channel_url: .channel_url,
+            }' <<<"$json" | jq -s
+}
+
+function oneliner_export_reverse() {
+  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | reverse | .[]
+          | "> " +
+            (if .uploader == null then .channel else .uploader end) + ": " +
+            .title + "||" +
+            .webpage_url + "||" +
+            .upload_date' <<<"$json" | tr -d '"'
+}
+
+function opinionated_print() {
+  [ "$more" = "true" ] && format_more && return
+  [ "$reverse" = "true" ] && echo -e "${GREEN}$(format_oneliner_reverse)" && return
+  echo -e "${GREEN}$(format_oneliner)"
+}
+
+function save_fvid() {
+  create_export_dirs
+  oneliner_export_reverse >"$fvid_export_dir/oneliners/$text"
+  format_more_reverse >"$fvid_export_dir/compact/$text"
+  jq <<<"$json" >"$fvid_export_dir/full/$text"
+}
+
+function msg_multiple_channels_found() {
+  if [ -n "$1" ]; then command="$1"; else echo "no arg passed in function msg_multiple_channels_found, called from $command" && return 0; fi
+  echo "found more than one metadata JSON file"
+  echo "$json_files"
+  echo "pass the platform name to specify further"
+  [ "$command" = "fvidc" ] && echo "usage: $command \$PARTIAL_CHANNEL_NAME \$SEARCH_TEXT \$PLATFORM" && return
+  echo "usage: $command \$PARTIAL_CHANNEL_NAME \$PLATFORM"
+}
+
+function clearLastLine() {
+  tput cuu 1 && tput el
+}
+
+# `say --overwrite` will leave behind lines that are too big for the terminal size e.g. when terminal size is 80 while string is 120.
+function say() {
+  [ "$quiet" = "true" ] && return
+  if [ "$1" = "--overwrite" ] || [ "$1" = "-o" ]; then
+    clearLastLine
+    file="$(echo "$2" | tr -d "'" | sed "s/.json//g")"  # remove quotes and '.json' from filename
+    # 1. remove VidHop root from path; 2. trim down to 'screensize - ".json" (5 chars)'; 3. append '.json'
+    echo "$(echo -n "${file#$subtract}" | cut -c -"$(("$termux_screen_char_count" - 5))").json"
+    return
+  fi
+  echo -e "$1"
+}
+
+function fvidv() {
+  init_vars "$@" || return
+  case $? in # exit code of init_vars
+  1) echo "failed to initiate vars (function init_vars)" ;;
+  2) return 0 ;; # fvid --help was called and shown, exit program.
+  esac
+
+  say "searching in vidhop videos metadata at $vids_meta_dir..."
+  say "searching in single videos metadata...\n"
+  while read -r vidjson; do
+    subtract="$vids_meta_dir/" && say -o "$vidjson"
+    json+=$(
+      jq --arg text "$text" '
+            select(
+                ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
+                ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+            )' "$vidjson"
+    )
+  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print
+}
+
+function fvidc() {
+  init_vars "$@" || return
+  case $? in # exit code of init_vars
+  1) echo "failed to initiate vars (function init_vars)" ;;
+  2) return 0 ;; # fvid --help was called and shown, exit program.
+  esac
+
+  say "searching in channels metadata at $channels_meta_dir...\n"
+  while read -r chanjson; do
+    subtract="$channels_meta_dir/" && say -o "$chanjson"
+    json+=$(
+      jq --arg text "$text" '.entries[] |
+              select(
+                  ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
+                  ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+              )' "$chanjson"
+    )
+  done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json") && clearLastLine
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print
+}
+
+function fvidcv() {
+  if [ -n "$1" ]; then name="$1"; else echo usage: fvidcv CHANNEL_NAME SEARCH_TEXT && return 0; fi
+  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo usage: fvidcv CHANNEL_NAME SEARCH_TEXT && return 0; fi
+  platform="$3"
+
+  json_files=$(json_files_for_channel_name "$name" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "fvidc" && return 0
+  json_file="$json_files" && unset json_files # only one entry in json_files
+
+  results_json=$(
+    jq --arg text "$text" '.entries[] |
+              select(
+                  ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
+                  ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+              )' "$json_file"
+  )
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$results_json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print
+}
+
+# Output all video files whose name match your query.
+function fvidf() { # find video files (on disk)
+  text="$1"
+
+  echo "\n>>> recursive search results for DLV single videos:"
+  find "$vids_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort # sed adds quotes for filenames with spaces
+
+  echo "\n>>> recursive search results for DLV channels:"
+  find "$channels_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort
+
+  echo "\n>>> recursive search results in default videos directory in \$HOME:"
+  find "$HOME/Videos" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort
+}
+
+function fvid() {
+  init_vars "$@" || return
+  case $? in # exit code of init_vars
+  1) echo "failed to initiate vars (function init_vars)" ;;
+  2) return 0 ;; # fvid --help was called and shown, exit program.
+  esac
+
+  say "searching in VidHop metadata at $vidhop_dir/metadata..."
+  say "searching in single videos metadata at $vids_meta_dir...\n"
+  while read -r vidjson; do
+    subtract="$vids_meta_dir/" && say -o "$vidjson"
+    json+=$(
+      jq --arg text "$text" '
+            select(
+                ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
+                ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+            )' "$vidjson"
+    )
+  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
+  echo "done searching videos"
+
+  say "searching in channels metadata at $channels_meta_dir...\n"
+  while read -r chanjson; do
+    subtract="$channels_meta_dir/" && say -o "$chanjson"
+    json+=$(
+      jq --arg text "$text" '.entries[] |
+              select(
+                  ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
+                  ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+              )' "$chanjson"
+    )
+  done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json") && clearLastLine
+  echo "done searching channels"
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print
+  save_fvid
+}
+
+# Show the metadata of a single video.
+# Provide the filename (not path) as 1st argument, don't worry about the .mp4 extension.
+function vidi() { # video info
+  init_vars "$@" || return
+  cd "$vids_meta_dir"
+  [ -z "$text" ] && echo navigated to videos metadata directory so you can tab autocomplete && return 0
+
+  name=$(basename "$text" ".mp4")
+  json=$(find "$vids_meta_dir" -iname "*$name*.json" | head -n 1)
+  [ -z "$json" ] && echo no match found && return 0
+
+  json=$(jq '.' "$json")
+  opinionated_print
+}
+
+function json_files_for_channel_name() {
+  name="$1" platform="$2"
+  find "$channels_meta_dir" -type f ! -iname "*avatar_data*json" -iwholename "*$name*$platform*json"
+}
+
+function print_channel_data() {
+  url_msg="url     : $(channel_url_from_file "$json_file")"
+  line=""
+  for ((i = 1; i < $(echo "$url_msg" | wc -c); i++)); do
+    line+="_"
+  done && echo -e "$line"
+
+  echo "name    : $(basename "$json_file" ".json")"
+  echo "url     : $(channel_url_from_file "$json_file")"
+  echo "platform: $(extract_platform_name "$json_file")"
+  echo "videos  : $(jq '.entries | length' <<<"$json")"
+}
+
+# Show all videos of a channel, one line per video.
+function chani() { # channel info
+  init_vars "$@" || return
+  [ -z "$text" ] && echo navigated to channels metadata directory so you can tab autocomplete && return 0
+
+  json_files=$(json_files_for_channel_name "$text" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chani" && return 0
+  json_file="$json_files" && unset json_files # only one entry in json_files
+  json=$(jq '.' "$json_file")
+
+  opinionated_print
+  print_channel_data
+}
+
+function chancount() {
+  [ -z "$1" ] && echo "usage: chancount PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  name="$1" platform="$2"
+
+  json_files=$(json_files_for_channel_name "$name" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chancount" && return 0
+
+  json_file="$json_files" && unset json_files # only one entry in json_files
+
+  jq '.entries | length' "$json_file"
+}
+
+function channel_url_from_name() {
+  [ -z "$1" ] && echo "usage: channel_url_from_name PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  name="$1" platform="$2"
+
+  json_files=$(json_files_for_channel_name "$name" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "channel_url_from_name" && return 0
+  json_file="$json_files" && unset json_files # only one entry in json_files
+
+  channel_url_from_file "$json_file"
+}
+
+function chanmeta() {
+  [ -z "$1" ] && echo "usage: chanmeta PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  name="$1" platform="$2"
+
+  json_files=$(json_files_for_channel_name "$name" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chanmeta" && return 0
+
+  json_file="$json_files"
+
+  code "$json_file"
+}
+
+function json_files_for_video_name() {
+  name=$(echo "$1" | tr " \- " '*' | tr "\-" '*' | tr ":" '*')
+  platform="$2"
+  find "$vids_meta_dir" -type f -iwholename "*$platform*$name*json"
+}
+
+function vidmeta() {
+  [ -z "$1" ] && echo "usage: vidmeta PARTIAL_VIDEO_NAME [PLATFORM]" && return
+  name="$1" platform="$2"
+
+  json_files=$(json_files_for_video_name "$name" "$platform")
+  [ -z "$json_files" ] && echo no match found && return 0
+  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "vidmeta" && return 0
+  json_file="$json_files"
+
+  code "$json_file"
+}
+
+function create_export_dirs() {
+  mkdir -p \
+    "$fvid_export_dir/full" \
+    "$fvid_export_dir/compact" \
+    "$fvid_export_dir/oneliners" \
+    "$fvid_export_dir/merge/full" \
+    "$fvid_export_dir/merge/compact" \
+    "$fvid_export_dir/merge/oneliners" \
+    "$wp_export_dir/full" \
+    "$wp_export_dir/compact" \
+    "$wp_export_dir/oneliners" \
+    2>/dev/null
+}
+
+function create_merge_export_dirs() {
+  mkdir -p \
+    "$fvid_export_dir/merge/full" \
+    "$fvid_export_dir/merge/compact" \
+    "$fvid_export_dir/merge/oneliners" \
+    2>/dev/null
+}
+
+# merges all files in export/fvid/full and outputs to merge/full, merge/compact and merge/oneliners
+function merge_fvid_exports() {
+  [ -z "$1" ] && echo "provide the name of the merge file (in quotes if it has spaces)" && return
+  name="$1" # name="merge_$(date +'%d-%m-%Y_%H:%M:%S')" ||
+  create_merge_export_dirs
+
+  unset json
+  while read -r file; do
+    [ "$(jq '.entries | length' "$file")" -gt 0 ] && json+=$(jq '.entries[]' "$file") # add together all fvid results
+  done < <(find "$fvid_export_dir/full" -type f) # use full json data
+
+  json=$(jq -s '{entries: unique_by(.webpage_url) | sort_by(.upload_date) | reverse}' <<<"$json") # remove duplicates
+
+  jq <<<"$json" >"$fvid_export_dir/merge/full/$name"                # write full json merge
+  format_more_reverse >"$fvid_export_dir/merge/compact/$name"       # write compact json merge
+  oneliner_export_reverse >"$fvid_export_dir/merge/oneliners/$name" # write oneliner merge
+
+  jq <<<"$json"
+}
+
+# 1. user did multiple fvid queries and filled up fvid/full | compact | oneliners
+# 2. merge fvid queries, fills up merge/full | compact | oneliners
+# 3. convert fvid/merge/oneliners to fvid/merge/oneliners
+# TODO: path to Python project won't work for users.
+function wp_convert_fvid_merge() {
+  [ -z "$1" ] && echo "provide the name of the merge file (in quotes if it has spaces)" && return
+  name="$1" # name="merge_$(date +'%d-%m-%Y_%H:%M:%S')" ||
+
+  merge_fvid_exports "$name"
+
+  pwd=$(pwd)
+  mkdir -p "$wp_export_dir/merge/oneliners"
+  cd /home/freetalk/code/vidhop || return 1
+  python -m cli.vidhop --wp-convert --merge-exports
+  cd "$pwd" || return 1
+
+  code "$wp_export_dir/merge/oneliners/$name"
+}
+
+# Converts one fvid export file to a wp_convert file (WordPress HTML).
+function wp_convert_fvid_oneliner_file() {
+  [ -z "$1" ] && echo "provide fvid oneliner file input" && return
+
+  input_file="$fvid_export_dir/oneliners/$1"
+  ! [ -f "$input_file" ] && echo "in exports/fvid/oneliners/$1 not found" && return 1
+
+  pwd=$(pwd)
+  mkdir -p "$wp_export_dir/merge/oneliners"
+  cd /home/freetalk/code/vidhop || return 1
+  python -m cli.vidhop --wp-convert --input-file "$input_file"
+  cd "$pwd" || return 1
+}
+
+function clear_fvid() { # clear all fvid results
+  rm -rf "$fvid_export_dir"
+}
+
+function rm_fvid() { # clear one fvid result
+  [ -z "$1" ] && echo -e "please provide the fvid search text of which you want to delete the results"
+  find "$fvid_export_dir" -iname "$1" -exec rm {} \;
+}
+
+function ls_fvid() { # list fvid results
+  ls -l "$fvid_export_dir/full"
+}
+
+function rm_wp_merge() {
+  [ -z "$1" ] && echo -e "please provide the file name of the merge you want to delete\n"
+  find "$wp_export_dir/merge" -iname "$1" -exec rm {} \;
+}
+
+function clear_wp() {
+  rm -rf "$wp_export_dir/merge"
+}
+
+function ls_wp() {
+  ll -l "$wp_export_dir/merge"
+}

@@ -1,0 +1,735 @@
+#!/bin/bash
+# YT-DLP video and channel downloader functions.
+
+function dlv_help() {
+  echo " Title: dlv"
+  echo " Description: Download video(s) and channels."
+  echo " Commands:"
+  echo "    dlv <URL>     => download video at <URL> plus information (metadata, thumbnail)"
+  echo "    dlvi <URL>    => download video information only at <URL>, no mp4 download"
+  echo "    dlc <URL>     => download channel, all videos, metadata and thumbnails"
+  echo "    dlci <URL>    => download channel information, same as dlc but no video downloads"
+  echo "    dlvpl <URL>   => download video playlist"
+  echo "    dlvpli <URL>  => download video playlist information"
+  echo "    dlpod <URL>   => download podcast, technically also audio but we differentiate podcasts from music"
+  echo "    dla <URL>     => download audio, as mp3 from music videos"
+  echo "    dlt <URL>     => download thumbnail, as jpg"
+  return 0
+}
+
+function clear_vars_dlv() {
+  unset url standalone platform name json archive_file has_archive archive_content avatar_json avatar_json_file valid
+  rm "$log_json_file" 2>/dev/null
+  return 0
+}
+
+check_valid_platform() {
+  [ -n "$1" ] && url="$1"
+  for platform in "${platform_names[@]}"; do
+    [[ "$url" == *$platform* ]] && valid=true && break
+  done
+  [ -z "$valid" ] && logInfo "url '$url' is invalid, unknown platform" &&
+    echo "url '$url' is invalid, unknown platform" && return 1
+  return 0
+}
+
+# Fetch video metadata (yt-dlp), select relevant fields and pretty print (jq).
+# Populates global variable $json.
+function fetch_video_metadata() {
+  url="$1"
+  json=$(
+    yt-dlp --dump-single-json --verbose "$url" |
+      jq '{
+                  id: .id,
+                  title: .title,
+                  thumbnail: .thumbnail,
+                  description: .description,
+                  upload_date: .upload_date,
+                  uploader: .uploader,
+                  uploader_id: .uploader_id,
+                  uploader_url: .uploader_url,
+                  channel: .channel,
+                  channel_follower_count: .channel_follower_count,
+                  channel_id: .channel_id,
+                  channel_url: .channel_url,
+                  duration: .duration,
+                  view_count: .view_count,
+                  average_rating: .average_rating,
+                  age_limit: .age_limit,
+                  webpage_url: .webpage_url,
+                  categories: .categories,
+                  tags: .tags,
+                  playable_in_embed: .playable_in_embed,
+                  is_live: .is_live,
+                  was_live: .was_live,
+                  live_status: .live_status,
+                  release_timestamp: .release_timestamp,
+                  like_count: .like_count,
+                  availability: .availability,
+                  original_url: .original_url,
+                  webpage_url_basename: .webpage_url_basename,
+                  webpage_url_domain: .webpage_url_domain,
+                  fulltitle: .fulltitle,
+                  display_id: .display_id,
+                  duration_string: .duration_string,
+                  __has_drm: .__has_drm,
+                  epoch: .epoch,
+                  language: .language,
+                  protocol: .protocol,
+                  ext: .ext,
+                  filesize_approx: .filesize_approx,
+                  format: .format,
+                  format_id: .format_id,
+                  format_note: .format_note,
+                  vcodec: .vcodec,
+                  resolution: .resolution,
+                  width: .width,
+                  height: .height,
+                  vbr: .vbr,
+                  fps: .fps,
+                  tbr: .tbr,
+                  dynamic_range: .dynamic_range,
+                  stretched_ratio: .stretched_ratio,
+                  acodec: .acodec,
+                  audio_channels: .audio_channels,
+                  abr: .abr,
+                  asr: .asr
+            }'
+  )
+}
+
+# SINGLE VIDEO
+# ------------
+
+# Download video information of one video: metadata and video thumbnail..
+function fetch_sanitized_title() {
+  yt-dlp --print "%(title)s" \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '-' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+}
+
+# Download video information. Video metadata and thumbnail.
+function dlvi() {
+  local standalone="$2"
+  [ -z "$standalone" ] && clear_vars_dlv && standalone=true
+  local url="$1" && [ -n "$3" ] && local debug="$3"
+  local function=$([ "$standalone" = "true" ] && echo dlvi || echo dlv)
+  check_valid_platform "$url" || return 1
+
+  platform=$(extract_platform_name "$url")
+  mkdir "$vids_meta_dir/$platform" 2>/dev/null
+
+  fetch_video_metadata "$url" # populates $json
+  name="$(fetch_sanitized_title)"
+  jq <<<"$json" >"$vids_meta_dir/$platform/$name.json"
+
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    -P "$vids_meta_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+
+  add_to_vhistory
+
+  if [ "$standalone" = "true" ]; then
+    jq <<<"$json"
+    cd "$vids_meta_dir/$platform" || return
+  fi
+}
+
+# Download video. Plus thumbnail and metadata.
+function dlv() {
+  [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
+  clear_vars_dlv
+  local url="$1"
+  local standalone=false
+  local function=dlv
+  check_valid_platform "$url" || return 1
+
+  platform=$(extract_platform_name "$url") || return 1
+  mkdir "$vids_dir/$platform" 2>/dev/null
+
+  dlvi "$url" "$standalone"
+
+  yt-dlp -S ext:mp4:m4a --recode mp4 --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+
+  jq <<<"$json"
+  cd "$vids_dir/$platform" || return
+}
+
+# CHANNELS
+# --------
+# Fetch channel metadata (yt-dlp), select relevant fields and pretty print (jq).
+# Populates global variable $json.
+function fetch_channel_metadata() {
+  url="$1"
+  archive_args="$(echo "--download-archive $archive_file")"
+
+  json=$(
+    yt-dlp --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") --verbose "$url" | jq '
+       {
+         title: .title,
+         description: .description,
+         webpage_url: .webpage_url,
+         original_url: .original_url,
+         url: .url,
+         uploader: .uploader,
+         upload_date: .upload_date,
+         channel: .channel,
+         channel_url: .channel_url,
+         channel_follower_count: .channel_follower_count,
+         duration_string: .duration_string,
+         thumbnail: .thumbnail,
+         like_count: .like_count,
+         n_entries: .n_entries,
+         categories: .categories,
+         tags: .tags,
+         __has_drm: .__has_drm,
+         availability: .availability,
+         display_id: .display_id,
+         fulltitle: .fulltitle,
+         is_live: .is_live,
+         was_live: .was_live,
+         playable_in_embed: .playable_in_embed,
+         duration: .duration,
+         view_count: .view_count,
+         average_rating: .average_rating,
+         age_limit: .age_limit,
+         epoch: .epoch,
+         entries: .entries
+       }'
+  )
+  json=$(
+    jq 'del(.entries[] | .formats)' <<<"$json" |
+      jq 'del(.entries[] | select(.ie_key))' |
+      jq 'del(.entries[] | .thumbnails)' |
+      jq 'del(.entries[] | .requested_downloads)' |
+      jq 'del(.entries[] | .requested_formats)' |
+      jq 'del(.entries[] | .subtitles)' |
+      jq 'del(.entries[] | .automatic_captions)' |
+      jq 'del(.entries[] | nulls)'
+  )
+}
+
+# With --downloaded-archive, only new videos are downloaded.
+# This method merges previous metadata json with the newly scraped json.
+function merge_json_with_archive() { # called by dlci
+  old_json=$(jq '.' "$json_file")
+  entries=$(jq -s '.[0].entries += .[1].entries | .[0].entries | sort_by(.date) | reverse' <<<"$old_json" <<<"$json")
+  json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$old_json" <<<"$entries")
+}
+
+# Each yt-dlp command that uses downloaded archive file, updates it, adds the new entries.
+# As we call yt-dlp multiple times, we only want to have that happen in the last yt-dlp call.
+# To solve that, we reset the file to its original values when the program started.
+function reset_archive_file() {
+  echo "$archive_content" >"$archive_file"
+}
+
+# Download channel information (metadata and thumbnails of all videos and the avatar image.
+function dlci() {
+  local url="$1"
+  local standalone="$2"
+  [ -n "$3" ] && local debug="$3"
+  [ -z "$has_archive" ] && has_archive="false"
+  local function=$([ "$standalone" = "false" ] && echo dlc || echo dlci)
+  logInfo "start dlci $(date +'%d-%m-%Y_%H:%M:%S')"
+  check_valid_platform "$url" || return 1
+
+  archive_file="$downloaded_dir/$(url_to_filename "$url")"
+  [ "$has_archive" = "false" ] && has_archive=$([ -f "$archive_file" ] && echo true || echo false)
+  archive_content=$(cat "$archive_file" 2>/dev/null)
+
+  logInfo "start fetch_channel_metadata"
+  fetch_channel_metadata "$url" # populates $json
+  logJq "1: after fetch metadata"
+
+  # quit if no (new) entries (channel videos)
+  [ "$(jq '.entries | length' <<<"$json")" = 0 ] && echo no new entries from channel fetch &&
+    logInfo "downloaded archive filename:\n$archive_file" && return 0
+  [ "$has_archive" ] && reset_archive_file
+
+  # Save metadata to the channel directory. Each channel in its own directory.
+  name=$(channel_name_from_obj)            # if all downloaded before, no entries, no uploader, channelname = null
+  platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.
+
+  mkdir -p "$channels_meta_dir/$name/$platform" 2>/dev/null
+  json_file="$channels_meta_dir/$name/$platform/$name.json"
+
+  # Merge scraped json with previous json on disk.
+  if [ -f "$json_file" ]; then
+    logInfo "found a previous channel json, starting merge"
+
+    if [ "$(head -n 1 "$json_file")" = "{" ]; then
+      merge_json_with_archive
+      logJq "2: merge result"
+      [ "$has_archive" ] && reset_archive_file
+    else
+      logInfo "merge error: bad JSON in $json_file, see json.log"
+      logJq "2: merge failed: bad JSON"
+      json_file_bkp="$channels_meta_dir/$name/$platform/$name.bkp.json"
+      jq <<<"$json" >"$json_file_bkp"
+      echo "$url" >>"$import_dir/failed_urls.txt"
+      url_to_filename "$url" >>"$import_dir/failed_urls.txt"
+      return 1
+    fi
+  else
+    logInfo "no JSON file found at $json_file, skipped merge_json_with_archive"
+  fi
+
+  ## Download videos thumbnails
+  logInfo "fetch thumbnails"
+  [ "$has_archive" ] && reset_archive_file
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    $([ "$has_archive" = "true" ] && echo "--download-archive $archive_file") \
+    -P "$channels_meta_dir/$name/$platform" -o "%(title)s.%(ext)s" \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  logInfo "fetch channel avatar img"
+  # shellcheck disable=SC2154
+  python "$scrape_channel_avatar_img_py" --channel-url "$url" --channel-name "$name" --channels-meta-dir "$channels_meta_dir"
+
+  avatar_json_file="$channels_meta_dir/$name/$platform/avatar_data.json"
+  logJq "4 start avatar JSON merge"
+  if [ -f "$avatar_json_file" ]; then
+    avatar_json=$(jq . "$avatar_json_file")
+    json=$(jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json")
+    sort_upload_date_desc
+    logJq "3: after avatar merge"
+  else
+    logInfo "avatar json file does not exist at $avatar_json_file"
+  fi
+
+  logInfo "write json metadata to file"
+  logJq "4: final JSON written to file"
+  jq <<<"$json" >"$json_file"
+  add_to_chistory
+
+  if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
+    logInfo "write video IDs to downloaded archive and print result"
+    save_channel_entries_to_archive
+    jq <<<"$json"
+    cd "$channels_meta_dir/$name/$platform" || return
+    logInfo "downloaded archive filename: $archive_file"
+    unset has_archive
+  fi
+  return 0
+}
+
+# Download all videos of a channel, metadata of the channel and the avatar image.
+function dlc() {
+  clear_vars_dlv
+  url="$1"
+  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
+  local standalone=false
+  local function=dlc
+  check_valid_platform "$url" || return 1
+
+  dlci "$url" "$standalone"
+  [ ! $? ] && echo "download channel info failed (function: dlci)" && return
+
+  # Download all videos from channel.
+  yt-dlp -S ext:mp4:m4a --recode mp4 -P "$channels_dir/$name/$platform" -o "%(title)s.%(ext)s" \
+    $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  save_channel_entries_to_archive
+  jq <<<"$json"
+  cd "$channels_dir/$name/$platform" || return
+}
+
+function fetch_playlist_metadata() {
+  url="$1"
+  archive_args="$(echo "--download-archive $archive_file")"
+
+  json=$(
+    yt-dlp --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") --verbose "$url" | jq '
+       {
+         title: .title,
+         description: .description,
+         webpage_url: .webpage_url,
+         original_url: .original_url,
+         url: .url,
+         uploader: .uploader,
+         upload_date: .upload_date,
+         channel: .channel,
+         channel_url: .channel_url,
+         channel_follower_count: .channel_follower_count,
+         duration_string: .duration_string,
+         thumbnail: .thumbnail,
+         like_count: .like_count,
+         n_entries: .n_entries,
+         categories: .categories,
+         tags: .tags,
+         _has_drm: ._has_drm,
+         availability: .availability,
+         display_id: .display_id,
+         fulltitle: .fulltitle,
+         is_live: .is_live,
+         was_live: .was_live,
+         playable_in_embed: .playable_in_embed,
+         duration: .duration,
+         view_count: .view_count,
+         average_rating: .average_rating,
+         age_limit: .age_limit,
+         epoch: .epoch,
+         entries: .entries
+       }'
+  )
+  json=$(
+    jq 'del(.entries[] | .formats)' <<<"$json" |
+      jq 'del(.entries[] | select(.ie_key))' |
+      jq 'del(.entries[] | .thumbnails)' |
+      jq 'del(.entries[] | .requested_downloads)' |
+      jq 'del(.entries[] | .requested_formats)' |
+      jq 'del(.entries[] | .subtitles)' |
+      jq 'del(.entries[] | .automatic_captions)' |
+      jq 'del(.entries[] | nulls)'
+  )
+}
+
+# Download video playlist information (similar to dlci).
+function dlvpli() {
+  local url="$1"
+  local standalone="$2"
+  [ -n "$3" ] && local debug="$3"
+  [ -z "$has_archive" ] && has_archive="false"
+  local function=$([ "$standalone" = "false" ] && echo dlvpl || echo dlvpli)
+  logInfo "start dlcpi $(date +'%d-%m-%Y_%H:%M:%S')"
+  check_valid_platform "$url" || return 1
+
+  archive_file="$downloaded_dir/$(url_to_filename "$url")"
+  [ "$has_archive" = "false" ] && has_archive=$([ -f "$archive_file" ] && echo true || echo false)
+  archive_content=$(cat "$archive_file" 2>/dev/null)
+
+  logInfo "start fetch_playlist_metadata"
+  fetch_playlist_metadata "$url" # populates $json
+  logJq "1: after fetch metadata"
+
+  # quit if no (new) entries (channel videos)
+  [ "$(jq '.entries | length' <<<"$json")" = 0 ] && echo no new entries from channel fetch &&
+    logInfo "downloaded archive filename:\n$archive_file" && return 0
+  [ "$has_archive" ] && reset_archive_file
+
+  # Save metadata to the channel directory. Each channel in its own directory.
+  name=$(channel_name_from_obj)            # if all downloaded before, no entries, no uploader, channelname = null
+  platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.
+  pl_name="$(jq '.entries[0].playlist_title' <<<"$json" | sanitize_filename)"
+
+  mkdir -p "$channels_meta_dir/$name/$platform/$pl_name" 2>/dev/null
+  json_file="$channels_meta_dir/$name/$platform/$pl_name/$pl_name.json"
+
+  # Merge scraped json with previous json on disk.
+  if [ -f "$json_file" ]; then
+    logInfo "found a previous channel json, starting merge"
+
+    if [ "$(head -n 1 "$json_file")" = "{" ]; then
+      merge_json_with_archive
+      logJq "2: merge result"
+      [ "$has_archive" ] && reset_archive_file
+    else
+      logInfo "merge error: bad JSON in $json_file, see json.log"
+      logJq "2: merge failed: bad JSON"
+      json_file_bkp="$channels_meta_dir/$name/$platform/$pl_name/$pl_name.bkp.json"
+      jq <<<"$json" >"$json_file_bkp"
+      echo "$url" >>"$import_dir/failed_urls.txt"
+      url_to_filename "$url" >>"$import_dir/failed_urls.txt"
+      return 1
+    fi
+  else
+    logInfo "no JSON file found at $json_file, skipped merge_json_with_archive"
+  fi
+
+  ## Download videos thumbnails
+  logInfo "fetch thumbnails"
+  [ "$has_archive" ] && reset_archive_file
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    $([ "$has_archive" = "true" ] && echo "--download-archive $archive_file") \
+    -P "$channels_meta_dir/$name/$platform/$pl_name" -o "%(playlist_index)s. %(title)s.%(ext)s" \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  logInfo "write json metadata to file"
+  logJq "4: final JSON written to file"
+  jq <<<"$json" >"$json_file"
+
+  if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
+    logInfo "write video IDs to downloaded archive and print result"
+    save_channel_entries_to_archive
+    jq <<<"$json"
+    cd "$channels_meta_dir/$name/$platform/$pl_name" || return
+    logInfo "downloaded archive filename: $archive_file"
+    unset has_archive
+  fi
+  return 0
+}
+
+# Download video playlist.
+function dlvpl() {
+  clear_vars_dlv
+  url="$1"
+  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
+  local standalone=false
+  local function=dlvpl
+  check_valid_platform "$url" || return 1
+
+  dlvpli "$url" "$standalone"
+  [ ! $? ] && echo "download channel info failed (function: dlvpli)" && return
+
+  # Download all videos from channel.
+  yt-dlp -S ext:mp4:m4a --recode mp4 \
+    -P "$channels_dir/$name/$platform/$pl_name" -o "%(playlist_index)s. %(title)s.%(ext)s" \
+    $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  save_channel_entries_to_archive
+  jq <<<"$json"
+  cd "$channels_dir/$name/$platform" || return
+}
+
+# Download audio. Save only the mp3 audio of a video plus metadata and thumbnail.
+function dla() {
+  clear_vars_dlv
+  url="$1"
+  local function=dla
+  check_valid_platform "$url" || return 1
+  mkdir -p "$music_meta_dir" 2>/dev/null
+
+  name="$(fetch_sanitized_title)"
+  fetch_video_metadata "$url" # populates json
+  jq <<<"$json" >"$music_meta_dir/$name.json"
+  add_to_ahistory
+
+  # download mp3
+  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
+    -P "$music_dir" -o "$name.%(ext)s" --verbose "$url"
+
+  # download thumbnail
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    -P "$music_meta_dir" -o "$name.%(ext)s" --verbose "$url"
+
+  jq <<<"$json"
+  cd "$music_dir" || return
+}
+# Download video playlist information (similar to dlci).
+function dlapli() {
+  local url="$1"
+  local standalone="$2"
+  [ -n "$3" ] && local debug="$3"
+  [ -z "$has_archive" ] && has_archive="false"
+  local function=$([ "$standalone" = "false" ] && echo dlapl || echo dlapli)
+  logInfo "start dlapli $(date +'%d-%m-%Y_%H:%M:%S')"
+  check_valid_platform "$url" || return 1
+
+  archive_file="$downloaded_dir/$(url_to_filename "$url")"
+  [ "$has_archive" = "false" ] && has_archive=$([ -f "$archive_file" ] && echo true || echo false)
+  archive_content=$(cat "$archive_file" 2>/dev/null)
+
+  logInfo "start fetch_playlist_metadata in dlapli"
+  fetch_playlist_metadata "$url" # populates $json
+  logJq "1: after fetch metadata"
+
+  # quit if no (new) entries (channel videos)
+  [ "$(jq '.entries | length' <<<"$json")" = 0 ] && echo no new entries from channel fetch &&
+    logInfo "downloaded archive filename:\n$archive_file" && return 0
+  [ "$has_archive" ] && reset_archive_file
+
+  # Save metadata to the channel directory. Each channel in its own directory.
+  name=$(channel_name_from_obj)            # if all downloaded before, no entries, no uploader, channelname = null
+  platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.  - entries[0].artist
+  album=$(jq '.entries[0].album' <<<"$json" | tr -d '"')
+  artist=$(jq '.entries[0].artist' <<<"$json" | tr -d '"')
+  pl_name="$(jq '.entries[0].playlist_title' <<<"$json" | sanitize_filename)"
+
+  if [ "$album" != null ] && [ "$artist" != null ]; then
+    pl_dir="$artist/$album"
+  else
+    pl_dir="$name/$pl_name"
+  fi
+
+  mkdir -p "mv/$pl_name" 2>/dev/null
+  json_file="$music_meta_dir/$pl_dir/$pl_name.json"
+  #  mkdir -p "$music_meta_dir/$name/$platform/$pl_name" 2>/dev/null
+  #  json_file="$music_meta_dir/$name/$platform/$pl_name/$pl_name.json"
+
+  # Merge scraped json with previous json on disk.
+  if [ -f "$json_file" ]; then
+    logInfo "found a previous channel json, starting merge"
+    if [ "$(head -n 1 "$json_file")" = "{" ]; then
+      merge_json_with_archive # TODO: possibly fails for playlists as this function was written for channels
+      logJq "2: merge result"
+      [ "$has_archive" ] && reset_archive_file
+    else
+      logInfo "merge error: bad JSON in $json_file, see json.log"
+      logJq "2: merge failed: bad JSON"
+      json_file_bkp="$music_meta_dir/$pl_dir/$pl_name.bkp.json"
+      jq <<<"$json" >"$json_file_bkp"
+      echo "$url" >>"$import_dir/failed_urls.txt"
+      url_to_filename "$url" >>"$import_dir/failed_urls.txt"
+      return 1
+    fi
+  else
+    logInfo "no JSON file found at $json_file, skipped merge_json_with_archive"
+  fi
+
+  ## Download videos thumbnails
+  logInfo "fetch thumbnails"
+  [ "$has_archive" ] && reset_archive_file
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    $([ "$has_archive" = "true" ] && echo "--download-archive $archive_file") \
+    -P "$music_meta_dir/$pl_dir" -o "%(playlist_index)s. %(title)s.%(ext)s" \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  logInfo "write json metadata to file"
+  logJq "4: final JSON written to file"
+  jq <<<"$json" >"$json_file"
+
+  if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
+    logInfo "write video IDs to downloaded archive and print result"
+    save_channel_entries_to_archive
+    jq <<<"$json"
+    cd "$music_meta_dir/$pl_dir" || return
+    logInfo "downloaded archive filename: $archive_file"
+    unset has_archive
+  fi
+  return 0
+}
+
+# Download video playlist.
+function dlapl() {
+  clear_vars_dlv
+  url="$1"
+  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
+  local standalone=false
+  local function=dlapl
+  check_valid_platform "$url" || return 1
+
+  dlapli "$url" "$standalone"
+  [ ! $? ] && echo "download channel info failed (function: dlapli)" && return
+
+  # Download all videos from channel.
+  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
+    -P "$music_dir/$pl_dir" -o "%(playlist_index)s. %(title)s.%(ext)s" \
+    $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
+    --replace-in-metadata "title" '"' "'" \
+    --replace-in-metadata "title" '\*' '' \
+    --replace-in-metadata "title" '/' '' \
+    --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '<' '' \
+    --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\\' '' \
+    --replace-in-metadata "title" '\|' '_' \
+    --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+
+  save_channel_entries_to_archive
+  jq <<<"$json"
+  cd "$music_dir/$name" || return
+}
+
+function dlalbum() {
+  dlapl "$@"
+}
+
+# Download podcast. We differentiate podcasts from music.
+function dlpod() {
+  clear_vars_dlv
+  url="$1"
+  local function=dlpod
+  check_valid_platform "$url" || return 1
+  platform=$(extract_platform_name "$url")
+  mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
+
+  name="$(fetch_sanitized_title)"
+  fetch_channel_metadata "$url"
+  jq <<<"$json" >"$podcasts_meta_dir/$platform/$name.json"
+  add_to_phistory
+
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    -P "$podcasts_meta_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+  echo thumbnail download completed
+
+  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --no-mtime \
+    -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+  echo audio download completed
+
+  jq <<<"$json"
+  cd "$podcasts_dir/$platform" || return
+}
+
+# Download thumbnail. Store the thumbnail of a single video plus its metadata.
+function dlt() {
+  clear_vars_dlv
+  url="$1"
+  check_valid_platform "$url" || return 1
+  platform=$(extract_platform_name "$url")
+  local function=dlt
+  mkdir -p "$thumbnails_dir/$platform" "$thumbnails_meta_dir/$platform" 2>/dev/null
+
+  name="$(fetch_sanitized_title)"
+  fetch_video_metadata "$url"
+  jq <<<"$json" >"$thumbnails_meta_dir/$platform/$name.json"
+  add_to_thistory
+
+  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
+    -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+
+  jq <<<"$json"
+  cd "$thumbnails_dir/$platform" || return
+}

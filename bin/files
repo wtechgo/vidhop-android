@@ -1,0 +1,196 @@
+#!/bin/bash
+
+function files_help() {
+  echo " Title: files"
+  echo " Description: Manage VidHop files."
+  echo " Commands:"
+  echo "    play                            => play last downloaded video in default media player (MPV recommended)"
+  echo "    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player (MPV recommended)"
+  echo "    specs                           => shows technical video information like codecs, resolution...of last downloaded video"
+  echo "    specs <URL>                     => shows technical video information like codecs, resolution...of a video at <URL>"
+  echo "    specs <PARTIAL_FILENAME>        => shows technical video information like codecs, resolution...of a video who's filename matches <PARTIAL_FILENAME>"
+  echo "    rmchan <PARTIAL_CHANNEL_NAME>   => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
+  echo "    rmlast                          => remove all files of last downloaded video"
+  echo "    renlast <NEW_FILENAME>          => rename all files of last downloaded video to <NEW_FILENAME>"
+  echo "    rmvid <PARTIAL_FILENAME>        => remove all files of a video who's name matches <PARTIAL_FILENAME>"
+  echo "    renvid <PARTIAL_OLD_FILENAME> <NEW_FILENAME>  => rename all files of a video that matches <PARTIAL_OLD_FILENAME>"
+  return 0
+}
+
+function replace_bashrc() {
+  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+}
+
+function play() {
+  [ -n "$1" ] && [ -f "$1" ] && media_file="$1"
+  if [ -z "$media_file" ]; then
+    files=$(find "$vidhop_dir" -iname "*$1*")
+    [ $(wc -l <<<"$files") -gt 1 ] &&
+      echo -e "play requires 1 file but found\n$files\nyou can be more specific by providing an extension e.g. foo.mp4" &&
+      return
+    media_file="$files" && unset files
+  fi
+
+  [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
+  [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
+  [[ "$media_file" == *.json ]] && "$text_app" "$media_file" && return
+  [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
+  [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
+}
+
+function usage_specs() {
+  echo -e "usage:\n  specs          uses the media file of the last dlv execution\n  specs <URL>\n  specs <FILE>" && return
+}
+
+function specs() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && usage_specs
+  if [ "$(is_url "$1")" = true ]; then
+    yt-dlp -F --force-ipv4 "$1"
+    yt-dlp -J --force-ipv4 "$1" | jq '{
+      title: .title,
+      original_url: .webpage_url,
+      duration_string: .duration_string,
+      resolution: .resolution,
+      format: .format,
+      dynamic_range: .dynamic_range,
+      vcodec: .vcodec,
+      acodec: .acodec,
+      vbr: .vbr,
+      abr: .abr,
+    }'
+  elif [ -f "$1" ]; then
+    mediainfo "$1"
+  else
+    [ -z "$media_file" ] && echo "no media file from previous dlv execution to display" && usage_specs && return
+    mediainfo "$media_file"
+  fi
+}
+
+function rename_file() {
+  old_file="$1"
+  new_file="$2"
+  dir_name=$(dirname "$old_file")
+  ext=$(get_extension "$old_file")
+  new_file="$dir_name/$new_name.$ext"
+  mv "$old_file" "$new_file"
+  echo -e "renamed $old_file\nto $new_file"
+}
+
+# Rename a video and its metadata.
+function renvid() {
+  cd "$vids_dir" || return 1
+  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid OLD_NAME NEW_NAME\n
+    you are in the videos dir now (for autocomplete)\n
+    OLD_NAME input works with and without file extensions" && return 0
+
+  old_name="$1"
+  new_name="$2"
+
+  results=$(find "$vidhop_dir" -iname "*$old_name*")
+  [ -z "$results" ] && echo found no matches && return
+  echo "$results"
+
+  echo -n "rename these files? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] && return
+
+  # rename history entry
+  find "$vidhop_dir" -iname "*$old_name*" | while read -r old_name; do rename_file "$old_name" "$new_name"; done
+  json_file=$(find "$vidhop_dir" -iname "$new_name.json")
+  ! [ -f "$json_file" ] && echo "could not locate metadata json file at $json_file" && return
+  json=$(jq . "$json_file")
+  name=$(basename "$json_file" | sed "s/.json//g")
+  if [ -f "$titles_file" ]; then
+    head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
+    echo "$name" >>"$log_dir/titles.tmp.log"
+    mv "$log_dir/titles.tmp.log" "$titles_file"
+  fi
+}
+
+function renlast() {
+  [ -z "$1" ] && echo "usage: renlast <PARTIAL_VIDEO_NAME>" && return 1
+  renvid "$(lasttitle)" "$1"
+}
+
+function rmvid() {
+  [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
+  name="$1"
+
+  results=$(find "$vidhop_dir" -iname "*$name*")
+  [ -z "$results" ] && echo found no matches && return
+  echo "$results"
+
+  echo -n "delete these files permanently? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ "$answer" = "N" ] && return
+
+  find "$vidhop_dir" -iname "*$name*" -exec rm -rf {} \;
+  echo "deleted '$name.mp4|.json|.jpg.|.png|.webp'"
+
+  head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
+  mv "$log_dir/titles.tmp.log" "$titles_file"
+}
+
+function rmlast() {
+  rmvid "$(lasttitle)"
+}
+
+function find_archive_file_from_channel_name() {
+  name="$1"
+  found_json=$(find "$channels_meta_dir" -type f -iname "*$name*.json")
+  [ -z "$found_json" ] && return 0
+  [ "$(wc -l <<<"$found_json")" -gt 1 ] && echo -e "found more than one file:\n$results" && return 1
+
+  channel_url=$(channel_url_from_file "$found_json")
+  archive_filename=$(url_to_filename "$channel_url")
+  find "$downloaded_dir" -type f -iname "$archive_filename"
+}
+
+function rmchan() {
+  [ -z "$1" ] && echo "usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
+  unset answer found_channel_dir found_downloaded_file
+
+  name="$1"
+  [ -n "$2" ] && answer="$2"
+  found_channel_dir=$(find "$channels_dir" -type d -iname "*$name*")
+  found_channel_meta_dir=$(find "$channels_meta_dir" -type d -iname "*$name*")
+  found_downloaded_file=$(find_archive_file_from_channel_name "$name" || echo "")
+
+  logInfo "downloaded archive file: $found_downloaded_file"
+  [ -z "$found_channel_dir" ] && [ -z "$found_channel_meta_dir" ] && [ -z "$found_downloaded_file" ] && echo found no matches && return
+  echo "found files:"
+  [ -n "$found_channel_dir" ] && echo -e "$found_channel_dir"
+  [ -n "$found_channel_meta_dir" ] && echo -e "$found_channel_meta_dir"
+  [ -n "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
+
+  if [ -z "$answer" ]; then
+    echo "caution: rmchan will remove all media and metadata files of '$name' for all platforms"
+    echo -n "delete channel permanently? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] && return
+  fi
+
+  # remove files
+  [ -n "$found_channel_dir" ] && rm -rf "$found_channel_dir" && echo "deleted channel media directory: $found_channel_dir"
+  [ -n "$found_channel_meta_dir" ] && rm -rf "$found_channel_meta_dir" && echo "deleted channel metadata directory: $found_channel_meta_dir"
+  [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
+}
+
+function rm_dowloaded_by_url() {
+  url="$1"
+  grep -q https <<<"$url" && rm "$downloaded_dir/$(url_to_filename "$url")" && return
+  echo "invalid url $url"
+}
+
+function replace_bashrc() {
+  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+}
+
+updatevidhop() {
+  pwd=$(pwd)
+  cd "$app_dir"
+  git fetch --all
+  git reset --hard origin/master
+  cd "$pwd"
+  echo "VidHop updated."
+}

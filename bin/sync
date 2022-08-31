@@ -1,0 +1,352 @@
+#!/bin/bash
+
+# Sync VidHop data from phone to workstation using rsync.
+# Don't forget to start sshd on the workstation `systemctl start sshd`.
+# No permissions error was solved by disabling the firewall on computer.
+
+# WORKSTATION
+IP_WS="FILL_IN_IP_ADDRESS_FROM_WORKSTATION"
+USER_WS="FILL_IN_USER_FROM_WORKSTATION"
+SHELL_WS="bashrc" # FILL IN YOUR SHELL e.g. zsh, ksh. Works with bash & zsh, other shells not tested.
+
+HOME_WS="/home/$USER_WS"   # not used by `syncvidhop`, rather for sending manually downloaded files
+VIDHOP_DIR_WS="$HOME_WS/Videos/VidHop" # target
+VIDHOP_BIN_DIR_WS="/opt/vidhop/bin"
+BASHRC_WS="$HOME_WS/.$SHELL_WS"
+SSH_PORT_WS=22
+
+# PHONE
+SHARED_DIR_PHONE="/data/data/com.termux/files/home/storage/shared"
+VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
+VIDHOP_BIN_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
+BASHRC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
+
+function sync_help() {
+echo -e "
+ Title: history
+ Description: Sync files between phone and workstation.
+ Commands:
+   syncvidhop  => fetch VidHop files from phone to workstation and send files from workstation to phone
+   sendvidhop  => send files from workstation to phone
+   fetchvidhop => fetch VidHop files from phone to workstation
+
+ Usage:
+   1. start sshd on workstation and phone (Termux)
+   2. run sendvidhop to sync from phone to workstation
+   3. run fetchvidhop to sync from workstation to phone
+
+ Notes:
+   sendvidhop sends all VidHop files, keeps the metadata (JSON) and deletes media files to not clog up the phone.
+   fetchvidhop fetches only metadata files (JSON) to enable video searches in Termux via the fvid command.
+
+ Troubleshoot:
+   No permissions error was solved by disabling the firewall on the workstation."
+  return 0
+}
+
+# sendvidhop
+function real_sendvidhop() {
+  echo -e "sending metadata JSON files..."
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.json" \
+    --include="*.mp3" \
+    --exclude="*" \
+    "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
+
+  echo -e "\n" && echo echo "sending media files and delete from phone..."
+  rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.mp4" \
+    --include="*.jpg" \
+    --include="*.jpeg" \
+    --include="*.png" \
+    --include="*.webp" \
+    --exclude="*.json" \
+    "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
+}
+
+function dry_sendvidhop() {
+  echo -e "sending metadata JSON files..."
+  rsync -Pauvn -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.json" \
+    --include="*.mp3" \
+    --exclude="*" \
+    "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
+
+  echo -e "\n" && echo echo "sending media files and delete from phone..."
+  rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.mp4" \
+    --include="*.jpg" \
+    --include="*.jpeg" \
+    --include="*.png" \
+    --include="*.webp" \
+    --exclude="*.json" \
+    "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
+}
+
+# sync media files
+# ----------------
+function sendvidhop() {
+  unset answer
+  if [ "$1" = "-exec" ]; then
+    real_sendvidhop
+  else
+    dry_sendvidhop
+
+    echo "---"
+    echo "this was a dry run"
+    echo "execute 'sendvidhop -exec' to do a real run"
+    echo "real run deletes mp4, jpg, png and webp files in the DLV directory"
+    echo -n "Do real run now? Y/n: " && read -r answer
+    # Ask for real run and do it if yes.
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" == "n" ] && return
+    [ "$answer" == "y" ] || [ -z "$answer" ] && sendvidhop -exec
+  fi
+}
+
+# fetchvidhop
+function real_fetchvidhop() {
+  echo -e "fetching metadata JSON files..."
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.json" \
+    --exclude="*" \
+    "$USER_WS@$IP_WS:$VIDHOP_DIR_WS/" "$VIDHOP_DIR_PHONE"
+}
+
+function dry_fetchvidhop() {
+  echo -e "fetching metadata JSON files..."
+  rsync -Pauvn -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="bin/" \
+    --exclude="log/" \
+    --exclude="import/" \
+    --exclude="export/" \
+    --include="*/" \
+    --include="*.json" \
+    --exclude="*" \
+    "$USER_WS@$IP_WS:$VIDHOP_DIR_WS/" "$VIDHOP_DIR_PHONE"
+}
+
+# Termux doesn't support creating files with names containing colons, backslash and who knows what else.
+# For files with such names, rsync will not work either, hence fetchvidhop will not work either.
+function fetchvidhop() {
+  unset answer
+  if [ "$1" = "-exec" ]; then
+    real_fetchvidhop
+  else
+    dry_fetchvidhop
+
+    echo "---"
+    echo "this was a dry run"
+    echo "execute 'fetchvidhop -exec' to do a real run"
+    echo "note: fetchvidhop fetches JSON metadata only"
+    echo -n "Do real run now? Y/n: " && read -r answer
+    # Ask for real run and do it if yes.
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" == "n" ] && return
+    [ "$answer" == "y" ] || [ -z "$answer" ] && fetchvidhop -exec
+  fi
+}
+
+function syncvidhop() {
+  unset answer
+  echo -n "Do real run (y) or dry run (n) or abort (a)? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] &&
+    echo -e "\n> SENDING vidhop files DRY RUN..." && dry_sendvidhop &&
+    echo -e "\n> FETCHING vidhop files DRY RUN..." && dry_fetchvidhop &&
+    syncvidhop && return
+  [ "$answer" = "y" ] &&
+    echo -n "" &&
+    echo -e "\n> SENDING vidhop files DRY RUN..." && sendvidhop -exec &&
+    echo -e "\n> FETCHING vidhop files DRY RUN..." && fetchvidhop -exec
+}
+
+function sendvidhopbin() {
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    "$VIDHOP_BIN_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_BIN_DIR_WS"
+}
+
+function fetchvidhopbin() {
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    "$USER_WS@$IP_WS:$VIDHOP_BIN_DIR_WS/" "$VIDHOP_BIN_DIR_PHONE"
+}
+
+function sendbashrc() {
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$BASHRC_PHONE" "$USER_WS@$IP_WS:$BASHRC_WS"
+}
+
+function fetchbashrc() {
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$USER_WS@$IP_WS:$BASHRC_WS" "$BASHRC_PHONE"
+}
+
+function sendfile() {
+  file_phone="$1"
+  file_ws="$2"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$file_phone" "$USER_WS@$IP_WS:$file_ws"
+}
+
+function fetchfile() {
+  file_ws="$1"
+  file_phone="$2"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$USER_WS@$IP_WS:$file_ws" "$file_phone"
+}
+
+function senddir() {
+  dir_phone="$1"
+  dir_ws="$2"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$dir_phone" "$USER_WS@$IP_WS:$dir_ws"
+}
+
+function fetchdir() {
+  dir_ws="$1"
+  dir_phone="$2"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS" "$USER_WS@$IP_WS:$dir_ws" "$dir_phone"
+}
+
+function sshconfig() {
+  echo "User on this phone      : $(whoami)"
+  echo "IP-address of this phone: $(ifdata -pa wlan0)"
+}
+
+# sync downloaded files
+# ---------------------
+# img media directories
+dl="$SHARED_DIR_PHONE/Download"
+pictures="$SHARED_DIR_PHONE/Pictures"
+screenshots="$pictures/Screenshots"
+fb1="$pictures/Facebook"
+messenger="$pictures/Messenger"
+twitter="$pictures/Twitter"
+fb2="$SHARED_DIR_PHONE/DCIM/Facebook"
+# mov media directories
+youcut="$SHARED_DIR_PHONE/Movies/youcut"
+screen_rec="$SHARED_DIR_PHONE/Movies/Screen Recorder"
+
+# file extensions
+doc_exts="doc docx xls xlsx pdf txt md"
+img_exts="jpg png webp jpeg"
+audio_exts="mp3 m4a wav flacc aac"
+mov_exts="mp4 mkv mov avi"
+
+function senddownloads() {
+  if [ "$1" == "-exec" ]; then
+    for ext in $audio_exts; do
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Music"
+    done
+
+    for ext in $doc_exts; do
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Documents"
+    done
+
+    for ext in $img_exts; do
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+    done
+
+    for ext in $mov_exts; do
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+      rsync --remove-source-files -Pauv --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+    done
+
+  else # dry run, files identical to previous block
+    for ext in $audio_exts; do
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Music"
+    done
+
+    for ext in $doc_exts; do
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Documents"
+    done
+
+    for ext in $img_exts; do
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+    done
+
+    for ext in $mov_exts; do
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+      rsync --remove-source-files -Pauvn --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+    done
+    # --- Ask if the user wants to do a real run. --- #
+    echo "---"
+    echo "this was a dry run"
+    echo "execute 'senddownloads -exec' to do a real run"
+    echo -n "Do real run now? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" == "n" ] && return
+    [ "$answer" == "y" ] || [ -z "$answer" ] && senddownloads -exec
+  fi
+}
+
+function cleandownloads() {
+  exts="jpg png webp jpeg mp4 mkv mov avi doc docx xls xlsx pdf txt md mp3 m4a wav flacc aac"
+
+  for ext in $exts; do
+    rm -rf "$dl/*.$ext"
+    rm -rf "$youcut/*.$ext"
+    rm -rf "$screenshots/*.$ext"
+    rm -rf "$screen_rec/*.$ext"
+    rm -rf "$fb1/*.$ext"
+    rm -rf "$fb2/*.$ext"
+    rm -rf "$messenger/*.$ext"
+    rm -rf "$twitter/*.$ext"
+  done
+}

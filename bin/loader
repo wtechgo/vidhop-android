@@ -1,0 +1,22 @@
+#!/bin/bash
+
+bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
+
+. "$bin_dir/vars"
+. "$bin_dir/common"
+. "$bin_dir/logger"
+. "$bin_dir/history"
+. "$bin_dir/files"
+
+. "$bin_dir/dlv"
+. "$bin_dir/fvid"
+. "$bin_dir/sync"  # from phone to workstation
+. "$bin_dir/debug"
+
+function all_help() {
+  dlv_help && echo
+  fvid_help && echo
+  files_help && echo
+  history_help && echo
+  sync_help && return
+}

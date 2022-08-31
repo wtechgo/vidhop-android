@@ -1,0 +1,123 @@
+#!/bin/bash
+
+function create_app_dirs() {
+  mkdir -p \
+    "$vids_dir" \
+    "$channels_dir" \
+    "$music_dir" \
+    "$podcasts_dir" \
+    "$vids_meta_dir" \
+    "$channels_meta_dir" \
+    "$music_meta_dir" \
+    "$podcasts_meta_dir" \
+    "$import_dir" \
+    "$export_dir" \
+    "$log_dir" \
+    "$downloaded_dir" \
+    2>/dev/null
+}
+create_app_dirs
+
+# Determine the video platform for a  given url e.g. https://youtube.com yields youtube.
+function extract_platform_name() {
+  input=$(tr '[:upper:]' '[:lower:]' <<<"$1")
+  for name in "${platform_names[@]}"; do
+    if [[ "$input" == *$name* ]]; then
+      echo "$name"
+      return
+    fi
+  done
+
+  echo could not determine platform for "$url"
+  return 1
+}
+
+# shellcheck disable=SC2120
+function sanitize_filename() {  # echo '"*/<>?\|_: ..ok`' | sanitize_filename
+    [ -n "$1" ] && echo "$1" | sanitize_filename && return
+    tr '"' "'" | \
+    tr -d '\*' | \
+    tr -d '/' | \
+    tr -d '<' | \
+    tr -d '>' | \
+    tr -d '\?' | \
+    tr -d '\\' | \
+    tr '\|' '-' | \
+    tr '\`' "'" | \
+    sed 's/:/ -/g' | \
+    sed 's/\.\{2,\}/./g' | \
+    xargs # xargs trims spaces string start & end
+    # sed 's/\.\{2,\}//g' removes 2 or more dots
+}
+
+function channel_url_from_file() {
+  [ -z "$1" ] && echo "usage: channel_url_from_file PARTIAL_CHANNEL_NAME [PLATFORM]" && return 1
+  json_file="$1"
+  jq 'if .channel_url != null then .channel_url
+      elif .webpage_url != null then .webpage_url
+      elif .entries[0] | has("uploader_url") then .entries[0].uploader_url
+      elif .entries[0] | has("channel_url") then .entries[0].channel_url
+      else empty end' "$json_file" | tr -d '"'
+}
+
+function channel_url_from_obj() {
+  [ -z "$json" ] && [ -z "$1" ] && echo -e "no \$json was not found as a set variable, nor as argument" &&
+    echo -e "usage: channel_url_from_file PARTIAL_CHANNEL_NAME [PLATFORM]" && return 1
+  [ -n "$1" ] && json="$1"
+  jq 'if .channel_url != null then .channel_url
+      elif .webpage_url != null then .webpage_url
+      elif .entries[0] | has("uploader_url") then .entries[0].uploader_url
+      elif .entries[0] | has("channel_url") then .entries[0].channel_url
+      else empty end' <<<"$json" | tr -d '"'
+}
+
+# Extract the name of a channel from yt-dlp --dump-single-json.
+function channel_name_from_obj() {
+  jq 'if .channel != null then .channel
+      elif .uploader != null then .uploader
+      elif .entries[0] | has("channel") then .entries[0].channel
+      elif .entries[0] | has("uploader") then .entries[0].uploader
+      else empty end' <<<"$json" | sanitize_filename
+}
+
+function save_channel_entries_to_archive() {
+  jq '[.entries[].id] | unique' <<<"$json" | jq --arg platform "$platform" '$platform + " " + .[]' | tr -d '"' >"$archive_file"
+}
+
+# Create name for downloaded archive file.
+function url_to_filename() {
+  echo "$1" | tr '/' '-' | tr '.' '_' | tr '@' 'AT' | tr ':' '_' | tr -d '"'
+}
+
+function is_url() {
+  [[ "$1" == *http* ]] && echo true || echo false
+}
+
+function is_json() {
+  [ -f "$1" ] && echo false && return
+  first=$(cat <<<"$1" | head -n 1)
+  [ "$first" = "{" ] || [ "$first" = "[" ] && echo true
+  echo false
+}
+
+function get_extension() {
+  ext=$(echo -n "$1" | rev | cut -d '.' -f 1 | rev)
+  [ "$(echo -n "$ext" | wc -m)" -gt 4 ] && return
+  echo "$ext"
+}
+
+function sort_upload_date_desc() {
+  [ -z "$json" ] && echo no json variable availble, abort sort && return 1
+  entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")
+  json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
+}
+
+function sort_playlist_index_asc() {
+  [ -z "$json" ] && echo no json variable availble, abort sort && return 1
+  entries=$(jq ".entries | sort_by(.playlist_index) " <<<"$json")
+  json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
+}
+
+function updateytdlp() {
+  pip install yt-dlp -U
+}

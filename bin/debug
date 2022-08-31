@@ -1,0 +1,37 @@
+#!/bin/bash
+
+function dlvd() {
+  debug=true
+  dlv "$1"
+  debug=false
+}
+
+function dlvid() {
+  debug=true
+  dlvi "$1"
+  debug=false
+}
+
+function dlcd() {
+  debug=true
+  dlc "$1"
+  debug=false
+}
+
+function dlcid() {
+  debug=true
+  dlci "$1"
+  debug=false
+}
+
+function dlad() {
+  debug=true
+  dla "$1"
+  debug=false
+}
+
+function dltd() {
+  debug=true
+  dlt "$1"
+  debug=false
+}

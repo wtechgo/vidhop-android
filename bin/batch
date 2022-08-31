@@ -1,0 +1,224 @@
+#!/bin/bash
+
+# Extract the name of a channel from yt-dlp --dump-single-json.
+function channel_name_from_file() {
+  [ -n "$1" ] && local json_file="$1" # putting the arg local might be important when running multiple processes
+  jq 'if .channel != null then .channel
+      elif .uploader != null then .uploader
+      elif .entries[0] | has("channel") then .entries[0].channel
+      elif .entries[0] | has("uploader") then .entries[0].uploader
+      else empty end' "$json_file" | tr -d '"'
+}
+
+# Write urls from channels to file.
+function export_channel_urls() {
+  youtube_channels_1="$import_dir/urls_export.txt"
+  url_stream_txt="$import_dir/url_stream.txt"
+  channel_stream_json="$import_dir/channel_stream.json"
+  all_channels_json="$import_dir/all_channels.json"
+  error_log="$import_dir/error.log"
+
+  rm "$youtube_channels_1" "$url_stream_txt" "$channel_stream_json" "$all_channels_json" "$error_log"
+
+  while read -r json_file; do
+    channel_name=$(channel_name_from_file "$json_file")
+    channel_url=$(channel_url_from_file "$json_file")
+
+    [ -z "$channel_url" ] && echo "skipped processing $json_file \n> url of the channel_name was missing" &&
+      echo "[$(date)] channel_name url missing in $json_file" >>"$error_log" && continue
+
+    echo processing "$channel_name"...
+    echo "$channel_url" >>"$url_stream_txt"
+    printf "{\"channel_name\": \"%s\", \"channel_url\": \"%s\"}\n" "$channel_name" "$channel_url" >>"$channel_stream_json"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*.json" -type f -iname "*.json")
+
+  allchans=$(jq -s '.' "$channel_stream_json" | jq 'sort_by(.channel_name) | unique_by(.channel_url)')
+
+  jq '.[].channel_url' <<<"$allchans" | tr -d '"' >"$youtube_channels_1"
+  jq <<<"$allchans" >"$all_channels_json"
+}
+
+function can_add_jobs() {
+  [ "$(pgrep yt-dlp | wc -l)" -gt 6 ] && echo false || echo true
+}
+
+function jobs_done() {
+  [ "$(pgrep yt-dlp)" ] && echo false || echo true
+}
+
+# An alias for import from txt files.
+function syncchannels() {
+  declare -a channel_lists=(
+    "$import_dir/youtube_channels_1.txt"
+    "$import_dir/youtube_channels_2.txt"
+    "$import_dir/youtube_channels_3.txt"
+    "$import_dir/youtube_channels_4.txt"
+    "$import_dir/bitchute_channels_1.txt"
+    "$import_dir/bitchute_channels_2.txt"
+    "$import_dir/bitchute_channels_3.txt"
+  )
+
+  for list in "${channel_lists[@]}"; do
+    logInfo "load list $list ..."
+    while read -r url; do
+      dlci "$url" &
+    done <"$list"
+    logInfo "List loaded $list ..."
+
+    sleep 10
+
+    logInfo "start polling..."
+    while [ "$(can_add_jobs)" = false ]; do
+      logInfo "$(pgrep yt-dlp | wc -l) yt-dlp jobs remaining...."
+      echo "$(pgrep yt-dlp | wc -l) yt-dlp jobs remaining...."
+      echo polling again after 3 minutes...
+      sleep 180
+    done
+    logInfo "end polling..."
+    logInfo "List done $list ..."
+  done
+
+  echo "final 5 jobs running..."
+}
+
+# Download metadata for all channels that have a json file.
+function syncchannels_json_based() {
+  while read -r json_file; do
+    channel_url=$(channel_url_from_file "$json_file")
+    dlci "$channel_url" &# ! spawns multiple processes in the background
+  done < <(find "$channels_meta_dir" ! -name "avatar_*json" -type f -iname "*.json")
+}
+
+# Import URLs line per line from $meta_dir/import.txt.
+# Choose dlv or dlvi mode by passing it as and argument.
+# Example 1: import dlv  |  exemple 2: import dlvi
+# Note: -a import_file.txt is another possibility
+function import() {
+  mode=$([ -z "$1" ] && echo dlv || echo "$1")
+  urls="$import_dir/urls.txt"
+
+  if [[ $mode == "dlv" ]]; then
+    while read -r url; do
+      dlv "$url" &
+    done <"$urls"
+
+  elif [[ $mode == "dlvi" ]]; then
+    while read -r url; do
+      dlvi "$url" &
+    done <"$urls"
+
+  elif [[ $mode == "dlc" ]]; then
+    while read -r url; do
+      dlc "$url" &
+    done <"$urls"
+
+  elif [[ $mode == "dlci" ]]; then
+    while read -r url; do
+      dlci "$url" &
+    done <"$urls"
+  fi
+}
+
+# Merge subset metadata json of all channels and write one big file to channels metadata root directory.
+function squashjson() {
+  unset json
+
+  while read -r chanjson; do
+    echo "processing $chanjson..."
+    channel_name=$(channel_name_from_file "$chanjson")
+    channel_url=$(channel_url_from_file "$chanjson")
+
+    channel_thumbnail_path=$(jq '.channel_thumbnail_path' "$chanjson" | tr -d '"')
+    channel_thumbnail_url=$(jq '.channel_thumbnail_url' "$chanjson" | tr -d '"')
+    platform=$(jq '.platform' "$chanjson")
+
+    json+=$(
+      jq --arg channel_name "$channel_name" \
+        --arg channel_url "$channel_url" \
+        --arg channel_thumbnail_path "$channel_thumbnail_path" \
+        --arg channel_thumbnail_url "$channel_thumbnail_url" \
+        --arg platform "$platform" \
+        '.entries[] |
+            {
+              title: .title,
+              description: .description,
+              url: .webpage_url,
+              thumbnail: .thumbnail,
+              channel_name: $channel_name,
+              channel_url: $channel_url,
+              channel_thumbnail_path: $channel_thumbnail_path,
+              channel_thumbnail_url: $channel_thumbnail_url,
+              platform: $platform
+            }
+          ' "$chanjson"
+    )
+    unset channel_thumbnail_path channel_thumbnail_url platform
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*.json" -type f -iname "*.json")
+
+  jq -s 'map(select(.title != null))' <<<"$json" >"$channels_meta_dir/all_channels".json # remove { null: null} objects
+  jq -s <<<"$json" >"$import_dir/squashed.json"
+  unset json
+}
+
+# Functions for manual data repair and troubleshoot.
+# --------------------------------------------------
+
+function update_archives_from_json_metadata() {
+  while read -r json_file; do
+    echo processing "$json_file"
+    json=$(jq . "$json_file")
+    save_channel_entries_to_archive
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
+}
+
+function fetch_avatars_by_json() {
+  while read -r json_file; do
+    echo processing "$json_file"...
+    channel_name=$(channel_name_from_file "$json_file")
+    channel_url=$(channel_url_from_file "$json_file")
+    python "$scrape_channel_avatar_img_py" --channel-url "$channel_url" --channel-name "$channel_name"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
+}
+
+function merge_avatar_json() { # jq merge overwrites previous fields.
+  while read -r json_file; do
+    echo processing "$json_file"...
+    channel_name=$(channel_name_from_file "$json_file")
+    avatar_json_file=$(find "$channels_meta_dir/$channel_name" -iname "avatar*json")
+    avatar_json=$(jq . "$avatar_json_file")
+    [ -z "$avatar_json" ] && continue
+
+    json=$(jq '.' "$json_file")
+    jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
+}
+
+function inspect_field_all_channels() {
+  while read -r json_file; do
+    jq '.categories' "$json_file"
+  done < <(find "$channels_meta_dir" ! -name "avatar_*json" -type f -iname "*.json")
+}
+
+# does not work
+function sort_channel_entries_desc() {
+  echo starting sort all channel entries descending by upload date
+  while read -r json_file; do
+    unset json && echo processing "$json_file"...
+
+    json=$(jq . "$json_file")
+    entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")
+    json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")   # workaround for --argjson value too large
+
+    jq <<<"$json" > "$json_file"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
+}
+
+function list_channel_avatars() {
+  while read -r channelDir; do
+    echo "channel: $channelDir"
+    # doesn't work because platform name is missing
+    ll "$channelDir/$channelDir.jpg" 2>/dev/null
+    ll "$channelDir/$channelDir.webp" 2>/dev/null
+    ll "$channelDir/$channelDir.png" 2>/dev/null
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
+}

@@ -13,7 +13,7 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 . "$bin_dir/sync"  # from phone to workstation
 . "$bin_dir/debug"
 
-function all_help() {
+function vidhophelp() {
   dlv_help && echo
   fvid_help && echo
   files_help && echo

@@ -18,17 +18,19 @@ function dlv_help() {
 }
 
 function clear_vars_dlv() {
-  unset url standalone platform name json archive_file has_archive archive_content avatar_json avatar_json_file valid
+  unset url standalone platform name json archive_file has_archive archive_content avatar_json \
+    avatar_json_file valid album artist pl_name pl_dir
   rm "$log_json_file" 2>/dev/null
   return 0
 }
 
 check_valid_platform() {
-  [ -n "$1" ] && url="$1"
+  [ -n "$1" ] && url="$1" && unset valid
   for platform in "${platform_names[@]}"; do
     [[ "$url" == *$platform* ]] && valid=true && break
   done
-  [ -z "$valid" ] && logInfo "url '$url' is invalid, unknown platform" &&
+  [ -z "$valid" ] &&
+    logInfo "url '$url' is invalid, unknown platform" &&
     echo "url '$url' is invalid, unknown platform" && return 1
   return 0
 }
@@ -592,10 +594,8 @@ function dlapli() {
     pl_dir="$name/$pl_name"
   fi
 
-  mkdir -p "mv/$pl_name" 2>/dev/null
+  mkdir -p "$music_meta_dir/$pl_dir/$pl_name" 2>/dev/null
   json_file="$music_meta_dir/$pl_dir/$pl_name.json"
-  #  mkdir -p "$music_meta_dir/$name/$platform/$pl_name" 2>/dev/null
-  #  json_file="$music_meta_dir/$name/$platform/$pl_name/$pl_name.json"
 
   # Merge scraped json with previous json on disk.
   if [ -f "$json_file" ]; then
@@ -680,7 +680,7 @@ function dlapl() {
 
   save_channel_entries_to_archive
   jq <<<"$json"
-  cd "$music_dir/$name" || return
+  cd "$music_dir/$pl_dir" || return
 }
 
 function dlalbum() {

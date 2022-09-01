@@ -44,7 +44,7 @@ VidHop is in essence a collection of bash scripts users load in terminal via `ba
 `. vidhop` or `source vidhop`. `bash.bashrc is the Termux equivalent of `.bashrc` in Linux.
 
 We enable a terminal in Android by installing [Termux from F-droid](https://f-droid.org/en/packages/com.termux/).
-Installing Termux from Google Play is not recommended as this is an old version.
+Installing Termux from Google Play is not recommended as this is an [old version](https://www.xda-developers.com/termux-terminal-linux-google-play-updates-stopped/).
 
 VidHop uses [YT-DLP](https://github.com/yt-dlp/yt-dlp) (written in Python) for downloading videos and metadata.
 `install.sh` also installs FFmpeg for converting YT-DLP download when necessary.
@@ -90,75 +90,53 @@ Let's first consider an overview of how to configure SSH. The next chapter goes 
 - Inform VidHop on laptop of the IP-address and user of phone.
 - Inform VidHop on phone of the IP-address and user of laptop.
 
-#### SSH Configuration Laptop
+#### SSH Configuration on Laptop
 
-If you don't have SSH installed on laptop, install package `openssh`.  
-You can check if it's installed with `which sshd`, `type sshd` or by trying to start it with `systemctl start sshd`.
+Note: the instructions below create new SSH keys with as name 'id_vidhop'.
+
+Check that you have SSH installed with `which sshd` or `type sshd`. If not install package `openssh`.
+
+check that you have rsync installed with `which rsync` or `type rsync`. If not install package `rsync`.
+
+For the next steps, we need to get hold of the **user** and **IP-address** of the **phone**. Open Termux on your phone 
+and run `sshconfig` (a VidHop function), which will output the information.
 
 ```
-PHONE_USER="FILL_IN_PHONE_USER"
-PHONE_IP="FILL_IN_PHONE_IP"
+USER_PHONE="FILL_IN_USER_OF_PHONE"
+IP_PHONE="FILL_IN_IP_OF_PHONE"
 
 # Generate RSA keys. To dodge password prompts, leave password empty, just hit enter for each question.
-ssh-keygen -t rsa -b 4096 -f id_vidhop
+yes | ssh-keygen -t rsa -b 4096 -f id_vidhop
 
 # Copy you public key to phone.
 # Make sure `sshd` is running on phone first. Open Termux and run `sshd`.
-ssh-copy-id -i ~/.ssh/id_vidhop -p 22 $PHONE_USER@$PHONE_IP
+ssh-copy-id -i "$HOME/.ssh/id_vidhop" -p 8022 $USER_PHONE@$IP_PHONE
 
 # Make an initial SSH connection and accept the the device fingerprint of laptop.
-ssh -4 -p 8022 $PHONE_USER@$PHONE_IP 
+ssh -4 -i "$HOME/.ssh/id_vidhop" -p 8022 $USER_PHONE@$IP_PHONE 
 ```
 
-#### SSH Configuration Phone
+If the last command was successful, you are now in Termux which you can verify with command `uname -a`.
 
-We recommend you use the SSH connection from the previous part to do this configuration on phone so you can type 
-on your keyboard instead of finger-typing on your droid.
+#### SSH Configuration on Phone
+
+We recommend you use the SSH connection from the previous part to do the configuration on your phone as doing 
+configuration via finger-typing on screens is not particularly pleasant.
 
 ```
-LAPTOP_USER="FILL_IN_LAPTOP_USER"
-LAPTOP_IP="FILL_IN_LAPTOP_IP"
+USER_WS="FILL_IN_USER_OF_WS"
+IP_WS="FILL_IN_IP_OF_WS"
 
 # Generate RSA keys. To dodge password prompts, leave password empty, just hit enter for each question.
-ssh-keygen -t rsa -b 4096 -f id_vidhop
+yes | ssh-keygen -t rsa -b 4096 -f id_vidhop
 
 # Copy you public key to laptop.
 # Make sure `sshd` is running on laptop first. Open a terminal and run `systemctl start sshd` (or distro equivalent).
-ssh-copy-id -i ~/.ssh/id_vidhop -p 8022 $LAPTOP_USER@LAPTOP_IP
+ssh-copy-id -i "$HOME/.ssh/id_vidhop" -p 22 $USER_WS@$IP_WS
 
 # Make an initial SSH connection and accept the the device fingerprint of phone.
-ssh $LAPTOP_USER@LAPTOP_IP
+ssh -i "$HOME/.ssh/id_vidhop" $USER_WS@$IP_WS
 ```
-
-#### Inform VidHop of your SSH connection
-
-1. Make sure you have a working SSH connection between your phone **and** the laptop (SSH instructions above).
-2. On the phone in Termux, tell VidHop the IP-address and the user of **laptop**.
-   ```
-   # opens the sync script in nano editor
-   nanosync
-   
-   # replace these placeholders and **save** the file with CTRL+x, type 'y', press 'enter'
-   # WS stands for workstation, in our case it represents laptop.
-   IP_WS="REPLACE_WITH_YOUR_LAPTOP_IP_ADDRESS"
-   USER_WS="REPLACE_WITH_YOUR_LAPTOP_USER"
-   ```
-   To get hold of the **user** on your **laptop**, open a terminal on laptop and run `whoami`.
-
-   To find out your **IP-address** on your **laptop**, run one of these (whichever works):
-
-   ```
-   ip addr              # install package `iproute2` if command is missing
-   ifconfig -a          # install package `net-tools` if command is missing
-   ipaddr -pa wlan0     # install package `moreutils` if command is missing
-   hostname -I       
-   ```
-3. Make sure `sshd` is running on the other device.
-    - Start `sshd` on **laptop** with `systemctl start sshd`.  
-      If you don't have `sshd`, install `openssh` package.
-    - start `sshd` on **phone** with `sshd`
-
-Here are the [Termux docs for configuring SSH](https://wiki.termux.com/wiki/Remote_Access) just in case.
 
 
 #### Inform VidHop of your SSH connection
@@ -168,27 +146,16 @@ Here are the [Termux docs for configuring SSH](https://wiki.termux.com/wiki/Remo
         > nanosync
    
    - 1.2. Replace the placeholders (REPLACE_WITH...) with the IP-address and user of laptop.
-      > IP_WS="REPLACE_WITH_YOUR_LAPTOP_IP_ADDRESS"  
-        USER_WS="REPLACE_WITH_YOUR_LAPTOP_USER"
-
-      To get hold of the **user** on **laptop**, open a terminal on laptop and run `whoami`.
-      
-      To find out your **IP-address** on **laptop**, run one of these (whichever works):
-   
-      ```
-      ip addr              # install package `iproute2` if command is missing
-      ifconfig -a          # install package `net-tools` if command is missing
-      ipaddr -pa wlan0     # install package `moreutils` if command is missing
-      hostname -I       
-      ```
+      > IP_WS="REPLACE_WITH_YOUR_IP_WS_ADDRESS"  
+        USER_WS="REPLACE_WITH_YOUR_USER_WS"
    - 1.3. **Save** the file with CTRL+x, type 'y', press 'enter'
 2. On **Laptop** (similar to 1.) 
    - 1.1. Open the sync script in nano editor.
-        > nanosync
+     > nanosync
    
    - 1.2. Replace the placeholders (REPLACE_WITH...) with the IP-address and user of **phone**.
-      > IP_WS="REPLACE_WITH_YOUR_LAPTOP_IP_ADDRESS"  
-        USER_WS="REPLACE_WITH_YOUR_LAPTOP_USER"
+     > IP_WS="REPLACE_WITH_YOUR_IP_WS_ADDRESS"  
+       USER_WS="REPLACE_WITH_YOUR_USER_WS"
 
       To get hold of the **user** and **IP-address** of **phone**,  
       open Termux and run `sshconfig` (sshconfig is a VidHop function).

@@ -27,7 +27,6 @@ function extract_platform_name() {
       return
     fi
   done
-
   echo could not determine platform for "$url"
   return 1
 }
@@ -86,7 +85,15 @@ function save_channel_entries_to_archive() {
 
 # Create name for downloaded archive file.
 function url_to_filename() {
-  echo "$1" | tr '/' '-' | tr '.' '_' | tr '@' 'AT' | tr ':' '_' | tr -d '"'
+  echo "$1" |
+    tr '/' '-' |
+    tr '.' '_' |
+    tr '@' 'AT' |
+    tr ':' '_' |
+    tr -d '"' |
+    tr -d '\\' |
+    tr '?' '_' |
+    tr '&' '-'
 }
 
 function is_url() {

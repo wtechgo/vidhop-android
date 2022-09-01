@@ -176,10 +176,16 @@ function rmchan() {
   [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
 }
 
-function rm_dowloaded_by_url() {
+function rmarchive() {
+  [ -z "$1" ] && echo 'rmarchive $URL' && return
   url="$1"
-  grep -q https <<<"$url" && rm "$downloaded_dir/$(url_to_filename "$url")" && return
-  echo "invalid url $url"
+  [[ "$url" != http* ]] && echo "invalid url '$url'" && return
+
+  archive_to_be_removed="$downloaded_dir/$(url_to_filename "$url")"
+  ! [ -f "$archive_to_be_removed" ] &&
+    echo -e "tried to remove '$archive_to_be_removed' but file doesn't exist\nno downloaded archive file for url '$url'" &&
+    return
+  rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
 function replace_bashrc() {

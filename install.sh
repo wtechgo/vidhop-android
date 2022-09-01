@@ -118,11 +118,11 @@ answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]') &&
   [ -z "$answer" ] || [ "$answer" = "y" ] || [ "$answer" = "yes" ] && unset answer &&
   cp $vidhop_bashrc $bashrc
-
+echo
 echo "You can try a VidHop command now e.g.:"
 echo "  dlv https://www.youtube.com/watch?v=-DT7bX-B1Mg" && echo
 echo "Alternatively, you can read the docs by executing:"
-echo "  all_help"
+echo "  vidhophelp"
 echo
 echo -e "${GREEN}Happy downloading and building of your metadata library"'!'"${NC}\n" && sleep 1
 echo -e "Requesting Termux access to sd card..."

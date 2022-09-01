@@ -33,7 +33,6 @@ function play() {
 
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
-  [[ "$media_file" == *.json ]] && "$text_app" "$media_file" && return
   [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
   [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
 }
@@ -79,7 +78,7 @@ function rename_file() {
 # Rename a video and its metadata.
 function renvid() {
   cd "$vids_dir" || return 1
-  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid OLD_NAME NEW_NAME\n
+  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>\n
     you are in the videos dir now (for autocomplete)\n
     OLD_NAME input works with and without file extensions" && return 0
 

@@ -109,8 +109,8 @@ function msg_multiple_channels_found() {
   echo "found more than one metadata JSON file"
   echo "$json_files"
   echo "pass the platform name to specify further"
-  [ "$command" = "fvidc" ] && echo "usage: $command \$PARTIAL_CHANNEL_NAME \$SEARCH_TEXT \$PLATFORM" && return
-  echo "usage: $command \$PARTIAL_CHANNEL_NAME \$PLATFORM"
+  [ "$command" = "fvidc" ] && echo "usage: $command <PARTIAL_CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM>" && return
+  echo "usage: $command <PARTIAL_CHANNEL_NAME> <PLATFORM>"
 }
 
 function clearLastLine() {
@@ -182,8 +182,8 @@ function fvidc() {
 }
 
 function fvidcv() {
-  if [ -n "$1" ]; then name="$1"; else echo usage: fvidcv CHANNEL_NAME SEARCH_TEXT && return 0; fi
-  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo usage: fvidcv CHANNEL_NAME SEARCH_TEXT && return 0; fi
+  if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT>" && return 0; fi
+  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT>" && return 0; fi
   platform="$3"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -309,7 +309,7 @@ function chani() { # channel info
 }
 
 function chancount() {
-  [ -z "$1" ] && echo "usage: chancount PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  [ -z "$1" ] && echo "usage: chancount <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -322,7 +322,7 @@ function chancount() {
 }
 
 function channel_url_from_name() {
-  [ -z "$1" ] && echo "usage: channel_url_from_name PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  [ -z "$1" ] && echo "usage: channel_url_from_name <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -334,7 +334,7 @@ function channel_url_from_name() {
 }
 
 function chanmeta() {
-  [ -z "$1" ] && echo "usage: chanmeta PARTIAL_CHANNEL_NAME [PLATFORM]" && return
+  [ -z "$1" ] && echo "usage: chanmeta <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -353,7 +353,7 @@ function json_files_for_video_name() {
 }
 
 function vidmeta() {
-  [ -z "$1" ] && echo "usage: vidmeta PARTIAL_VIDEO_NAME [PLATFORM]" && return
+  [ -z "$1" ] && echo "usage: vidmeta <PARTIAL_VIDEO_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_video_name "$name" "$platform")

@@ -5,6 +5,8 @@
 Download videos, channels, playlists, music...with metadata or only metadata and query the metadata with one simple command
 to search your favorite videos and channels on Android.
 
+[Watch: An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0).
+
 ## Installation
 
 1. Install [Termux from F-droid](https://f-droid.org/en/packages/com.termux/) on Android.

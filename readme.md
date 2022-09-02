@@ -12,7 +12,7 @@ to search your favorite videos and channels on Android.
 1. [Install F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
    Android will notify you about installation of unknown sources. I suppose everything that is **not** 
    Google is "uknown".
-2. Install [Termux from F-droid](https://f-droid.org/en/packages/com.termux/) on Android.
+2. Install [Termux from F-Droid](https://f-droid.org/en/packages/com.termux/) on Android.
 3. Open Termux and paste this command.
 
     ```   
@@ -48,7 +48,7 @@ inspect video specs for files and urls, remove the last download or play it...
 VidHop is in essence a collection of bash scripts users load in terminal via `bash.bashrc` or by calling the loader
 `. vidhop` or `source vidhop`. `bash.bashrc is the Termux equivalent of `.bashrc` in Linux.
 
-We enable a terminal in Android by installing [Termux from F-droid](https://f-droid.org/en/packages/com.termux/).
+We enable a terminal in Android by installing [Termux from F-Droid](https://f-droid.org/en/packages/com.termux/).
 Installing Termux from Google Play is not recommended as this is an [old version](https://www.xda-developers.com/termux-terminal-linux-google-play-updates-stopped/).
 
 VidHop uses [YT-DLP](https://github.com/yt-dlp/yt-dlp) (written in Python) for downloading videos and metadata.

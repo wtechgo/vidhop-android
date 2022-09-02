@@ -9,15 +9,18 @@ to search your favorite videos and channels on Android.
 
 ## Installation
 
-1. Install [Termux from F-droid](https://f-droid.org/en/packages/com.termux/) on Android.
-2. Open Termux and paste this command.
+1. [Install F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
+   Android will notify you about installation of unknown sources. I suppose everything that is **not** 
+   Google is "uknown".
+2. Install [Termux from F-droid](https://f-droid.org/en/packages/com.termux/) on Android.
+3. Open Termux and paste this command.
 
     ```   
        curl -sL https://raw.githubusercontent.com/wtechgo/vidhop-android/master/install.sh > install.sh && 
        chmod +x install.sh && ./install.sh && rm install.sh && . $PREFIX/etc/bash.bashrc && . vidhop
     ```   
 
-3. Check if it works: download a video and play it !
+4. Check if it works: download a video and play it !
 
     ```
        dlv https://www.youtube.com/watch?v=-DT7bX-B1Mg && ls -l && sleep 3 && play

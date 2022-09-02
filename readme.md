@@ -2,8 +2,16 @@
 
 ## Description
 
-Download videos, channels, playlists, music...with metadata or only metadata and query the metadata with one simple command
-to search your favorite videos and channels on Android.
+Download videos, channels, playlists, music and thumbnails from any video platform on Android.
+
+VidHop stores metadata of the video files you process as JSON files, metadata through which you can easily search.
+
+VidHop is like a Swiss knife for anyone interested in saving audiovisual content from the internet, on your phone.
+
+VidHop also exists for Linux. Sync functionality is built-in on both Linux and Android versions of VidHop though that 
+requires a working SSH connection between laptop and phone.
+
+A port for Windows would be nice, with MSYS2 perhaps or WSL2..
 
 [Watch: An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0).
 

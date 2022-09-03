@@ -6,21 +6,26 @@ Download videos, channels, playlists, music and thumbnails from any video platfo
 
 VidHop stores metadata of the video files you process as JSON files, metadata through which you can easily search.
 
-VidHop is like a Swiss knife for anyone interested in saving audiovisual content from the internet, on your phone.
+VidHop is like a Swiss knife for anyone interested in saving audiovisual content from the internet.
 
-VidHop also exists for Linux. Sync functionality is built-in on both Linux and Android versions of VidHop though that 
+VidHop for Linux also exists. Sync functionality is built-in on both Linux and Android versions of VidHop though that 
 requires a working SSH connection between laptop and phone.
 
-A port for Windows would be nice, with MSYS2 perhaps or WSL2..
+A port for Windows is another idea.
 
-[Watch: An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0).
+###Videos
+
+[An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0)
+
+[Installing VidHop form Scratch](https://odysee.com/@WTechGo:e/Install-VidHop-from-Scratch:c)
 
 ## Installation
 
-1. [Install F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
-   Android will notify you about installation of unknown sources. I suppose everything that is **not** 
-   Google is "uknown".
-2. Install [Termux from F-Droid](https://f-droid.org/en/packages/com.termux/) on Android.
+1. Install [F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
+   Your browser will ask permission to install the .apk from unknown sources, in this case that is F-Droid which fine. 
+   Grant your browser the permission.
+2. Install [Termux](https://f-droid.org/en/packages/com.termux/) from F-Droid on Android.  
+   You'll get the same notification as before, only this time the unknown source is Termux, grant it.
 3. Open Termux and paste this command.
 
     ```   

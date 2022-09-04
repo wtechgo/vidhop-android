@@ -13,7 +13,7 @@ requires a working SSH connection between laptop and phone.
 
 A port for Windows is another idea.
 
-###Videos
+### Videos
 
 [An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0)
 

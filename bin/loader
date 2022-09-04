@@ -10,8 +10,20 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 
 . "$bin_dir/dlv"
 . "$bin_dir/fvid"
-. "$bin_dir/sync"  # from phone to workstation
+. "$bin_dir/sync" # from phone to workstation
 . "$bin_dir/debug"
+
+function uninstallvidhop() {
+  echo "This is the uninstallation program for VidHop."
+  echo "Uninstall removes all program files."
+  echo "It does not delete your downloads in the VidHop directory."
+  echo -n 'Are you sure you want to uninstall VidHop? y/N: ' && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "aborted uninstall" && return
+  [ "$answer" = "y" ] &&
+    rm "$PREFIX/bin/vidhop" &&
+    rm -rf "$PREFIX/opt/vidhop"
+}
 
 function vidhophelp() {
   dlv_help && echo

@@ -22,14 +22,22 @@ function replace_bashrc() {
 }
 
 function play() {
-  [ -n "$1" ] && [ -f "$1" ] && media_file="$1"
-  if [ -z "$media_file" ]; then
-    files=$(find "$vidhop_dir" -iname "*$1*")
-    [ $(wc -l <<<"$files") -gt 1 ] &&
-      echo -e "play requires 1 file but found\n$files\nyou can be more specific by providing an extension e.g. foo.mp4" &&
-      return
+  search_text="$1"
+  [ -z "$media_file" ] && [ -z "$search_text" ] && echo "no media file and no search text" && return
+
+  if [ -n "$search_text" ]; then
+    files=$(find "$vidhop_dir" -iname "*$1*mp4")
+    echo "$files"
+    count=$(wc -l <<<"$files")
+    [ "$files" = "" ] && count=0
+
+    [ "$count" -eq 0 ] && echo "found nothing for '$search_text'" && unset files && return
+    [ "$count" -gt 1 ] &&
+      echo -e "play requires 1 file but found $count $files\nyou can specifiy your search term further" &&
+      unset files && return
     media_file="$files" && unset files
   fi
+  ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return

@@ -65,8 +65,8 @@ if [ -d "$vidhop_app_dir" ]; then
   echo -n "$vidhop_app_dir already existis, remove it? Y/n: " && read answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "y" ] || [ -z "$answer" ] &&
-    rm -rf "$vidhop_app_dir" && unset answer && sleep 3
-  git clone https://github.com/wtechgo/vidhop-android.git "$vidhop_app_dir"
+    rm -rf "$vidhop_app_dir" && unset answer && sleep 3 &&
+    git clone https://github.com/wtechgo/vidhop-android.git "$vidhop_app_dir"
 else
   git clone https://github.com/wtechgo/vidhop-android.git "$vidhop_app_dir"
 fi

@@ -45,16 +45,16 @@ VidHop enables Android users to download videos, songs, thumbnails, complete cha
 platforms to their phones.
 
 Each download also saves the video **metadata** and its thumbnail (video banner image). When users download a channel or
-playlist, the same happens for each video while also saving channel metadat. It's also possible to fetch **only** the
+playlist, the same happens for each video while also saving channel metadata. It's also possible to fetch **only** the
 metadata of a video, channel or playlist.
 
-**The metadata is what makes VidHop powerful** as it provides functions for users to query their collected metadata
+**The metadata is what makes application powerful** as VidHop provides functions for users to query their collected metadata
 using search words or sentences. Effectively, VidHop will look for the search word in video titles and descriptions
-though the metadata contains other useful data like video, channel and thumbnail urls. File extensions incude mp4 (
+though the metadata contains other useful data like video, channel and thumbnail URLs. File extensions include mp4 (
 video), json (metadata) and jpg (thumbnails).
 
 Finally, VidHop provides many utilities for day-to-day use such as keeping a history, renaming of downloaded files,
-inspect video specs for files and urls, remove the last download or play it...
+inspect video specs of files and URLs, remove the last download or play it...
 
 ## Technical Information
 
@@ -65,7 +65,7 @@ We enable a terminal in Android by installing [Termux from F-Droid](https://f-dr
 Installing Termux from Google Play is not recommended as this is an [old version](https://www.xda-developers.com/termux-terminal-linux-google-play-updates-stopped/).
 
 VidHop uses [YT-DLP](https://github.com/yt-dlp/yt-dlp) (written in Python) for downloading videos and metadata.
-`install.sh` also installs FFmpeg for converting YT-DLP download when necessary.
+`install.sh` also installs FFmpeg for converting YT-DLP downloads when necessary.
 
 Handling metadata JSON files happens with [JQ](https://github.com/stedolan/jq).
 

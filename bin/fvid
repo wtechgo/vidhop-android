@@ -17,9 +17,6 @@ function fvid_help() {
   echo "    chanmeta <CHANNEL_NAME> => show channel metadata for channel"
   echo "    chanmeta <CHANNEL_NAME> <PLATFORM> => show channel metadata for channel from platform"
   return 0
-  #  echo "    merge_fvid_exports => merge_fvid_exports <EXPORT_FILE_NAME>"  => merge all fvid results into one file"
-  #  echo "    wp_convert_fvid_merge  => compound function, does fvid merge AND wp_converts the fvid merge (using 'oneliners' exports)"
-  #  echo "    wp_convert_fvid_oneliner_file  => converts one fvid export file to one wp_convert file"
 }
 
 function clear_vars_fvid() {

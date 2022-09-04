@@ -72,6 +72,7 @@ else
 fi
 chmod +x "$vidhop_app_dir/install.sh"
 
+chmod +x "$loader"
 cp "$loader" "$loader_bin" # copy loader to /bin as 'vidhop' to , load VidHop with command 'source vidhop`
 echo -e "\n. vidhop" >>$PREFIX/etc/bash.bashrc
 

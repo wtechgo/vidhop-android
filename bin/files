@@ -17,10 +17,6 @@ function files_help() {
   return 0
 }
 
-function replace_bashrc() {
-  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
-}
-
 function play() {
   search_text="$1"
   [ -z "$media_file" ] && [ -z "$search_text" ] && echo "no media file and no search text" && return
@@ -183,6 +179,36 @@ function rmchan() {
   [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
 }
 
+function rmartist() {
+  [ -z "$1" ] && echo "usage: rmartist <PARTIAL_ARTIST_NAME>" && return 1
+  unset answer found_artist_dir found_downloaded_file
+
+  name="$1"
+  [ -n "$2" ] && answer="$2"
+  found_artist_dir=$(find "$music_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_artist_meta_dir=$(find "$music_meta_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_downloaded_file=$(find_archive_file_from_channel_name "$name" || echo "")
+
+  logInfo "downloaded archive file: $found_downloaded_file"
+  [ -z "$found_artist_dir" ] && [ -z "$found_artist_meta_dir" ] && [ -z "$found_downloaded_file" ] && echo found no matches && return
+  echo "found files:"
+  [ -n "$found_artist_dir" ] && echo -e "$found_artist_dir"
+  [ -n "$found_artist_meta_dir" ] && echo -e "$found_artist_meta_dir"
+  [ -n "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
+
+  if [ -z "$answer" ]; then
+    echo "caution: rmchan will remove all media and metadata files of '$name' for all platforms"
+    echo -n "delete channel permanently? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] && return
+  fi
+
+  # remove files
+  [ -n "$found_artist_dir" ] && rm -rf "$found_artist_dir" && echo "deleted channel media directory: $found_artist_dir"
+  [ -n "$found_artist_meta_dir" ] && rm -rf "$found_artist_meta_dir" && echo "deleted channel metadata directory: $found_artist_meta_dir"
+  [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
+}
+
 function rmarchive() {
   [ -z "$1" ] && echo 'rmarchive $URL' && return
   url="$1"
@@ -193,17 +219,4 @@ function rmarchive() {
     echo -e "tried to remove '$archive_to_be_removed' but file doesn't exist\nno downloaded archive file for url '$url'" &&
     return
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
-}
-
-function replace_bashrc() {
-  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
-}
-
-updatevidhop() {
-  pwd=$(pwd)
-  cd "$app_dir"
-  git fetch --all
-  git reset --hard origin/master
-  cd "$pwd"
-  echo "VidHop updated."
 }

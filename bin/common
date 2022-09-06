@@ -124,7 +124,3 @@ function sort_playlist_index_asc() {
   entries=$(jq ".entries | sort_by(.playlist_index) " <<<"$json")
   json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
 }
-
-function updateytdlp() {
-  pip install yt-dlp -U
-}

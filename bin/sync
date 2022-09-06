@@ -66,7 +66,7 @@ function real_sendvidhop() {
     --exclude="*" \
     "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 
-  echo -e "\n" && echo echo "sending media files and delete from phone..."
+  echo -e "\n" && echo "sending media files and delete from phone..."
   rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \
@@ -101,7 +101,7 @@ function dry_sendvidhop() {
     --exclude="*" \
     "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 
-  echo -e "\n" && echo echo "sending media files and delete from phone..."
+  echo -e "\n" && echo "sending media files and delete from phone..."
   rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \
@@ -143,7 +143,7 @@ function sendvidhop() {
 
 # fetchvidhop
 function real_fetchvidhop() {
-  echo -e "fetching metadata JSON files..."
+  echo -e ">> FETCHING METADATA (JSON files)..."
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \
@@ -159,7 +159,7 @@ function real_fetchvidhop() {
 }
 
 function dry_fetchvidhop() {
-  echo -e "fetching metadata JSON files..."
+  echo -e ">> FETCHING METADATA (JSON files)..."
   rsync -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \

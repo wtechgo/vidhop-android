@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
+bin_dir="/data/data/com.termux/files/usr/opt/vidhop"
 
 . "$bin_dir/vars"
 . "$bin_dir/common"
@@ -10,8 +10,32 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 
 . "$bin_dir/dlv"
 . "$bin_dir/fvid"
-. "$bin_dir/sync" # from phone to workstation
+. "$bin_dir/batch"
+. "$bin_dir/sync"  # from workstation to phone
 . "$bin_dir/debug"
+
+function replace_bashrc() {
+  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+}
+
+function updateytdlp() {
+  pip install yt-dlp -U
+}
+
+function updatevidhop() {
+  pwd=$(pwd)
+  cd "$app_dir" || echo "could not find vidhop appdir at $app_dir" && return
+
+  echo "updating VidHop binaries at $bin_dir..."
+  git fetch --all
+  git reset --hard origin/master
+
+  echo "updating yt-dlp..."
+  updateytdlp
+
+  cd "$pwd" || echo "could not restore present working directory at $pwd"
+  echo "VidHop updated."
+}
 
 function uninstallvidhop() {
   echo "This is the uninstallation program for VidHop."

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bin_dir="/data/data/com.termux/files/usr/opt/vidhop"
+bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 
 . "$bin_dir/vars"
 . "$bin_dir/common"
@@ -14,8 +14,8 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop"
 . "$bin_dir/sync"  # from workstation to phone
 . "$bin_dir/debug"
 
-function replace_bashrc() {
-  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+function install_loader() {
+  cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
 }
 
 function updateytdlp() {
@@ -24,16 +24,17 @@ function updateytdlp() {
 
 function updatevidhop() {
   pwd=$(pwd)
-  cd "$app_dir" || echo "could not find vidhop appdir at $app_dir" && return
+  cd "$app_dir"
 
   echo "updating VidHop binaries at $bin_dir..."
   git fetch --all
   git reset --hard origin/master
+  install_loader
 
   echo "updating yt-dlp..."
   updateytdlp
 
-  cd "$pwd" || echo "could not restore present working directory at $pwd"
+  cd "$pwd"
   echo "VidHop updated."
 }
 
@@ -55,4 +56,8 @@ function vidhophelp() {
   files_help && echo
   history_help && echo
   sync_help && return
+}
+
+function replace_bashrc() {
+  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
 }

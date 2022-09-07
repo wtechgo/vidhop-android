@@ -19,6 +19,8 @@ A port for Windows is another idea.
 
 [Installing VidHop form Scratch](https://odysee.com/@WTechGo:e/Install-VidHop-from-Scratch:c)
 
+[Sync VidHop between laptop and phone](https://odysee.com/@WTechGo:e/sync-vidhop-between-laptop-and-phone:1)
+
 ## Installation
 
 1. Install [F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  

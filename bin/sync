@@ -7,13 +7,12 @@
 # WORKSTATION
 IP_WS="FILL_IN_IP_ADDRESS_FROM_WORKSTATION"
 USER_WS="FILL_IN_USER_FROM_WORKSTATION"
-SHELL_WS="bashrc"                      # FILL IN YOUR SHELL e.g. zsh, ksh. Works with bash & zsh, other shells not tested.
+USER_HOME_WS="/home/$USER_WS"               # not used by `syncvidhop`, rather for sending manually downloaded files
+VIDHOP_DIR_WS="$USER_HOME_WS/Videos/VidHop" # target
+VIDHOP_BIN_DIR_WS="/home/$USER_WS/code/vidhop/shell/linux/bin" # make /opt/vidhop/bin on public repo
+SHELL_WS="bash" # FILL IN YOUR SHELL e.g. zsh, ksh. Works with bash & zsh, other shells not tested.
+SHELL_RC_WS="$USER_HOME_WS/.${SHELL_WS}rc"
 SSH_PORT_WS=22
-
-HOME_WS="/home/$USER_WS"               # not used by `syncvidhop`, rather for sending manually downloaded files
-VIDHOP_DIR_WS="$HOME_WS/Videos/VidHop" # target
-VIDHOP_BIN_DIR_WS="/opt/vidhop/bin"
-BASHRC_WS="$HOME_WS/.$SHELL_WS"
 
 # PHONE
 SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
@@ -226,11 +225,11 @@ function fetchvidhopbin() {
 }
 
 function sendbashrc() {
-  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$BASHRC_PHONE" "$USER_WS@$IP_WS:$BASHRC_WS"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$BASHRC_PHONE" "$USER_WS@$IP_WS:$SHELL_RC_WS"
 }
 
 function fetchbashrc() {
-  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$BASHRC_WS" "$BASHRC_PHONE"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$SHELL_RC_WS" "$BASHRC_PHONE"
 }
 
 function sendfile() {
@@ -286,71 +285,71 @@ function senddownloads() {
   if [ "$1" == "-exec" ]; then
     for ext in $audio_exts; do
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Music"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Music"
     done
 
     for ext in $doc_exts; do
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Documents"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Documents"
     done
 
     for ext in $img_exts; do
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
     done
 
     for ext in $mov_exts; do
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
     done
 
   else # dry run, files identical to previous block
     for ext in $audio_exts; do
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Music"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Music"
     done
 
     for ext in $doc_exts; do
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Documents"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Documents"
     done
 
     for ext in $img_exts; do
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$screenshots/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$fb2/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$fb1/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$messenger/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$HOME_WS/Pictures"
+        --include="*.$ext" --exclude="*" "$twitter/" "$USER_WS@$IP_WS:$USER_HOME_WS/Pictures"
     done
 
     for ext in $mov_exts; do
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$dl/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$youcut/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
       rsync --remove-source-files -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
-        --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$HOME_WS/Videos"
+        --include="*.$ext" --exclude="*" "$screen_rec/" "$USER_WS@$IP_WS:$USER_HOME_WS/Videos"
     done
     # --- Ask if the user wants to do a real run. --- #
     echo "---"

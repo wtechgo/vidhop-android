@@ -21,9 +21,11 @@ create_app_dirs
 # Determine the video platform for a  given url e.g. https://youtube.com yields youtube.
 function extract_platform_name() {
   input=$(tr '[:upper:]' '[:lower:]' <<<"$1")
+  domain=$(echo "$url" | awk -F/ '{print $3}')
+
   for name in "${platform_names[@]}"; do
-    if [[ "$input" == *$name* ]]; then
-      echo "$name"
+    if [[ "$input" == *$domain* ]]; then
+      echo "$domain"
       return
     fi
   done

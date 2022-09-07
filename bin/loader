@@ -19,22 +19,21 @@ function install_loader() {
 }
 
 function updateytdlp() {
-  pip install yt-dlp -U
+  python -m pip install yt-dlp -U
 }
 
 function updatevidhop() {
   pwd=$(pwd)
-  cd "$app_dir"
+  cd "$app_dir" || echo "could not find vidhop appdir at $app_dir" && return
 
   echo "updating VidHop binaries at $bin_dir..."
   git fetch --all
   git reset --hard origin/master
-  install_loader
 
   echo "updating yt-dlp..."
   updateytdlp
 
-  cd "$pwd"
+  cd "$pwd" || echo "could not restore present working directory at $pwd"
   echo "VidHop updated."
 }
 

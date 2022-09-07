@@ -18,8 +18,8 @@ function files_help() {
 }
 
 function play() {
-  search_text="$1"
-  [ -z "$media_file" ] && [ -z "$search_text" ] && echo "no media file and no search text" && return
+  [ -z "$media_file" ] && [ -z "$1" ] && echo "no media file available and no user input received" && return
+  [ -f "$1" ] && media_file="$1" || search_text="$1"
 
   if [ -n "$search_text" ]; then
     files=$(find "$vidhop_dir" -iname "*$1*mp4")
@@ -219,4 +219,14 @@ function rmarchive() {
     echo -e "tried to remove '$archive_to_be_removed' but file doesn't exist\nno downloaded archive file for url '$url'" &&
     return
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
+}
+
+function treevidhopbefore() {
+  ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
+  tree "$vidhop_dir" >"$log_dir/tree_vidhop_before"
+}
+
+function treevidhopafter() {
+  ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
+  tree "$vidhop_dir" >"$log_dir/tree_vidhop_after"
 }

@@ -25,9 +25,10 @@ function clear_vars_dlv() {
 }
 
 check_valid_platform() {
-  [ -n "$1" ] && url="$1" && unset valid
+  [ -n "$1" ] && url="$1"; unset valid
+  domain=$(echo "$url" | awk -F/ '{print $3}')
   for platform in "${platform_names[@]}"; do
-    [[ "$url" == *$platform* ]] && valid=true && break
+    [[ "$domain" == *$platform* ]] && valid=true && break
   done
   [ -z "$valid" ] &&
     logInfo "url '$url' is invalid, unknown platform" &&
@@ -116,6 +117,21 @@ function fetch_sanitized_title() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '-' \
     --replace-in-metadata "title" '\`' "'" \
+    --verbose "$url"
+}
+
+function fetch_song_filename() {
+  yt-dlp --print "%(artist)s - %(title)s" \
+    --replace-in-metadata "artist,title" '"' "'" \
+    --replace-in-metadata "artist,title" '\*' '' \
+    --replace-in-metadata "artist,title" '/' '' \
+    --replace-in-metadata "artist,title" ':' ' -' \
+    --replace-in-metadata "artist,title" '<' '' \
+    --replace-in-metadata "artist,title" '>' '' \
+    --replace-in-metadata "artist,title" '\?' '' \
+    --replace-in-metadata "artist,title" '\\' '' \
+    --replace-in-metadata "artist,title" '\|' '-' \
+    --replace-in-metadata "artist,title" '\`' "'" \
     --verbose "$url"
 }
 
@@ -542,7 +558,7 @@ function dla() {
   check_valid_platform "$url" || return 1
   mkdir -p "$music_meta_dir" 2>/dev/null
 
-  name="$(fetch_sanitized_title)"
+  name="$(fetch_song_filename)"
   fetch_video_metadata "$url" # populates json
   jq <<<"$json" >"$music_meta_dir/$name.json"
   add_to_ahistory
@@ -558,6 +574,7 @@ function dla() {
   jq <<<"$json"
   cd "$music_dir" || return
 }
+
 # Download video playlist information (similar to dlci).
 function dlapli() {
   local url="$1"

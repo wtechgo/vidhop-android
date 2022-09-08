@@ -15,6 +15,7 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 . "$bin_dir/debug"
 
 function install_loader() {
+  chmod +x "$PREFIX/opt/vidhop/bin/loader"
   cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
 }
 

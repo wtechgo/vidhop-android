@@ -31,6 +31,7 @@ function updatevidhop() {
   git reset --hard origin/master
   updateytdlp
   install_loader
+  . vidhop
   cd "$pwd" && echo "VidHop updated."
 }
 

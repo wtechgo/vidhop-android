@@ -24,8 +24,8 @@ function updateytdlp() {
 }
 
 function updatevidhop() {
-  pwd=$(pwd) && cd "$app_dir"
-  echo "> updating VidHop binaries at $bin_dir..."
+  pwd=$(pwd) && cd "$vidhop_app_dir"
+  echo "> updating VidHop at $vidhop_app_dir..."
   git fetch --all
   git reset --hard origin/master
   updateytdlp
@@ -54,5 +54,5 @@ function vidhophelp() {
 }
 
 function replace_bashrc() {
-  cp "$app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+  cp "$vidhop_app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
 }

@@ -2,8 +2,8 @@
 
 shared="/data/data/com.termux/files/home/storage/shared"
 vidhop_dir="$shared/VidHop"
+vidhop_app_dir="/data/data/com.termux/files/usr/opt/vidhop"  # already defined in loader
 bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"  # already defined in loader
-app_dir="/data/data/com.termux/files/usr/opt/vidhop"  # already defined in loader
 scrape_channel_avatar_img_py="$bin_dir/scrape_channel_avatar_img.py"
 
 # media
@@ -47,7 +47,7 @@ termux_screen_char_count=53
 
 # .bashrc shortkeys
 alias cdvidhop='cd $vidhop_dir'
-alias cdappdir='cd $app_dir'
+alias cdappdir='cd $vidhop_app_dir'
 alias cdvidhopbin='cd $bin_dir'
 alias cdvbin='cd $bin_dir'
 alias cdvid='cd $vids_dir'

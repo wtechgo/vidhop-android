@@ -69,14 +69,20 @@ function specs() {
   fi
 }
 
-function rename_file() {
+function path_newfile() {
   old_file="$1"
-  new_file="$2"
+  new_name="$2"
   dir_name=$(dirname "$old_file")
   ext=$(get_extension "$old_file")
-  new_file="$dir_name/$new_name.$ext"
+  echo "$dir_name/$new_name.$ext"
+}
+
+function rename_file() {
+  old_file="$1"
+  new_name="$2"
+  new_file=$(path_newfile "$old_file" "$new_name")
   mv "$old_file" "$new_file"
-  echo -e "renamed $old_file\nto $new_file"
+  echo -e "> Renamed:\n$old_file\nTo:\n$new_file"
 }
 
 # Rename a video and its metadata.
@@ -111,8 +117,32 @@ function renvid() {
 }
 
 function renlast() {
-  [ -z "$1" ] && echo "usage: renlast <PARTIAL_VIDEO_NAME>" && return 1
-  renvid "$(lasttitle)" "$1"
+  [ -z "$1" ] && echo "usage: renlast <NEW_NAME>" && return
+  [ "$(has_vhistory_vars)" = false ] && echo "no files in memory to rename" && return
+  new_name="$1"   #  new_name=$(sanitize_filename "$1")
+
+  echo "> Rename:"
+  [ -f "$media_file" ] && echo "$media_file"
+  [ -f "$meta_file" ] && echo "$meta_file"
+  [ -f "$thumb_file" ] && echo "$thumb_file"
+  [ -f "$avatar_file" ] && echo "$avatar_file"
+  echo "> To:"
+  [ -f "$media_file" ] && path_newfile "$media_file" "$new_name"
+  [ -f "$meta_file" ] && path_newfile "$meta_file" "$new_name"
+  [ -f "$thumb_file" ] && path_newfile "$thumb_file" "$new_name"
+  [ -f "$avatar_file" ] && path_newfile "$avatar_file" "$new_name"
+
+  echo -n "Rename these files? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] && return
+
+  [ -f "$media_file" ] && rename_file "$media_file" "$new_name" && media_file=$(path_newfile "$media_file" "$new_name")
+  [ -f "$meta_file" ] && rename_file "$meta_file" "$new_name" && meta_file=$(path_newfile "$meta_file" "$new_name")
+  [ -f "$thumb_file" ] && rename_file "$thumb_file" "$new_name" && thumb_file=$(path_newfile "$thumb_file" "$new_name")
+  [ -f "$avatar_file" ] && rename_file "$avatar_file" "$new_name" && avatar_file=$(path_newfile "$avatar_file" "$new_name")
+  [ -f "$title" ] &&
+    echo "> Renamed to:" &&
+    echo "$name" >>"$titles_file"
 }
 
 function rmvid() {
@@ -219,6 +249,10 @@ function rmarchive() {
     echo -e "tried to remove '$archive_to_be_removed' but file doesn't exist\nno downloaded archive file for url '$url'" &&
     return
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
+}
+
+function echomediafile() {
+  echo "$media_file"
 }
 
 function treevidhopbefore() {

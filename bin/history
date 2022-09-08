@@ -259,6 +259,10 @@ function lastfiles() {
   [ -n "$avatar_file" ] && echo "avatar_file: $avatar_file"
 }
 
+function has_vhistory_vars() {
+  if [ -f "$media_file" ] || [ -f "$meta_file" ] || [ -f "$thumb_file" ]; then echo true; else echo false; fi
+}
+
 function lastmeta() {
   found="$(find "$vidhop_dir" -iname "$(lasttitle).json")"
   [ -n "$found" ] && echo "$found" && "$text_app" "$found" || echo "$(lasttitle).json not found"

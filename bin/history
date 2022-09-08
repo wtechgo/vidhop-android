@@ -39,7 +39,7 @@ function add_to_vhistory() {
   thumb_file="$(find "$vids_meta_dir" -iname "*$name*.jpg" -o -iname "*$name*.png" -o -iname "*$name*.webp")"
   vh_downloaded="$([ "$function" = "dlv" ] && echo true || echo false)"
   vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
-  upload_date="$(jq '.upload_date' <<<"$json")"
+  upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"
 
   history_entry=$(
     cat <<JSON
@@ -53,10 +53,10 @@ function add_to_vhistory() {
     "thumb_file": "$thumb_file",
     "vh_downloaded": "$vh_downloaded",
     "vh_fetch_date": "$vh_fetch_date",
-    "upload_date": $upload_date
+    "upload_date": "$upload_date"
 }
 JSON
-  )
+  ) # $upload_date has no quotes
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$vhistory_file")
   jq <<<"$new_history" >"$vhistory_file"
@@ -107,7 +107,7 @@ function add_to_ahistory() {
   thumb_file="$(find "$music_meta_dir" -iname "*$name*.jpg" -o -iname "*$name*.png" -o -iname "*$name*.webp")"
   vh_downloaded="$([ "$function" = "dla" ] && echo true || echo false)"
   vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
-  upload_date="$(jq '.upload_date' <<<"$json")"
+  upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"
 
   history_entry=$(
     cat <<JSON
@@ -121,7 +121,7 @@ function add_to_ahistory() {
     "thumb_file": "$thumb_file",
     "vh_downloaded": "$vh_downloaded",
     "vh_fetch_date": "$vh_fetch_date",
-    "upload_date": $upload_date
+    "upload_date": "$upload_date"
 }
 JSON
   )
@@ -146,7 +146,7 @@ function add_to_thistory() {
   thumb_file="$media_file"
   vh_downloaded="$([ "$function" = "dla" ] && echo true || echo false)"
   vh_fetch_date="$(date +'%d-%m-%Y_%H:%M:%S')"
-  upload_date="$(jq '.upload_date' <<<"$json")"
+  upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"
 
   history_entry=$(
     cat <<JSON
@@ -160,7 +160,7 @@ function add_to_thistory() {
     "thumb_file": "$thumb_file",
     "vh_downloaded": "$vh_downloaded",
     "vh_fetch_date": "$vh_fetch_date",
-    "upload_date": $upload_date
+    "upload_date": "$upload_date"
 }
 JSON
   )

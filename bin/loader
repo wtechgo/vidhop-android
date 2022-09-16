@@ -17,6 +17,7 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 function install_loader() {
   chmod +x "$PREFIX/opt/vidhop/bin/loader"
   cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
+  . vidhop
 }
 
 function updateytdlp() {
@@ -31,7 +32,6 @@ function updatevidhop() {
   git reset --hard origin/master
   updateytdlp
   install_loader
-  . vidhop
   cd "$pwd" && echo "VidHop updated."
 }
 

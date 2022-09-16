@@ -31,7 +31,7 @@ A port for Windows is another idea.
 3. Open Termux and paste this command.
 
     ```   
-       curl -sL https://raw.githubusercontent.com/wtechgo/vidhop-android/master/install.sh > install.sh && 
+       cd; curl -sL https://raw.githubusercontent.com/wtechgo/vidhop-android/master/install.sh > install.sh && 
        chmod +x install.sh && ./install.sh && rm install.sh && . $PREFIX/etc/bash.bashrc && . vidhop
     ```   
 

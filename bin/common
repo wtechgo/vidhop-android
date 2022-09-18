@@ -15,6 +15,7 @@ function create_app_dirs() {
     "$log_dir" \
     "$downloaded_dir" \
     2>/dev/null
+  touch "$meta_dir/.nomedia" 2>/dev/null
 }
 create_app_dirs
 

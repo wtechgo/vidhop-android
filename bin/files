@@ -41,34 +41,6 @@ function play() {
   [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
 }
 
-function usage_specs() {
-  echo -e "usage:\n  specs          uses the media file of the last dlv execution\n  specs <URL>\n  specs <FILE>" && return
-}
-
-function specs() {
-  [ "$1" = "-h" ] || [ "$1" = "--help" ] && usage_specs
-  if [ "$(is_url "$1")" = true ]; then
-    yt-dlp -F --force-ipv4 "$1"
-    yt-dlp -J --force-ipv4 "$1" | jq '{
-      title: .title,
-      original_url: .webpage_url,
-      duration_string: .duration_string,
-      resolution: .resolution,
-      format: .format,
-      dynamic_range: .dynamic_range,
-      vcodec: .vcodec,
-      acodec: .acodec,
-      vbr: .vbr,
-      abr: .abr,
-    }'
-  elif [ -f "$1" ]; then
-    mediainfo "$1"
-  else
-    [ -z "$media_file" ] && echo "no media file from previous dlv execution to display" && usage_specs && return
-    mediainfo "$media_file"
-  fi
-}
-
 function path_newfile() {
   old_file="$1"
   new_name="$2"
@@ -119,7 +91,7 @@ function renvid() {
 function renlast() {
   [ -z "$1" ] && echo "usage: renlast <NEW_NAME>" && return
   [ "$(has_vhistory_vars)" = false ] && echo "no files in memory to rename" && return
-  new_name="$1"   #  new_name=$(sanitize_filename "$1")
+  new_name="$1" #  new_name=$(sanitize_filename "$1")
 
   echo "> Rename:"
   [ -f "$media_file" ] && echo "$media_file"
@@ -251,8 +223,68 @@ function rmarchive() {
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
-function echomediafile() {
+function setdescription() {
+  [ -z "$json" ] && json='{}'
+  [ "$#" = 0 ] && echo -e "usage:\n  setdescription <DESCRIPTION>\n  setdescription <PARTIAL_NAME_METADATA_FILENAME> <DESCRIPTION>" && return
+  [ "$#" = 1 ] && description="$1" && metadata="$json" # $meta_file was set too if $json was set.
+  [ "$#" = 2 ] && partial_filename="$1" && description="$2" &&
+    meta_file="$(find_one_meta "$partial_filename")" && result_find_one_meta="$?"
+  [ "$result_find_one_meta" = 0 ] && metadata="$(jq . "$meta_file")"
+  [ "$result_find_one_meta" = 1 ] && echo -e "found not metadata for '$partial_filename'" && return
+  [ "$result_find_one_meta" = 2 ] && echo -e "found more than 1 file, specify '$partial_filename' further" && return
+
+  json=$(jq --arg 'description' "$description" '.vh_description = $description' <<<"$metadata")
+  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file"
+}
+
+function setcategories() {
+  [ -z "$json" ] && json='{}'
+  [ "$#" = 0 ] && echo -e "usage:\n  command <CATEGORIES>\ncommand <PARTIAL_NAME_METADATA_FILENAME> <CATEGORIES>" && return
+  [ "$#" = 1 ] && categories="$1" && metadata="$json"  # meta_file should be set if $json is set
+  [ "$#" = 2 ] && partial_filename="$1" && categories="$2" &&
+  [ "$result_find_one_meta" = 0 ] && metadata="$(jq . "$meta_file")"
+  [ "$result_find_one_meta" = 1 ] && echo -e "found not metadata for '$partial_filename'" && return
+  [ "$result_find_one_meta" = 2 ] && echo -e "found more than 1 file, specify '$partial_filename' further" && return
+
+  # Append new categories to old categories.
+  json=$(jq --arg 'categories' "$categories" '.vh_categories = $categories' <<<"$metadata")
+  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file"
+}
+
+function usage_specs() {
+  echo -e "usage:\n  specs uses the media file of the last dlv execution\n  specs <URL>\n  specs <FILE>" && return
+}
+
+function specs() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && usage_specs
+  if [ "$(is_url "$1")" = true ]; then
+    yt-dlp -F --force-ipv4 "$1"
+    yt-dlp -J --force-ipv4 "$1" | jq '{
+      title: .title,
+      original_url: .webpage_url,
+      duration_string: .duration_string,
+      resolution: .resolution,
+      format: .format,
+      dynamic_range: .dynamic_range,
+      vcodec: .vcodec,
+      acodec: .acodec,
+      vbr: .vbr,
+      abr: .abr,
+    }'
+  elif [ -f "$1" ]; then
+    mediainfo "$1"
+  else
+    [ -z "$media_file" ] && echo "no media file from previous dlv execution to display" && usage_specs && return
+    mediainfo "$media_file"
+  fi
+}
+
+function mediafile() {
   echo "$media_file"
+}
+
+function metadata() {
+  [ -f "$meta_file" ] && jq . "$meta_file"
 }
 
 function treevidhopbefore() {

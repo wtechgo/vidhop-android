@@ -558,7 +558,7 @@ function dla() {
   check_valid_platform "$url" || return 1
   mkdir -p "$music_meta_dir" 2>/dev/null
 
-  name="$(fetch_song_filename)"
+  name="$(fetch_song_filename | sed 's/NA - //')"
   fetch_video_metadata "$url" # populates json
   jq <<<"$json" >"$music_meta_dir/$name.json"
   add_to_ahistory

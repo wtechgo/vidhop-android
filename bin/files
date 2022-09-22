@@ -223,32 +223,73 @@ function rmarchive() {
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
-function setdescription() {
-  [ -z "$json" ] && json='{}'
-  [ "$#" = 0 ] && echo -e "usage:\n  setdescription <DESCRIPTION>\n  setdescription <PARTIAL_NAME_METADATA_FILENAME> <DESCRIPTION>" && return
-  [ "$#" = 1 ] && description="$1" && metadata="$json" # $meta_file was set too if $json was set.
-  [ "$#" = 2 ] && partial_filename="$1" && description="$2" &&
-    meta_file="$(find_one_meta "$partial_filename")" && result_find_one_meta="$?"
-  [ "$result_find_one_meta" = 0 ] && metadata="$(jq . "$meta_file")"
-  [ "$result_find_one_meta" = 1 ] && echo -e "found not metadata for '$partial_filename'" && return
-  [ "$result_find_one_meta" = 2 ] && echo -e "found more than 1 file, specify '$partial_filename' further" && return
+function set_metadata_field() {
+  [ "$#" = 0 ] || [ "$#" = 1 ]  && echo "no metadata field given to remove" && return
+  [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # meta_file should be set if $json is set
+  [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" &&
+    meta_file="$(find_one_meta "$partial_filename")" &&
+    result_find_one_meta="$?" &&
+    metadata=$(jq . "$meta_file")
+  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
+  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return
 
-  json=$(jq --arg 'description' "$description" '.vh_description = $description' <<<"$metadata")
-  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file"
+  [ -z "$metadata" ] && echo "no metadata to work with" && return
+#  json=$(jq 'del(."'"$key"'")' <<<"$metadata")
+  json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$metadata")
+
+  [ -f "$meta_file" ] &&
+    jq . <<<"$json" >"$meta_file" ||
+    echo "no metadata file to write to"
+}
+
+function setdescription() {
+  set_metadata_field 'vh_description' "$@"
+}
+
+function setsummary() {
+  set_metadata_field 'vh_summary' "$@"
 }
 
 function setcategories() {
-  [ -z "$json" ] && json='{}'
-  [ "$#" = 0 ] && echo -e "usage:\n  command <CATEGORIES>\ncommand <PARTIAL_NAME_METADATA_FILENAME> <CATEGORIES>" && return
-  [ "$#" = 1 ] && categories="$1" && metadata="$json"  # meta_file should be set if $json is set
-  [ "$#" = 2 ] && partial_filename="$1" && categories="$2" &&
-  [ "$result_find_one_meta" = 0 ] && metadata="$(jq . "$meta_file")"
-  [ "$result_find_one_meta" = 1 ] && echo -e "found not metadata for '$partial_filename'" && return
-  [ "$result_find_one_meta" = 2 ] && echo -e "found more than 1 file, specify '$partial_filename' further" && return
+  set_metadata_field 'vh_categories' "$@"
+}
 
-  # Append new categories to old categories.
-  json=$(jq --arg 'categories' "$categories" '.vh_categories = $categories' <<<"$metadata")
-  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file"
+function settopics() {
+  set_metadata_field 'vh_topics' "$@"
+}
+
+function rm_metadata_field() {
+  [ "$#" = 0 ] && echo "no metadata field given to remove" && return
+  [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
+  [ "$#" = 2 ] && key="$1" && partial_filename="$2" &&
+    meta_file="$(find_one_meta "$partial_filename")" &&
+    result_find_one_meta="$?" &&
+    metadata=$(jq . "$meta_file")
+  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
+  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return
+
+  [ -z "$metadata" ] && echo "no metadata to work with" && return
+  json=$(jq 'del(."'"$key"'")' <<<"$metadata")
+
+  [ -f "$meta_file" ] &&
+    jq . <<<"$json" >"$meta_file" ||
+    echo "no metadata file to write to"
+}
+
+function rmdescription() {
+  rm_metadata_field 'vh_description' "$@"
+}
+
+function rmsummary() {
+  rm_metadata_field 'vh_summary' "$@"
+}
+
+function rmcategories() {
+  rm_metadata_field 'vh_categories' "$@"
+}
+
+function rmtopics() {
+  rm_metadata_field 'vh_topics' "$@"
 }
 
 function usage_specs() {

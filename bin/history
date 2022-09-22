@@ -247,14 +247,14 @@ function lasttitle() {
   [ -f "$titles_file" ] && tail -n 1 "$titles_file"
 }
 
-function lastfiles() {
-  [ -n "$title" ] && echo "title      : $title"
-  [ -n "$url" ] && echo "url         : $url"
+function last() {
+  [ -n "$title" ] && echo "      title: $title"
+  [ -n "$url" ] && echo "        url: $url"
   [ -n "$channel_url" ] && [ -z "$media_file" ] && echo "channel_url: $channel_url"
   [ -n "$channel_dir" ] && echo "channel_dir: $channel_dir"
-  [ -n "$media_file" ] && echo "media_file : $media_file"
-  [ -n "$meta_file" ] && echo "meta_file  : $meta_file"
-  [ -n "$thumb_file" ] && echo "thumb_file : $thumb_file"
+  [ -n "$media_file" ] && echo " media_file: $media_file"
+  [ -n "$meta_file" ] && echo "  meta_file: $meta_file"
+  [ -n "$thumb_file" ] && echo " thumb_file: $thumb_file"
   [ -n "$podcast_dir" ] && echo "podcast_dir: $podcast_dir"
   [ -n "$avatar_file" ] && echo "avatar_file: $avatar_file"
 }

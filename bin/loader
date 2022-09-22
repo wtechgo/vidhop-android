@@ -11,27 +11,49 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 . "$bin_dir/dlv"
 . "$bin_dir/fvid"
 . "$bin_dir/batch"
-. "$bin_dir/sync"  # from workstation to phone
+. "$bin_dir/sync" # from workstation to phone
 . "$bin_dir/debug"
 
-function install_loader() {
-  chmod +x "$PREFIX/opt/vidhop/bin/loader"
-  cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
-  . vidhop
+function updateytdlp() {
+  echo "> Updating YT-DLP via Python package manager..." && sleep 1
+  python -m pip install yt-dlp -U
 }
 
-function updateytdlp() {
-  echo "> updating yt-dlp..."
-  python -m pip install yt-dlp -U
+function install_loader() {
+  echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
+  chmod +x "$PREFIX/opt/vidhop/bin/loader"
+  cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
+}
+
+function fetch_github() {
+  echo "> Updating VidHop code at $vidhop_app_dir..."
+  echo "> Fetching from GitHub..." && sleep 1
+  git fetch --all
+  git reset --hard origin/master
+}
+
+function update_system() {
+  echo "> Updating & upgrading Termux system..." && sleep 1
+  yes | apt update
+  yes | apt upgrade
+  yes | pkg update
+  yes | pkg upgrade
 }
 
 function updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
-  echo "> updating VidHop at $vidhop_app_dir..."
-  git fetch --all
-  git reset --hard origin/master
-  updateytdlp
+  update_system
+  fetch_github
   install_loader
+  updateytdlp
+  cd "$pwd" && echo "VidHop updated."
+}
+
+function updatevidhopbin() {
+  pwd=$(pwd) && cd "$vidhop_app_dir"
+  fetch_github
+  install_loader
+  updateytdlp
   cd "$pwd" && echo "VidHop updated."
 }
 

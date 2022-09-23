@@ -259,6 +259,19 @@ function last() {
   [ -n "$avatar_file" ] && echo "avatar_file: $avatar_file"
 }
 
+function echovars() {
+  [ -n "$name" ] && echo "name: $name"
+  [ -n "$url" ] && echo "url: $url"
+  [ -n "$standalone" ] && echo "standalone: $standalone"
+  [ -n "$platform" ] && echo "platform: $platform"
+  [ -n "$json" ] && echo '$json is set' || echo '$json not set'
+  [ -n "$has_archive" ] && echo "has_archive: $has_archive"
+  [ -n "$album" ] && echo "album: $album"
+  [ -n "$artist" ] && echo "artist: $artist"
+  [ -n "$pl_name" ] && echo "pl_name: $pl_name"
+  [ -n "$pl_dir" ] && echo "pl_dir: $pl_dir"
+}
+
 function has_vhistory_vars() {
   if [ -f "$media_file" ] || [ -f "$meta_file" ] || [ -f "$thumb_file" ]; then echo true; else echo false; fi
 }

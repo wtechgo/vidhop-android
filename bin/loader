@@ -14,6 +14,8 @@ bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
 . "$bin_dir/sync" # from workstation to phone
 . "$bin_dir/debug"
 
+[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
+
 function updateytdlp() {
   echo "> Updating YT-DLP via Python package manager..." && sleep 1
   python -m pip install yt-dlp -U

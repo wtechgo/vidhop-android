@@ -127,6 +127,25 @@ function say() {
   echo -e "$1"
 }
 
+function find_one_meta() {
+  search_text="$1"
+  platform="$2"
+
+  # $meta_file determination.
+  if [ -f "$search_text" ]; then
+    meta_file="$search_text"
+  else
+    # $meta_file search.
+    results=$(find "$vids_meta_dir" -type f -iwholename "*$platform*$search_text*.json")
+    [ -z "$results" ] && return 1
+    count="$(wc -l <<<"$results")"
+    [ "$count" -eq 1 ] && meta_file="$results" || return 2
+  fi
+
+  [ -f "$meta_file" ] && title=$(basename "$meta_file" .json)
+  [ -n "$meta_file" ] && echo "$meta_file"
+}
+
 function fvidv() {
   init_vars "$@" || return
   case $? in # exit code of init_vars
@@ -202,18 +221,26 @@ function fvidcv() {
   opinionated_print
 }
 
-# Output all video files whose name match your query.
 function fvidf() { # find video files (on disk)
   text="$1"
+  unset result && found_something="false"
 
-  echo "\n>>> recursive search results for DLV single videos:"
-  find "$vids_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort # sed adds quotes for filenames with spaces
+  result=$(find "$vids_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "$result" &&
+    unset result && found_something="true"
 
-  echo "\n>>> recursive search results for DLV channels:"
-  find "$channels_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort
+  result=$(find "$channels_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Channel downloads in VidHop directory search result:" && echo -e "$result" &&
+    unset result && found_something="true"
 
-  echo "\n>>> recursive search results in default videos directory in \$HOME:"
-  find "$HOME/Videos" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort
+  result=$(find "$shared/Videos" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Videos in user home directory result:" && echo -e "$result" &&
+    unset result && found_something="true"
+
+  [ "$found_something" = "false" ] && echo "found nothing"
 }
 
 function fvid() {
@@ -278,16 +305,14 @@ function json_files_for_channel_name() {
 }
 
 function print_channel_data() {
-  url_msg="url     : $(channel_url_from_file "$json_file")"
-  line=""
-  for ((i = 1; i < $(echo "$url_msg" | wc -c); i++)); do
-    line+="_"
-  done && echo -e "$line"
+  url_msg="    name: $(basename "$json_file" ".json")"
+  line=$(print_line_for_msg "$url_msg")
 
-  echo "name    : $(basename "$json_file" ".json")"
-  echo "url     : $(channel_url_from_file "$json_file")"
+  echo "    name: $(basename "$json_file" ".json")"
+  echo "$line"
+  echo "     url: $(channel_url_from_file "$json_file")"
   echo "platform: $(extract_platform_name "$json_file")"
-  echo "videos  : $(jq '.entries | length' <<<"$json")"
+  echo "  videos: $(jq '.entries | length' <<<"$json")"
 }
 
 # Show all videos of a channel, one line per video.

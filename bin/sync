@@ -15,11 +15,11 @@ SHELL_RC_WS="$USER_HOME_WS/.${SHELL_WS}rc"
 SSH_PORT_WS=22
 
 # PHONE
-SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
 SHARED_DIR_PHONE="/data/data/com.termux/files/home/storage/shared"
 VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
 VIDHOP_BIN_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
 BASHRC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
+SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
 
 function sshcomputer() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"

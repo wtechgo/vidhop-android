@@ -1,22 +1,22 @@
 bin=$PREFIX/bin
 etc=$PREFIX/etc
+
+# User files.
 bashrc=$etc/bash.bashrc
-# ser files
 shared=/data/data/com.termux/files/home/storage/shared
 dl=$shared/Download
 
-# load VidHop
-. vidhop  # sources $PREFIX/bin/vidhop which
+# VidHop
+. vidhop
 
-# cd & ls
-alias ll='ls -lhtr'
-alias la='ls -lAhtr'
-
+# cd & ls.
 alias cdetc='cd $etc'
 alias cdbin='cd $bin'
 alias cddownloads='cd $dl'
 alias cdshared='cd $shared'
 
+alias ll='ls -lhtr'
+alias la='ls -lAhtr'
 alias lldownloads='ls -lhtr $dl'
 alias nanobashrc='nano $bashrc; source $bashrc'
 alias killtor='kill $(pgrep tor)'
@@ -26,6 +26,8 @@ function python_packages_location() {
     echo
     echo "system packages" && python -m site
 }
+
+cd "$vidhop_dir" # $vidhop_dir was loaded during . vidhop
 
 ##############
 ### TERMUX ###

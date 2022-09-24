@@ -21,7 +21,7 @@ function updateytdlp() {
   python -m pip install yt-dlp -U
 }
 
-function install_loader() {
+function installloader() {
   echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
   chmod +x "$PREFIX/opt/vidhop/bin/loader"
   cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
@@ -57,6 +57,7 @@ function updatevidhopbin() {
   fetch_github
   install_loader
   updateytdlp
+  . vidhop
   cd "$pwd" && echo "VidHop updated."
 }
 

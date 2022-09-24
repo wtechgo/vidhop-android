@@ -119,7 +119,7 @@ function say() {
   [ "$quiet" = "true" ] && return
   if [ "$1" = "--overwrite" ] || [ "$1" = "-o" ]; then
     clearLastLine
-    file="$(echo "$2" | tr -d "'" | sed "s/.json//g")"  # remove quotes and '.json' from filename
+    file="$(echo "$2" | tr -d "'" | sed "s/.json//g")" # remove quotes and '.json' from filename
     # 1. remove VidHop root from path; 2. trim down to 'screensize - ".json" (5 chars)'; 3. append '.json'
     echo "$(echo -n "${file#$subtract}" | cut -c -"$(("$termux_screen_char_count" - 5))").json"
     return
@@ -241,6 +241,82 @@ function fvidf() { # find video files (on disk)
     unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"
+}
+
+function format_usermeta() {
+  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
+          | "> " +
+            (if .uploader == null then .channel else .uploader end) +
+            ": " + .title +
+            " | " + .webpage_url +
+            " | " + .upload_date +
+            (if .vh_speakers != null then " | speakers: " + .vh_speakers else null end) +
+            (if .vh_summary != null then " | summary: " + .vh_summary else null end) +
+            (if .vh_description != null then " | description: " + .vh_description else null end) +
+            (if .vh_topics != null then " | topics: " + .vh_topics else null end) +
+            (if .vh_categories != null then " | categories: " + .vh_categories else null end)' <<<"$json" | tr -d '"'
+}
+
+function print_usermeta() {
+  echo -e "${GREEN}$(format_usermeta)"
+}
+
+function fvidusermeta() {
+  init_vars "$@" || return
+  case $? in # exit code of init_vars
+  1) echo "failed to initiate vars (function init_vars)" ;;
+  2) return 0 ;; # fvid --help was called and shown, exit program.
+  esac
+
+  say "Searching in vidhop videos metadata at $vids_meta_dir..."
+  say "Searching in single videos metadata...\n"
+  while read -r vidjson; do
+    subtract="$vids_meta_dir/" && say -o "$vidjson"
+    json+=$(
+      jq --arg text "$text" '
+            select(
+              ( if .vh_speakers != null then select(.vh_speakers | ascii_downcase | contains($text)) else null end ) or
+              ( if .vh_summary != null then select(.vh_summary | ascii_downcase | contains($text)) else null end ) or
+              ( if .vh_description != null then select(.vh_description | ascii_downcase | contains($text)) else null end ) or
+              ( if .vh_topics != null then select(.vh_topics | ascii_downcase | contains($text)) else null end ) or
+              ( if .vh_categories != null then select(.vh_categories | ascii_downcase | contains($text)) else null end )
+            )' "$vidjson"
+    )
+  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  print_usermeta
+}
+
+function fvidusermeta() {
+  init_vars "$@" || return
+  case $? in # exit code of init_vars
+  1) echo "failed to initiate vars (function init_vars)" ;;
+  2) return 0 ;; # fvid --help was called and shown, exit program.
+  esac
+
+  say "Searching in vidhop videos metadata at $vids_meta_dir..."
+  say "Searching in single videos metadata...\n"
+  while read -r vidjson; do
+    subtract="$vids_meta_dir/" && say -o "$vidjson"
+    json+=$(
+      jq --arg text "$text" '
+            select(
+                ( if .vh_summary != null then select(.vh_summary | ascii_downcase | contains($text)) else empty end ) or
+                ( if .vh_description != null then select(.vh_description | ascii_downcase | contains($text)) else empty end ) or
+                ( if .vh_speakers != null then select(.vh_speakers | ascii_downcase | contains($text)) else empty end ) or
+                ( if .vh_topics != null then select(.vh_topics | ascii_downcase | contains($text)) else empty end ) or
+                ( if .vh_categories != null then select(.vh_categories | ascii_downcase | contains($text)) else empty end )
+            )' "$vidjson"
+    )
+  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
+  echo "search done"
+
+  json=$(jq -s '{ entries: . }' <<<"$json")
+  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
+  print_usermeta
 }
 
 function fvid() {

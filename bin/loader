@@ -25,6 +25,7 @@ function install_loader() {
   echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
   chmod +x "$PREFIX/opt/vidhop/bin/loader"
   cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
+  . vidhop
 }
 
 function fetch_github() {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-vidhop_app_dir="$(dirname "$(dirname "$(realpath "$0")")")"
+vidhop_app_dir="$PREFIX/opt/vidhop"
 bin_dir="$vidhop_app_dir/bin"
 
 # overwrites $bin_dir with values from config (if needed).

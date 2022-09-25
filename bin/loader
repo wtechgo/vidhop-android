@@ -27,8 +27,11 @@ function updateytdlp() {
 
 function install_loader() {
   echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
-  chmod +x "$PREFIX/opt/vidhop/bin/loader"
-  cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
+  loader_bin="$bin_dir/loader"
+  echo '#!/bin/bash' >"$loader_bin"
+  echo >>"$loader_bin"
+  echo ". $loader_bin" >>"$loader_bin"
+  chmod +x "$loader_bin"
   . vidhop
 }
 
@@ -94,6 +97,4 @@ function vidhophelp() {
 
 function replace_bashrc() {
   cp "$vidhop_app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
-}
-
 }

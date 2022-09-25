@@ -71,10 +71,15 @@ else
   git clone https://github.com/wtechgo/vidhop-android.git "$vidhop_app_dir"
 fi
 chmod +x "$vidhop_app_dir/install.sh"
-
 chmod +x "$loader"
-cp "$loader" "$loader_bin" # copy loader to /bin as 'vidhop' to , load VidHop with command 'source vidhop`
+
+# Enabling the '. vidhop' command.
+echo '#!/bin/bash' >"$loader_bin"
+echo >>"$loader_bin"
+echo ". $loader" >>"$loader_bin"
+chmod +x "$loader_bin"
 echo -e "\n. vidhop" >>$PREFIX/etc/bash.bashrc
+
 
 echo "Configuring Termux for a streamlined VidHop experience..." && sleep 1
 echo "Removing Termux welcome message as it interferes with rsync (VidHop Sync)..." && sleep 1
@@ -101,6 +106,7 @@ echo -e "      and load VidHop manually with '. vidhop'"
 echo -e "      or 'source vidhop'."
 sleep 2
 
+. "$loader"
 echo -e "\n${GREEN}VidHop installed"'!'"${NC}\n" && sleep 1
 
 vidhop_bashrc="$vidhop_app_dir/bash.bashrc"
@@ -119,6 +125,7 @@ answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]') &&
   [ -z "$answer" ] || [ "$answer" = "y" ] || [ "$answer" = "yes" ] && unset answer &&
   cp $vidhop_bashrc $bashrc
+
 echo
 echo "You can try a VidHop command now e.g.:"
 echo "  dlv https://www.youtube.com/watch?v=-DT7bX-B1Mg" && echo

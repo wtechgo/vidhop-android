@@ -1,30 +1,34 @@
-bin=$PREFIX/bin
+bin=$PREFIX/bin # $PREFIX is /data/data/com.termux/files/usr
 etc=$PREFIX/etc
-
 # User files.
 bashrc=$etc/bash.bashrc
-shared=/data/data/com.termux/files/home/storage/shared
+shared=$HOME/storage/shared # $HOME is /data/data/com.termux/files/home
 dl=$shared/Download
 
 # VidHop
 . vidhop
 
-# cd & ls.
+# cd.
 alias cdetc='cd $etc'
 alias cdbin='cd $bin'
 alias cddownloads='cd $dl'
 alias cdshared='cd $shared'
-
+alias cdmovies='cd $shared/Movies'
+alias cdpictures='cd $shared/Pictures'
+alias cdmusic='cd $shared/Music'
+# ls.
 alias ll='ls -lhtr'
 alias la='ls -lAhtr'
-alias lldownloads='ls -lhtr $dl'
-alias nanobashrc='nano $bashrc; source $bashrc'
-alias killtor='kill $(pgrep tor)'
+alias lldownloads='ls -lAhtr $dl'
+alias llmovies='ls -lAhtr $shared/Movies'
+alias llpictures='ls -lAhtr $shared/Pictures'
+alias llmusic='ls -lAhtr $shared/Music'
 
-function python_packages_location() {
-    echo "user packages" && python -m site --user-site
-    echo
-    echo "system packages" && python -m site
+alias nanobashrc='nano $bashrc; source $bashrc'
+alias reloadbashrc='source $bashrc'
+
+function which() {
+  command -v "$1"
 }
 
 cd "$vidhop_dir" # $vidhop_dir was loaded during . vidhop

@@ -5,12 +5,12 @@
 # No permissions error was solved by disabling the firewall on computer.
 
 # WORKSTATION
-IP_WS="FILL_IN_IP_ADDRESS_FROM_WORKSTATION"
-USER_WS="FILL_IN_USER_FROM_WORKSTATION"
-USER_HOME_WS="/home/$USER_WS"               # not used by `syncvidhop`, rather for sending manually downloaded files
+IP_WS="FILL_IN_IP_ADDRESS_FROM_WS_IN_CONFIG.INI"
+USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI"
+USER_HOME_WS="/home/$USER_WS" # not used by `syncvidhop` but senddownloads and fetchdownloads
 VIDHOP_DIR_WS="$USER_HOME_WS/Videos/VidHop" # target
 VIDHOP_BIN_DIR_WS="/home/$USER_WS/code/vidhop/shell/linux/bin" # make /opt/vidhop/bin on public repo
-SHELL_WS="bash" # FILL IN YOUR SHELL e.g. zsh, ksh. Works with bash & zsh, other shells not tested.
+SHELL_WS="bash"
 SHELL_RC_WS="$USER_HOME_WS/.${SHELL_WS}rc"
 SSH_PORT_WS=22
 
@@ -20,6 +20,8 @@ VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
 VIDHOP_BIN_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
 BASHRC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
 SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
+
+[ -f "$config_ini" ] && . "$config_ini"
 
 function sshcomputer() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"

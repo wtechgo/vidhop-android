@@ -1,9 +1,9 @@
 #!/bin/bash
 
 shared="/data/data/com.termux/files/home/storage/shared"
-vidhop_dir="$shared/VidHop"
-vidhop_app_dir="/data/data/com.termux/files/usr/opt/vidhop"  # already defined in loader
-bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"  # already defined in loader
+[ -z "$vidhop_dir" ] && vidhop_dir="$HOME/Videos/VidHop"
+[ -z "$vidhop_app_dir" ] && vidhop_app_dir="$PREFIX/opt/vidhop"
+[ -z "$bin_dir" ] && bin_dir="$vidhop_app_dir/bin" # Overwrites loader.bin_dir (though this value is identical to loader.bin_dir).
 scrape_channel_avatar_img_py="$bin_dir/scrape_channel_avatar_img.py"
 
 # media
@@ -80,6 +80,7 @@ alias nanovars='nano $bin_dir/vars'
 alias nanocommon='nano $bin_dir/common'
 alias nanohistory='nano $bin_dir/history'
 alias nanoloader='nano $bin_dir/loader'
+alias nanoconfigini='nano $vidhop_app_dir/config.ini'
 
 # color codes
 BLACK='\e[30m'

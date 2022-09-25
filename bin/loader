@@ -1,8 +1,12 @@
 #!/bin/bash
 
-bin_dir="/data/data/com.termux/files/usr/opt/vidhop/bin"
+vidhop_app_dir="$(dirname "$(dirname "$(realpath "$0")")")"
+bin_dir="$vidhop_app_dir/bin"
 
-. "$bin_dir/vars"
+# overwrites $bin_dir with values from config (if needed).
+[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
+
+. "$bin_dir/vars" # Will overwrite all vars from config.ini
 . "$bin_dir/common"
 . "$bin_dir/logger"
 . "$bin_dir/history"

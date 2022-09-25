@@ -260,22 +260,27 @@ function set_metadata_field() {
 
 function setdescription() {
   set_metadata_field 'vh_description' "$@"
+  echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setsummary() {
   set_metadata_field 'vh_summary' "$@"
+  echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcategories() {
   set_metadata_field 'vh_categories' "$@"
+  echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function settopics() {
   set_metadata_field 'vh_topics' "$@"
+  echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setspeakers() {
   set_metadata_field 'vh_speakers' "$@"
+  echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function rm_metadata_field() {
@@ -298,22 +303,27 @@ function rm_metadata_field() {
 
 function rmdescription() {
   rm_metadata_field 'vh_description' "$@"
+  echo "'vh_description' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function rmsummary() {
   rm_metadata_field 'vh_summary' "$@"
+  echo "'vh_summary' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function rmcategories() {
   rm_metadata_field 'vh_categories' "$@"
+  echo "'vh_categories' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function rmtopics() {
   rm_metadata_field 'vh_topics' "$@"
+  echo "'vh_topics' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function rmspeakers() {
   rm_metadata_field 'vh_speakers' "$@"
+  echo "'vh_speakers' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function usage_specs() {

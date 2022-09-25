@@ -257,6 +257,8 @@ function fetch_channel_metadata() {
       jq 'del(.entries[] | .thumbnails)' |
       jq 'del(.entries[] | .requested_downloads)' |
       jq 'del(.entries[] | .requested_formats)' |
+      jq 'del(.entries[] | .subtitles)' |
+      jq 'del(.entries[] | .automatic_captions)' |
       jq 'del(.entries[] | nulls)'
   )
 }

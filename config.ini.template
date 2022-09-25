@@ -4,19 +4,19 @@
 
 ## VidHop directories.
 ## -------------------
-vidhop_dir=""   # Where VidHop stores downloaded media and metadata.
-vidhop_app_dir=""   # Where VidHop's code resides.
-bin_dir=""  # Overwrites loader.bin_dir before the loader loads in all other binarires.
+#vidhop_dir=""   # Where VidHop stores downloaded media and metadata.
+#vidhop_app_dir=""   # Where VidHop's code resides.
+#bin_dir=""  # Overwrites loader.bin_dir before the loader loads in all other binarires.
 
 ## SSH settings.
 ### PHONE.
 ### ------
-IP_PHONE=""
-USER_PHONE=""
+#IP_PHONE=""
+#USER_PHONE=""
 
 ### WORKSTATION (WS).
 ### -----------------
-IP_WS=""
-USER_WS=""
-USER_HOME_WS=""
-SHELL_WS=""
+#IP_WS=""
+#USER_WS=""
+#USER_HOME_WS=""
+#SHELL_WS=""

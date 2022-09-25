@@ -26,11 +26,12 @@ function updateytdlp() {
 }
 
 function install_loader() {
-  echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
-  loader_bin="$bin_dir/loader"
+  loader="$bin_dir/loader"
+  loader_bin="$PREFIX/bin/vidhop"
+  echo "> Installing VidHop loader to $loader_bin..." && sleep 1
   echo '#!/bin/bash' >"$loader_bin"
   echo >>"$loader_bin"
-  echo ". $loader_bin" >>"$loader_bin"
+  echo ". $loader" >>"$loader_bin"
   chmod +x "$loader_bin"
   . vidhop
 }
@@ -44,6 +45,8 @@ function fetch_github() {
   echo "> Fetching from GitHub..." && sleep 1
   git fetch --all
   git reset --hard origin/master
+  sleep 2
+  . "$PREFIX/opt/vidhop/bin/loader"
 }
 
 function update_system() {
@@ -58,8 +61,8 @@ function updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   update_system
   fetch_github
-  install_loader
   updateytdlp
+  install_loader
   echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"
@@ -68,8 +71,8 @@ function updatevidhop() {
 function updatevidhopbin() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   fetch_github
-  install_loader
   updateytdlp
+  install_loader
   echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"

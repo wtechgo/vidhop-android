@@ -371,3 +371,7 @@ function treevidhopafter() {
   ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
   tree "$vidhop_dir" >"$log_dir/tree_vidhop_after"
 }
+
+function testvh() {
+  echo "I'm a test!"
+}

@@ -1,0 +1,51 @@
+#!/bin/bash
+
+app_dir="$PREFIX/opt/vidhop"
+config="$app_dir/config.ini"
+template="$app_dir/config.ini.template"
+
+function set_user_phone() {
+  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#USER_PHONE=.*/USER_PHONE=\"$1\"/" "$config"
+}
+
+function set_ip_phone() {
+  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#IP_PHONE=.*/IP_PHONE=\"$1\"/" "$config"
+}
+
+function set_user_workstation() {
+  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#USER_WS=.*/USER_WS=\"$1\"/" "$config"
+}
+
+function set_ip_workstation() {
+  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#IP_WS=.*/IP_WS=\"$1\"/" "$config"
+}
+
+function create_config_ini() {
+  [ ! -f "$template" ] && echo "no config.ini.template found at $template, abort" && return
+  cp "$template" "$config"
+
+  user=$(whoami)
+  ip=$(ifdata -pa wlan0)
+  set_user_phone "$user"
+  set_ip_phone "$ip"
+
+  echo "We are on the phone now but the questions that follow are about your WORKSTATION."
+  echo "A workstation can be a laptop, desktop or any other device you wish to sync VidHop with."
+  echo "If you don't know the answers to the questions, just hit enter." && echo && unset answer
+
+  echo -n "Do you wish to continue? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] && return
+
+  echo -n "What is the IP-address of your workstation (e.g. 192.168.0.200)? " && read -r ip_ws
+  echo -n "What is your user on your workstation? " && read -r user_ws
+  user_ws=$(echo "$user_ws" | tr '[:upper:]' '[:lower:]')
+  [ -n "$ip_ws" ] && set_user_workstation "$ip_ws"
+  [ -n "$user_ws" ] && set_ip_workstation "$user_ws"
+
+  echo "Configuration done."
+}

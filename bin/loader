@@ -25,11 +25,15 @@ function updateytdlp() {
   python -m pip install yt-dlp -U
 }
 
-function installloader() {
+function install_loader() {
   echo "> Installing VidHop loader to $PREFIX/bin/vidhop..." && sleep 1
   chmod +x "$PREFIX/opt/vidhop/bin/loader"
   cp "$PREFIX/opt/vidhop/bin/loader" "$PREFIX/bin/vidhop"
   . vidhop
+}
+
+function installloader() {  # alias for phone hand typing
+  install_loader
 }
 
 function fetch_github() {
@@ -53,10 +57,9 @@ function updatevidhop() {
   fetch_github
   install_loader
   updateytdlp
-  . vidhop
-  cd "$pwd"
   echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
+  cd "$pwd"
 }
 
 function updatevidhopbin() {
@@ -64,10 +67,9 @@ function updatevidhopbin() {
   fetch_github
   install_loader
   updateytdlp
-  . vidhop
-  cd "$pwd"
   echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
+  cd "$pwd"
 }
 
 function uninstallvidhop() {
@@ -92,4 +94,6 @@ function vidhophelp() {
 
 function replace_bashrc() {
   cp "$vidhop_app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+}
+
 }

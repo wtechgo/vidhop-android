@@ -46,6 +46,8 @@ text_app="termux-open"
 termux_screen_char_count=53
 
 # .bashrc shortkeys
+alias loadconfigurator='. "$bin_dir/config'
+
 alias cdvidhop='cd $vidhop_dir'
 alias cdappdir='cd $vidhop_app_dir'
 alias cdvidhopbin='cd $bin_dir'

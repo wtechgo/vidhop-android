@@ -151,6 +151,22 @@ function find_archive_file_from_channel_name() {
   find "$downloaded_dir" -type f -iname "$archive_filename"
 }
 
+function find_archive_file_from_url() {
+  url="$1"
+  archive_file="$downloaded_dir/$(url_to_filename "$url")"
+  [ -f "$archive_file" ] && echo "$archive_file" && return
+  logInfo "find_archive_file_from_url created an invalid archive file path: $archive_file"
+}
+
+function rmarchiveforurl() {
+  url="$1"
+  [ "$(is_url "$url")" = "false" ] && echo "not a valid url" && return 1
+
+  archive_file=$(find_archive_file_from_url "$url")
+  [ -f "$archive_file" ] && rm "$archive_file" && echo "removed $archive_file" && return
+  echo "could not remove as file '$archive_file' does not exist"
+}
+
 function rmchan() {
   [ -z "$1" ] && echo "usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
   unset answer found_channel_dir found_downloaded_file

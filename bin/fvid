@@ -49,9 +49,12 @@ function init_vars() {
 }
 
 function format_oneliner() {
-  jq '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
+  channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
+  jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
           | "> " +
-            (if .uploader == null then .channel else .uploader end) + ": " +
+            (if .uploader != null then .uploader else
+              (if .channel != null then .channel else $channel_name_fallback end)
+            end) + ": " +
             .title + " | " +
             .webpage_url + " | " +
             .upload_date' <<<"$json" | tr -d '"'
@@ -221,6 +224,7 @@ function fvidcv() {
   opinionated_print
 }
 
+# Output all video files whose name match your query.
 function fvidf() { # find video files (on disk)
   text="$1"
   unset result && found_something="false"
@@ -381,13 +385,13 @@ function json_files_for_channel_name() {
 }
 
 function print_channel_data() {
-  url_msg="    name: $(basename "$json_file" ".json")"
+  url="$(channel_url_from_file "$json_file")"
+  url_msg="     url: $url"
   line=$(print_line_for_msg "$url_msg")
-
-  echo "    name: $(basename "$json_file" ".json")"
   echo "$line"
-  echo "     url: $(channel_url_from_file "$json_file")"
-  echo "platform: $(extract_platform_name "$json_file")"
+  echo "    name: $(basename "$json_file" ".json")"
+  echo "     url: $url"
+  echo "platform: $(extract_platform_name "$url")"
   echo "  videos: $(jq '.entries | length' <<<"$json")"
 }
 

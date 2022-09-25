@@ -85,6 +85,10 @@ function save_channel_entries_to_archive() {
   jq '[.entries[].id] | unique' <<<"$json" | jq --arg platform "$platform" '$platform + " " + .[]' | tr -d '"' >"$archive_file"
 }
 
+function is_url() {
+  [[ "$1" == *http* ]] && echo true || echo false
+}
+
 # Create name for downloaded archive file.
 function url_to_filename() {
   echo "$1" |
@@ -98,8 +102,18 @@ function url_to_filename() {
     tr '&' '-'
 }
 
-function is_url() {
-  [[ "$1" == *http* ]] && echo true || echo false
+function url_to_channel_name() {
+  url="$1"
+  [ "$(is_url "$url")" = "false" ] && return 1
+
+  echo "$url" | cut -d/ -f 4 | \
+    tr -d '@' | \
+    tr -d '?' | \
+    tr -d '"' | \
+    tr -d '\\' | \
+    tr ':' '-' | \
+    tr '/' '-' | \
+    tr '.' '_'
 }
 
 function is_json() {

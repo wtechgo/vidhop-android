@@ -140,7 +140,7 @@ function fetch_video_subs(){
   subs_dir="$vids_meta_dir/$platform/${name}.subs"
   subsauto_dir="$vids_meta_dir/$platform/${name}.subs/auto-generated"
 
-  # subs provided by the uploader
+  # subs provided by the uploader. https://www.science.co.il/language/Codes.php
   yt-dlp --write-subs --sub-langs "en,nl,fr,de,gr,es,it,tr,af,ar,ru,ch" \
     -P "$subs_dir" -o "$name.%(ext)s" \
     --no-download "$url"
@@ -279,7 +279,8 @@ function reset_archive_file() {
 # Download channel information (metadata and thumbnails of all videos and the avatar image.
 function dlci() {
   local url="$1"
-  local standalone="$2"
+  local standalone="true"
+  [ -n "$2" ] && local standalone="$2"
   [ -n "$3" ] && local debug="$3"
   [ -z "$has_archive" ] && has_archive="false"
   local function=$([ "$standalone" = "false" ] && echo dlc || echo dlci)
@@ -301,6 +302,7 @@ function dlci() {
 
   # Save metadata to the channel directory. Each channel in its own directory.
   name=$(channel_name_from_obj)            # if all downloaded before, no entries, no uploader, channelname = null
+  [ "$name" = "null" ] && name=$(url_to_channel_name "$url")
   platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.
 
   mkdir -p "$channels_meta_dir/$name/$platform" 2>/dev/null

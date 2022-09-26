@@ -64,7 +64,7 @@ function updatevidhop() {
   fetch_github
   updateytdlp
   install_loader
-  echo -e "\n${GREEN}VidHop was updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
+  echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"
 }
@@ -74,7 +74,7 @@ function updatevidhopbin() {
   fetch_github
   updateytdlp
   install_loader
-  echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
+  echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"
 }

@@ -23,7 +23,7 @@ SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
 
 [ -f "$config_ini" ] && . "$config_ini"
 
-function sshcomputer() {
+function sshworkstation() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"
 }
 

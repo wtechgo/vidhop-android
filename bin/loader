@@ -3,10 +3,11 @@
 vidhop_app_dir="$PREFIX/opt/vidhop"
 bin_dir="$vidhop_app_dir/bin"
 
-# overwrites $bin_dir with values from config (if needed).
+# overwrites $vidhop_app_dir and $bin_dir with values from config.ini (if needed).
 [ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
 
-. "$bin_dir/vars" # Will overwrite all vars from config.ini
+. "$bin_dir/vars" # overwrites all vars from config.ini except $vidhop_dir, $vidhop_app_dir, $bin_dir
+. "$bin_dir/config"
 . "$bin_dir/common"
 . "$bin_dir/logger"
 . "$bin_dir/history"
@@ -18,7 +19,7 @@ bin_dir="$vidhop_app_dir/bin"
 . "$bin_dir/sync" # from workstation to phone
 . "$bin_dir/debug"
 
-[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
+[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini" # overwrites sync vars with values from config.ini
 
 function updateytdlp() {
   echo "> Updating YT-DLP via Python package manager..." && sleep 1
@@ -63,7 +64,7 @@ function updatevidhop() {
   fetch_github
   updateytdlp
   install_loader
-  echo -e "\n${GREEN}VidHop was updated \!${NC}\n\nReload VidHop by choosing one of these two options:"
+  echo -e "\n${GREEN}VidHop was updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"
 }

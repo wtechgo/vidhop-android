@@ -1,37 +1,34 @@
 #!/bin/bash
 
-app_dir="$PREFIX/opt/vidhop"
-config="$app_dir/config.ini"
-template="$app_dir/config.ini.template"
-
 function set_user_phone() {
-  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
-  sed -i "s/^#USER_PHONE=.*/USER_PHONE=\"$1\"/" "$config"
+  [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#USER_PHONE=.*/USER_PHONE=\"$1\"/" "$config_ini"
 }
 
 function set_ip_phone() {
-  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
-  sed -i "s/^#IP_PHONE=.*/IP_PHONE=\"$1\"/" "$config"
+  [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#IP_PHONE=.*/IP_PHONE=\"$1\"/" "$config_ini"
 }
 
 function set_user_workstation() {
-  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
-  sed -i "s/^#USER_WS=.*/USER_WS=\"$1\"/" "$config"
+  [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#USER_WS=.*/USER_WS=\"$1\"/" "$config_ini"
 }
 
 function set_ip_workstation() {
-  [ ! -f "$config" ] && echo "no config.ini found at $config" && return
-  sed -i "s/^#IP_WS=.*/IP_WS=\"$1\"/" "$config"
+  [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
+  sed -i "s/^#IP_WS=.*/IP_WS=\"$1\"/" "$config_ini"
 }
 
-function create_config_ini() {
-  [ ! -f "$template" ] && echo "no config.ini.template found at $template, abort" && return
-  cp "$template" "$config"
+function configure_ssh() {
+  [ ! -f "$config_ini_template" ] && echo "no config.ini.template found at $config_ini_template, abort" && return
+  [ -f "$config_ini" ] && cp "$config_ini" "$config.backup"
+  cp "$config_ini_template" "$config_ini"
 
-  user=$(whoami)
-  ip=$(ifdata -pa wlan0)
-  set_user_phone "$user"
-  set_ip_phone "$ip"
+  user_phone=$(whoami)
+  ip_phone=$(ifdata -pa wlan0)
+  set_user_phone "$user_phone"
+  set_ip_phone "$ip_phone"
 
   echo "We are on the phone now but the questions that follow are about your WORKSTATION."
   echo "A workstation can be a laptop, desktop or any other device you wish to sync VidHop with."
@@ -47,5 +44,5 @@ function create_config_ini() {
   [ -n "$ip_ws" ] && set_user_workstation "$ip_ws"
   [ -n "$user_ws" ] && set_ip_workstation "$user_ws"
 
-  echo "Configuration done."
+  echo "configuration done"
 }

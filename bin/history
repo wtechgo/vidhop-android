@@ -247,6 +247,21 @@ function lasttitle() {
   [ -f "$titles_file" ] && tail -n 1 "$titles_file"
 }
 
+function print_last() {
+  [ -z "$title" ] && [ -n "$name" ] && title="$name"
+  [ -n "$title" ] && echo -e "$(print_line_for_msg "        title: $title")\n"
+  [ -n "$title" ] && echo -e "Files:"
+  [ -n "$title" ] && echo -e "${BOLD}${BLUE}--------title${NC}${NORMAL}: ${GREEN}$title"
+  [ -n "$url" ] && echo -e "${BOLD}${BLUE}----------url${NC}${NORMAL}: ${GREEN}$url"
+  [ -n "$channel_url" ] && [ -z "$media_file" ] && echo -e "${BOLD}${BLUE}--channel_url${NC}${NORMAL}: ${GREEN}$channel_url"
+  [ -n "$channel_dir" ] && echo -e "${BOLD}${BLUE}--channel_dir${NC}${NORMAL}: ${GREEN}$channel_dir"
+  [ -n "$media_file" ] && echo -e "${BOLD}${BLUE}---media_file${NC}${NORMAL}: ${GREEN}$media_file"
+  [ -n "$meta_file" ] && echo -e "${BOLD}${BLUE}----meta_file${NC}${NORMAL}: ${GREEN}$meta_file"
+  [ -n "$thumb_file" ] && echo -e "${BOLD}${BLUE}---thumb_file${NC}${NORMAL}: ${GREEN}$thumb_file"
+  [ -n "$podcast_dir" ] && echo -e "${BOLD}${BLUE}--podcast_dir${NC}${NORMAL}: ${GREEN}$podcast_dir"
+  [ -n "$avatar_file" ] && echo -e "${BOLD}${BLUE}--avatar_file${NC}${NORMAL}: ${GREEN}$avatar_file"
+}
+
 function last() {
   [ -n "$title" ] && echo "      title: $title"
   [ -n "$url" ] && echo "        url: $url"

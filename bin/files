@@ -178,11 +178,11 @@ function rmchan() {
   found_downloaded_file=$(find_archive_file_from_channel_name "$name" || echo "")
 
   logInfo "downloaded archive file: $found_downloaded_file"
-  [ -z "$found_channel_dir" ] && [ -z "$found_channel_meta_dir" ] && [ -z "$found_downloaded_file" ] && echo found no matches && return
+  [ ! -d "$found_channel_dir" ] && [ ! -d "$found_channel_meta_dir" ] && [ ! -f "$found_downloaded_file" ] && echo found no matches && return
   echo "found files:"
-  [ -n "$found_channel_dir" ] && echo -e "$found_channel_dir"
-  [ -n "$found_channel_meta_dir" ] && echo -e "$found_channel_meta_dir"
-  [ -n "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
+  [ -d "$found_channel_dir" ] && echo -e "$found_channel_dir"
+  [ -d "$found_channel_meta_dir" ] && echo -e "$found_channel_meta_dir"
+  [ -f "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
 
   if [ -z "$answer" ]; then
     echo "caution: rmchan will remove all media and metadata files of '$name' for all platforms"
@@ -192,9 +192,9 @@ function rmchan() {
   fi
 
   # remove files
-  [ -n "$found_channel_dir" ] && rm -rf "$found_channel_dir" && echo "deleted channel media directory: $found_channel_dir"
-  [ -n "$found_channel_meta_dir" ] && rm -rf "$found_channel_meta_dir" && echo "deleted channel metadata directory: $found_channel_meta_dir"
-  [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
+  [ -d "$found_channel_dir" ] && rm -rf "$found_channel_dir" && echo "deleted channel media directory: $found_channel_dir"
+  [ -d "$found_channel_meta_dir" ] && rm -rf "$found_channel_meta_dir" && echo "deleted channel metadata directory: $found_channel_meta_dir"
+  [ -f "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
 }
 
 function rmartist() {
@@ -208,11 +208,11 @@ function rmartist() {
   found_downloaded_file=$(find_archive_file_from_channel_name "$name" || echo "")
 
   logInfo "downloaded archive file: $found_downloaded_file"
-  [ -z "$found_artist_dir" ] && [ -z "$found_artist_meta_dir" ] && [ -z "$found_downloaded_file" ] && echo found no matches && return
+  [ ! -d "$found_artist_dir" ] && [ ! -d "$found_artist_meta_dir" ] && [ ! -f "$found_downloaded_file" ] && echo found no matches && return
   echo "found files:"
-  [ -n "$found_artist_dir" ] && echo -e "$found_artist_dir"
-  [ -n "$found_artist_meta_dir" ] && echo -e "$found_artist_meta_dir"
-  [ -n "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
+  [ -d "$found_artist_dir" ] && echo -e "$found_artist_dir"
+  [ -d "$found_artist_meta_dir" ] && echo -e "$found_artist_meta_dir"
+  [ -f "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
 
   if [ -z "$answer" ]; then
     echo "caution: rmchan will remove all media and metadata files of '$name' for all platforms"
@@ -222,9 +222,9 @@ function rmartist() {
   fi
 
   # remove files
-  [ -n "$found_artist_dir" ] && rm -rf "$found_artist_dir" && echo "deleted channel media directory: $found_artist_dir"
-  [ -n "$found_artist_meta_dir" ] && rm -rf "$found_artist_meta_dir" && echo "deleted channel metadata directory: $found_artist_meta_dir"
-  [ -n "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
+  [ -d "$found_artist_dir" ] && rm -rf "$found_artist_dir" && echo "deleted channel media directory: $found_artist_dir"
+  [ -d "$found_artist_meta_dir" ] && rm -rf "$found_artist_meta_dir" && echo "deleted channel metadata directory: $found_artist_meta_dir"
+  [ -f "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
 }
 
 function rmarchive() {

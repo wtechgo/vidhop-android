@@ -397,20 +397,19 @@ function print_channel_label() {
   url="$(channel_url_from_file "$json_file")"
   channel_name="$(basename "$json_file" ".json")"
   label="$channel_name | $url"
-  echo -e "\n${GREEN}$label"
-  echo -e "${GREEN}$(print_line_for_msg "$label")\n"
+  echo -e "${GREEN}$label"
+  echo -e "${GREEN}$(print_line_for_msg "$label")"
 }
 
 function print_channel_data() {
   url="$(channel_url_from_file "$json_file")"
   url_msg="     url: $url"
   line=$(print_line_for_msg "$url_msg")
-  echo -e "$line\n"
+  echo -e "$line"
   echo "    name: $(basename "$json_file" ".json")"
   echo "     url: $url"
   echo "platform: $(extract_platform_name "$url")"
   echo "  videos: $(jq '.entries | length' <<<"$json")"
-  echo
 }
 
 # Show all videos of a channel, one line per video.

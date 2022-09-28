@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# Extract the name of a channel from yt-dlp --dump-single-json.
-function channel_name_from_file() {
-  [ -n "$1" ] && local json_file="$1" # putting the arg local might be important when running multiple processes
-  jq 'if .channel != null then .channel
-      elif .uploader != null then .uploader
-      elif .entries[0] | has("channel") then .entries[0].channel
-      elif .entries[0] | has("uploader") then .entries[0].uploader
-      else empty end' "$json_file" | tr -d '"'
-}
-
 # Write urls from channels to file.
 function export_channel_urls() {
   youtube_channels_1="$import_dir/urls_export.txt"
@@ -21,8 +11,8 @@ function export_channel_urls() {
   rm "$youtube_channels_1" "$url_stream_txt" "$channel_stream_json" "$all_channels_json" "$error_log"
 
   while read -r json_file; do
-    channel_name=$(channel_name_from_file "$json_file")
-    channel_url=$(channel_url_from_file "$json_file")
+    channel_name=$(channel_name_from_json_file "$json_file")
+    channel_url=$(channel_url_from_json_file "$json_file")
 
     [ -z "$channel_url" ] && echo "skipped processing $json_file \n> url of the channel_name was missing" &&
       echo "[$(date)] channel_name url missing in $json_file" >>"$error_log" && continue
@@ -84,7 +74,7 @@ function syncchannels() {
 # Download metadata for all channels that have a json file.
 function syncchannels_json_based() {
   while read -r json_file; do
-    channel_url=$(channel_url_from_file "$json_file")
+    channel_url=$(channel_url_from_json_file "$json_file")
     dlci "$channel_url" &# ! spawns multiple processes in the background
   done < <(find "$channels_meta_dir" ! -name "avatar_*json" -type f -iname "*.json")
 }
@@ -125,8 +115,8 @@ function squashjson() {
 
   while read -r chanjson; do
     echo "processing $chanjson..."
-    channel_name=$(channel_name_from_file "$chanjson")
-    channel_url=$(channel_url_from_file "$chanjson")
+    channel_name=$(channel_name_from_json_file "$chanjson")
+    channel_url=$(channel_url_from_json_file "$chanjson")
 
     channel_thumbnail_path=$(jq '.channel_thumbnail_path' "$chanjson" | tr -d '"')
     channel_thumbnail_url=$(jq '.channel_thumbnail_url' "$chanjson" | tr -d '"')
@@ -174,8 +164,8 @@ function update_archives_from_json_metadata() {
 function fetch_avatars_by_json() {
   while read -r json_file; do
     echo processing "$json_file"...
-    channel_name=$(channel_name_from_file "$json_file")
-    channel_url=$(channel_url_from_file "$json_file")
+    channel_name=$(channel_name_from_json_file "$json_file")
+    channel_url=$(channel_url_from_json_file "$json_file")
     python "$scrape_channel_avatar_img_py" --channel-url "$channel_url" --channel-name "$channel_name"
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
 }
@@ -183,7 +173,7 @@ function fetch_avatars_by_json() {
 function merge_avatar_json() { # jq merge overwrites previous fields.
   while read -r json_file; do
     echo processing "$json_file"...
-    channel_name=$(channel_name_from_file "$json_file")
+    channel_name=$(channel_name_from_json_file "$json_file")
     avatar_json_file=$(find "$channels_meta_dir/$channel_name" -iname "avatar*json")
     avatar_json=$(jq . "$avatar_json_file")
     [ -z "$avatar_json" ] && continue

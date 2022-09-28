@@ -165,12 +165,18 @@ function fetch_video_thumbnail() {
     --no-download --verbose "$url"
 }
 
+function print_metadata() {
+  echo -e "Metadata JSON:"
+  jq <<<"$json"
+  print_last
+}
+
 # Download video information. Video metadata and thumbnail.
 function dlvi() {
-  local standalone="$2"
+  standalone="$2"
   [ -z "$standalone" ] && clear_vars_dlv && standalone=true
-  local url="$1" && [ -n "$3" ] && local debug="$3"
-  local function=$([ "$standalone" = "true" ] && echo dlvi || echo dlv)
+  url="$1" && [ -n "$3" ] && debug="$3"
+  function=$([ "$standalone" = "true" ] && echo dlvi || echo dlv)
   check_valid_platform "$url" || return 1
 
   platform=$(extract_platform_name "$url")
@@ -181,12 +187,10 @@ function dlvi() {
   jq <<<"$json" >"$vids_meta_dir/$platform/$name.json"
   fetch_video_subs
   fetch_video_thumbnail
-
   add_to_vhistory
 
   if [ "$standalone" = "true" ]; then
-    jq <<<"$json"
-    print_last
+    print_metadata
     cd "$vids_meta_dir/$platform" || return
   fi
 }
@@ -195,9 +199,9 @@ function dlvi() {
 function dlv() {
   [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
   clear_vars_dlv
-  local url="$1"
-  local standalone=false
-  local function=dlv
+  url="$1"
+  standalone=false
+  function=dlv
   check_valid_platform "$url" || return 1
 
   platform=$(extract_platform_name "$url") || return 1
@@ -207,8 +211,7 @@ function dlv() {
 
   yt-dlp -S ext:mp4:m4a --recode mp4 --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
-  jq <<<"$json"
-  print_last
+  print_metadata
   cd "$vids_dir/$platform" || return
 }
 
@@ -283,12 +286,12 @@ function reset_archive_file() {
 
 # Download channel information (metadata and thumbnails of all videos and the avatar image.
 function dlci() {
-  local url="$1"
-  local standalone="true"
-  [ -n "$2" ] && local standalone="$2"
-  [ -n "$3" ] && local debug="$3"
+  url="$1"
+  standalone="true"
+  [ -n "$2" ] && standalone="$2"
+  [ -n "$3" ] && debug="$3"
   [ -z "$has_archive" ] && has_archive="false"
-  local function=$([ "$standalone" = "false" ] && echo dlc || echo dlci)
+  function=$([ "$standalone" = "false" ] && echo dlc || echo dlci)
   logInfo "start dlci $(date +'%d-%m-%Y_%H:%M:%S')"
   check_valid_platform "$url" || return 1
 
@@ -376,8 +379,7 @@ function dlci() {
   if [ "$standalone" = "true" ]; then # if dlc() did not call dlci(), output to screen, file and exit
     logInfo "write video IDs to downloaded archive and print result"
     save_channel_entries_to_archive
-    jq <<<"$json"
-    print_last
+    print_metadata
     cd "$channels_meta_dir/$name/$platform" || return
     logInfo "downloaded archive filename: $archive_file"
     unset has_archive
@@ -389,9 +391,9 @@ function dlci() {
 function dlc() {
   clear_vars_dlv
   url="$1"
-  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
-  local standalone=false
-  local function=dlc
+  [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
+  standalone=false
+  function=dlc
   check_valid_platform "$url" || return 1
 
   dlci "$url" "$standalone"
@@ -413,8 +415,7 @@ function dlc() {
     --verbose "$url"
 
   save_channel_entries_to_archive
-  jq <<<"$json"
-  print_last
+  print_metadata
   cd "$channels_dir/$name/$platform" || return
 }
 
@@ -470,11 +471,11 @@ function fetch_playlist_metadata() {
 
 # Download video playlist information (similar to dlci).
 function dlvpli() {
-  local url="$1"
-  local standalone="$2"
-  [ -n "$3" ] && local debug="$3"
+  url="$1"
+  standalone="$2"
+  [ -n "$3" ] && debug="$3"
   [ -z "$has_archive" ] && has_archive="false"
-  local function=$([ "$standalone" = "false" ] && echo dlvpl || echo dlvpli)
+  function=$([ "$standalone" = "false" ] && echo dlvpl || echo dlvpli)
   logInfo "start dlcpi $(date +'%d-%m-%Y_%H:%M:%S')"
   check_valid_platform "$url" || return 1
 
@@ -545,7 +546,7 @@ function dlvpli() {
   if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
     logInfo "write video IDs to downloaded archive and print result"
     save_channel_entries_to_archive
-    jq <<<"$json"
+    print_metadata
     cd "$channels_meta_dir/$name/$platform/$pl_name" || return
     logInfo "downloaded archive filename: $archive_file"
     unset has_archive
@@ -557,9 +558,9 @@ function dlvpli() {
 function dlvpl() {
   clear_vars_dlv
   url="$1"
-  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
-  local standalone=false
-  local function=dlvpl
+  [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
+  standalone=false
+  function=dlvpl
   check_valid_platform "$url" || return 1
 
   dlvpli "$url" "$standalone"
@@ -582,7 +583,7 @@ function dlvpl() {
     --verbose "$url"
 
   save_channel_entries_to_archive
-  jq <<<"$json"
+  print_metadata
   cd "$channels_dir/$name/$platform" || return
 }
 
@@ -590,7 +591,7 @@ function dlvpl() {
 function dla() {
   clear_vars_dlv
   url="$1"
-  local function=dla
+  function=dla
   check_valid_platform "$url" || return 1
   mkdir -p "$music_meta_dir" 2>/dev/null
 
@@ -607,17 +608,17 @@ function dla() {
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$music_meta_dir" -o "$name.%(ext)s" --verbose "$url"
 
-  jq <<<"$json"
+  print_metadata
   cd "$music_dir" || return
 }
 
 # Download video playlist information (similar to dlci).
 function dlapli() {
-  local url="$1"
-  local standalone="$2"
-  [ -n "$3" ] && local debug="$3"
+  url="$1"
+  standalone="$2"
+  [ -n "$3" ] && debug="$3"
   [ -z "$has_archive" ] && has_archive="false"
-  local function=$([ "$standalone" = "false" ] && echo dlapl || echo dlapli)
+  function=$([ "$standalone" = "false" ] && echo dlapl || echo dlapli)
   logInfo "start dlapli $(date +'%d-%m-%Y_%H:%M:%S')"
   check_valid_platform "$url" || return 1
 
@@ -695,7 +696,7 @@ function dlapli() {
   if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
     logInfo "write video IDs to downloaded archive and print result"
     save_channel_entries_to_archive
-    jq <<<"$json"
+    print_metadata
     cd "$music_meta_dir/$pl_dir" || return
     logInfo "downloaded archive filename: $archive_file"
     unset has_archive
@@ -707,9 +708,9 @@ function dlapli() {
 function dlapl() {
   clear_vars_dlv
   url="$1"
-  [ "$1" = "--ignore-archive" ] && local url="$2" && local has_archive=false
-  local standalone=false
-  local function=dlapl
+  [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
+  standalone=false
+  function=dlapl
   check_valid_platform "$url" || return 1
 
   dlapli "$url" "$standalone"
@@ -732,7 +733,7 @@ function dlapl() {
     --verbose "$url"
 
   save_channel_entries_to_archive
-  jq <<<"$json"
+  print_metadata
   cd "$music_dir/$pl_dir" || return
 }
 
@@ -744,7 +745,7 @@ function dlalbum() {
 function dlpod() {
   clear_vars_dlv
   url="$1"
-  local function=dlpod
+  function=dlpod
   check_valid_platform "$url" || return 1
   platform=$(extract_platform_name "$url")
   mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
@@ -762,7 +763,7 @@ function dlpod() {
     -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
   echo audio download completed
 
-  jq <<<"$json"
+  print_metadata
   cd "$podcasts_dir/$platform" || return
 }
 
@@ -772,7 +773,7 @@ function dlt() {
   url="$1"
   check_valid_platform "$url" || return 1
   platform=$(extract_platform_name "$url")
-  local function=dlt
+  function=dlt
   mkdir -p "$thumbnails_dir/$platform" "$thumbnails_meta_dir/$platform" 2>/dev/null
 
   name="$(fetch_sanitized_title)"
@@ -783,6 +784,6 @@ function dlt() {
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
-  jq <<<"$json"
+  print_metadata
   cd "$thumbnails_dir/$platform" || return
 }

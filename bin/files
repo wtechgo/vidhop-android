@@ -146,7 +146,7 @@ function find_archive_file_from_channel_name() {
   [ -z "$found_json" ] && return 0
   [ "$(wc -l <<<"$found_json")" -gt 1 ] && echo -e "found more than one file:\n$results" && return 1
 
-  channel_url=$(channel_url_from_file "$found_json")
+  channel_url=$(channel_url_from_json_file "$found_json")
   archive_filename=$(url_to_filename "$channel_url")
   find "$downloaded_dir" -type f -iname "$archive_filename"
 }

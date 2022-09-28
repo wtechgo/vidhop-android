@@ -51,9 +51,20 @@ function sanitize_filename() {  # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     # sed 's/\.\{2,\}//g' removes 2 or more dots
 }
 
-function channel_url_from_file() {
-  [ -z "$1" ] && echo "usage: channel_url_from_file <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return 1
-  json_file="$1"
+# shellcheck disable=SC2120
+function channel_url_from_obj() {
+  [ -n "$json" ] &&
+    jq 'if .channel_url != null then .channel_url
+      elif .webpage_url != null then .webpage_url
+      elif .entries[0] | has("uploader_url") then .entries[0].uploader_url
+      elif .entries[0] | has("channel_url") then .entries[0].channel_url
+      else empty end' <<<"$json" | tr -d '"'
+}
+
+# shellcheck disable=SC2120
+function channel_url_from_json_file() {
+  [ -n "$1" ] && json_file="$1"
+  [ ! -f "$json_file" ] || [[ "$json_file" != *.json ]] && return
   jq 'if .channel_url != null then .channel_url
       elif .webpage_url != null then .webpage_url
       elif .entries[0] | has("uploader_url") then .entries[0].uploader_url
@@ -61,24 +72,49 @@ function channel_url_from_file() {
       else empty end' "$json_file" | tr -d '"'
 }
 
-function channel_url_from_obj() {
-  [ -z "$json" ] && [ -z "$1" ] && echo -e "no \$json was not found as a set variable, nor as argument" &&
-    echo -e "usage: channel_url_from_file <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return 1
-  [ -n "$1" ] && json="$1"
-  jq 'if .channel_url != null then .channel_url
-      elif .webpage_url != null then .webpage_url
-      elif .entries[0] | has("uploader_url") then .entries[0].uploader_url
-      elif .entries[0] | has("channel_url") then .entries[0].channel_url
-      else empty end' <<<"$json" | tr -d '"'
+function channel_url() {
+  channel_url="$(channel_url_from_obj)"
+  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url" && return
+  channel_url="$(channel_url_from_json_file)"
+  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url"
 }
 
-# Extract the name of a channel from yt-dlp --dump-single-json.
 function channel_name_from_obj() {
   jq 'if .channel != null then .channel
       elif .uploader != null then .uploader
       elif .entries[0] | has("channel") then .entries[0].channel
       elif .entries[0] | has("uploader") then .entries[0].uploader
       else empty end' <<<"$json" | sanitize_filename
+}
+
+# shellcheck disable=SC2120
+function channel_name_from_json_file() {
+  [ -n "$1" ] && [ -f "$1" ] && local file="$1"
+  [ -z "$file" ] && [ -f "$json_file" ] && file="$json_file"
+  [ -z "$file" ] && [ -f "$meta_file" ] && file="$meta_file"
+  [ ! -f "$file" ] && return 1
+
+  jq 'if .channel != null then .channel
+      elif .uploader != null then .uploader
+      elif .entries[0] | has("channel") then .entries[0].channel
+      elif .entries[0] | has("uploader") then .entries[0].uploader
+      else empty end' "$file" | sanitize_filename
+}
+
+# shellcheck disable=SC2120
+function channel_name_from_filename() {
+  [ ! -f "$json_file" ] && [ -f "$meta_file" ] && json_file="$meta_file"
+  [ -n "$json_file" ] && basename "$json_file" ".json"
+}
+
+function channel_name() {
+  channel_name="$(channel_name_from_obj)"
+  [ -n "$channel_name" ] && [ "$channel_name" != "null" ] && echo "$channel_name" && return
+  channel_name="$(channel_name_from_json_file)"
+  [ -n "$channel_name" ] && [ "$channel_name" != "null" ] && echo "$channel_name" && return
+  # shellcheck disable=SC2119
+  channel_name="$(channel_name_from_filename)"
+  [ -n "$channel_name" ] && [ "$channel_name" != "null" ] && echo "$channel_name"
 }
 
 function save_channel_entries_to_archive() {
@@ -132,14 +168,17 @@ function get_extension() {
 function strip_extension() {
   file="$1"
   ext=$(get_extension "$file")
-  echo "${file//.$ext/}"  # remove the extension e.g. remove .json from abs path
-#  echo "$file" |  sed "s/.$ext//"
+  echo "${file//.$ext/}" # remove the extension e.g. remove .json from abs path
 }
 
 function sort_upload_date_desc() {
   [ -z "$json" ] && echo no json variable availble, abort sort && return 1
   entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")
   json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
+}
+
+function first_channel_upload() {
+  [ -n "$json" ] && jq ".entries | sort_by(.upload_date) | .[0].upload_date" <<<"$json" | tr -d '"'
 }
 
 function sort_playlist_index_asc() {
@@ -165,8 +204,8 @@ function print_line_for_msg() {
 function repeat_char_full_screen() {
   [ -n "$1" ] && char="$1" || char="_"
   [ -n "$2" ] && count="$2" || count="$termux_screen_char_count"
-  for (( i = 0; i < $count; i++ )); do
-      result+="$char"
+  for ((i = 0; i < $count; i++)); do
+    result+="$char"
   done
   echo $result
 }

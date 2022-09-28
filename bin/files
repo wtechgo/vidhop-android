@@ -369,7 +369,13 @@ function mediafile() {
 }
 
 function metadata() {
-  [ -f "$meta_file" ] && jq . "$meta_file"
+  if [ -n "$1" ]; then
+    [ -f "$1" ] && jq . "$1" && return
+    found_meta_file="$(find_one_meta "$1")"
+    [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
+  else
+    [ -f "$meta_file" ] && jq . "$meta_file"
+  fi
 }
 
 function treevidhopbefore() {

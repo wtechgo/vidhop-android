@@ -34,21 +34,26 @@ function extract_platform_name() {
 }
 
 # shellcheck disable=SC2120
-function sanitize_filename() {  # echo '"*/<>?\|_: ..ok`' | sanitize_filename
-    [ -n "$1" ] && echo "$1" | sanitize_filename && return
-    tr '"' "'" | \
-    tr -d '\*' | \
-    tr -d '/' | \
-    tr -d '<' | \
-    tr -d '>' | \
-    tr -d '\?' | \
-    tr -d '\\' | \
-    tr '\|' '-' | \
-    tr '\`' "'" | \
-    sed 's/:/ -/g' | \
-    sed 's/\.\{2,\}/./g' | \
+function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
+  [ -n "$1" ] && echo "$1" | sanitize_filename && return
+  tr '"' "'" |
+    tr -d '\*' |
+    tr -d '/' |
+    tr -d '<' |
+    tr -d '>' |
+    tr -d '\?' |
+    tr -d '\\' |
+    tr '\|' '-' |
+    tr '\`' "'" |
+    sed 's/:/ -/g' |
+    sed 's/\.\{2,\}/./g' |
     xargs # xargs trims spaces string start & end
-    # sed 's/\.\{2,\}//g' removes 2 or more dots
+  # sed 's/\.\{2,\}//g' removes 2 or more dots
+}
+
+function is_single_download() {
+  [[ "$function" == dlv* ]] || [[ "$function" == dla* ]] || [[ "$function" == dlpod* ]] &&
+    echo "true" || echo "false"
 }
 
 # shellcheck disable=SC2120
@@ -142,13 +147,13 @@ function url_to_channel_name() {
   url="$1"
   [ "$(is_url "$url")" = "false" ] && return 1
 
-  echo "$url" | cut -d/ -f 4 | \
-    tr -d '@' | \
-    tr -d '?' | \
-    tr -d '"' | \
-    tr -d '\\' | \
-    tr ':' '-' | \
-    tr '/' '-' | \
+  echo "$url" | cut -d/ -f 4 |
+    tr -d '@' |
+    tr -d '?' |
+    tr -d '"' |
+    tr -d '\\' |
+    tr ':' '-' |
+    tr '/' '-' |
     tr '.' '_'
 }
 

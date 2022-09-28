@@ -6,7 +6,7 @@
 
 # WORKSTATION
 IP_WS="FILL_IN_IP_ADDRESS_FROM_WS_IN_CONFIG.INI"
-USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI"
+USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI" && [ -f "$config_ini" ] && . "$config_ini"
 USER_HOME_WS="/home/$USER_WS" # not used by `syncvidhop` but senddownloads and fetchdownloads
 VIDHOP_DIR_WS="$USER_HOME_WS/Videos/VidHop" # target
 VIDHOP_BIN_DIR_WS="/home/$USER_WS/code/vidhop/shell/linux/bin" # make /opt/vidhop/bin on public repo

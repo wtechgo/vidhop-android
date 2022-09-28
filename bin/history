@@ -249,8 +249,7 @@ function lasttitle() {
 
 function print_last() {
   [ -z "$title" ] && [ -n "$name" ] && title="$name"
-  [ -n "$title" ] && echo -e "$(print_line_for_msg "        title: $title")\n"
-  [ -n "$title" ] && echo -e "Files:"
+  [ -n "$title" ] && echo -e "\nFiles:"
   [ -n "$title" ] && echo -e "${BOLD}${BLUE}--------title${NC}${NORMAL}: ${GREEN}$title"
   [ -n "$url" ] && echo -e "${BOLD}${BLUE}----------url${NC}${NORMAL}: ${GREEN}$url"
   [ -n "$channel_url" ] && [ -z "$media_file" ] && echo -e "${BOLD}${BLUE}--channel_url${NC}${NORMAL}: ${GREEN}$channel_url"

@@ -48,6 +48,15 @@ function init_vars() {
   pwd=$(pwd)
 }
 
+function oneliner_channel_entries() {
+  channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
+  chani_entries=$(
+    jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
+          | "> " + .title + " | " + .webpage_url + " | " + .upload_date' <<<"$json" | tr -d '"'
+  )
+  echo -e "${GREEN}$chani_entries"
+}
+
 function format_oneliner() {
   channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
   jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
@@ -384,15 +393,24 @@ function json_files_for_channel_name() {
   find "$channels_meta_dir" -type f ! -iname "*avatar_data*json" -iwholename "*$name*$platform*json"
 }
 
+function print_channel_label() {
+  url="$(channel_url_from_file "$json_file")"
+  channel_name="$(basename "$json_file" ".json")"
+  label="$channel_name | $url"
+  echo -e "\n${GREEN}$label"
+  echo -e "${GREEN}$(print_line_for_msg "$label")\n"
+}
+
 function print_channel_data() {
   url="$(channel_url_from_file "$json_file")"
   url_msg="     url: $url"
   line=$(print_line_for_msg "$url_msg")
-  echo "$line"
+  echo -e "$line\n"
   echo "    name: $(basename "$json_file" ".json")"
   echo "     url: $url"
   echo "platform: $(extract_platform_name "$url")"
   echo "  videos: $(jq '.entries | length' <<<"$json")"
+  echo
 }
 
 # Show all videos of a channel, one line per video.
@@ -406,7 +424,8 @@ function chani() { # channel info
   json_file="$json_files" && unset json_files # only one entry in json_files
   json=$(jq '.' "$json_file")
 
-  opinionated_print
+  print_channel_label
+  oneliner_channel_entries
   print_channel_data
 }
 

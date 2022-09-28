@@ -283,6 +283,11 @@ function setspeakers() {
   echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
+function setcreators() {
+  set_metadata_field 'vh_creators' "$@"
+  echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
+}
+
 function rm_metadata_field() {
   [ "$#" = 0 ] && echo "no metadata field given to remove" && return
   [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
@@ -324,6 +329,11 @@ function rmtopics() {
 function rmspeakers() {
   rm_metadata_field 'vh_speakers' "$@"
   echo "'vh_speakers' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
+function rmcreators() {
+  rm_metadata_field 'vh_creators' "$@"
+  echo "'vh_creators' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
 function usage_specs() {

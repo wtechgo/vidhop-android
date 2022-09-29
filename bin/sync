@@ -6,21 +6,21 @@
 
 # WORKSTATION
 IP_WS="FILL_IN_IP_ADDRESS_FROM_WS_IN_CONFIG.INI"
-USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI" && [ -f "$config_ini" ] && . "$config_ini"
-USER_HOME_WS="/home/$USER_WS" # not used by `syncvidhop` but senddownloads and fetchdownloads
+USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI"
+USER_HOME_WS="/home/$USER_WS" # used by `senddownloads` and `fetchdownloads`, NOT `syncvidhop`
+[ -f "$config_ini" ] && . "$config_ini" # overwrite $USER_WS & $USER_HOME_WS
 VIDHOP_DIR_WS="$USER_HOME_WS/Videos/VidHop" # target
-VIDHOP_BIN_DIR_WS="/home/$USER_WS/code/vidhop/shell/linux/bin" # make /opt/vidhop/bin on public repo
-SHELL_WS="bash"
-SHELL_RC_WS="$USER_HOME_WS/.${SHELL_WS}rc"
+VIDHOP_APP_DIR_WS="/opt/vidhop"
+TERMUX_RC_WS="FILL_IN_PATH_OF_BASH.BASHRC_ON_WS_TO_SEND_TO_PHONE_IN_CONFIG.INI" # to be copied to $PREFIX/etc/bash.bashrc
 SSH_PORT_WS=22
+[ -f "$config_ini" ] && . "$config_ini" # overwrite $VIDHOP_APP_DIR_WS and $VIDHOP_BIN_DIR_WS
 
 # PHONE
 SHARED_DIR_PHONE="/data/data/com.termux/files/home/storage/shared"
 VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
-VIDHOP_BIN_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
-BASHRC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
+VIDHOP_APP_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
+TERMUX_RC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
 SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
-
 [ -f "$config_ini" ] && . "$config_ini"
 
 function sshworkstation() {
@@ -215,7 +215,7 @@ function sendvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$VIDHOP_BIN_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_BIN_DIR_WS"
+    "$VIDHOP_APP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_APP_DIR_WS"
 }
 
 function fetchvidhopbin() {
@@ -223,15 +223,15 @@ function fetchvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$USER_WS@$IP_WS:$VIDHOP_BIN_DIR_WS/" "$VIDHOP_BIN_DIR_PHONE"
+    "$USER_WS@$IP_WS:$VIDHOP_APP_DIR_WS/" "$VIDHOP_APP_DIR_PHONE"
 }
 
 function sendbashrc() {
-  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$BASHRC_PHONE" "$USER_WS@$IP_WS:$SHELL_RC_WS"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$TERMUX_RC_PHONE" "$USER_WS@$IP_WS:$TERMUX_RC_WS"
 }
 
 function fetchbashrc() {
-  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$SHELL_RC_WS" "$BASHRC_PHONE"
+  rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$TERMUX_RC_WS" "$TERMUX_RC_PHONE"
 }
 
 function sendfile() {

@@ -1,23 +1,24 @@
 ## Copy or rename config.ini.template to config.ini and VidHop will read it.
-## Fill in your personal information inside the double quotes and uncomment those line by removing the hashtag (#)
-## at the start of the line.
+## Fill in your personal information inside the double quotes.
 
-## VidHop directories.  ## Changing these values will affect all vars as all other vars use these values as the foundation.
-## -------------------  ## The values for the following 3 key-value pairs are defaults for VidHop on Termux.
-#vidhop_dir="/data/data/com.termux/files/home/storage/shared"
-#vidhop_app_dir="$PREFIX/opt/vidhop"
-#bin_dir="$vidhop_app_dir/bin"
-
+## App dirs.
+## ---------
+#vidhop_dir=""   # Where VidHop stores downloaded media and metadata.
+#vidhop_app_dir=""   # Where VidHop's code resides.
+#bin_dir=""  # Overwrites loader.bin_dir before the loader loads in all other binaries.
 
 ## SSH settings.
 ### PHONE.
 ### ------
 #IP_PHONE=""
 #USER_PHONE=""
+#VIDHOP_DIR_PHONE=""
+#VIDHOP_APP_DIR_PHONE=""
 
 ### WORKSTATION (WS).
 ### -----------------
 #IP_WS=""
 #USER_WS=""
 #USER_HOME_WS=""
-#SHELL_WS=""
+#VIDHOP_DIR_WS=""
+#VIDHOP_APP_DIR_WS=""

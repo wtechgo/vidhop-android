@@ -4,9 +4,10 @@
 
 Download videos, channels, playlists, music and thumbnails from any video platform on Android.
 
-VidHop stores metadata of the video files you process as JSON files, metadata through which you can easily search.
+VidHop stores metadata of the video files you process as JSON files, metadata through which you can easily search with 
+a VidHop command.
 
-VidHop is like a Swiss knife for anyone interested in saving audiovisual content from the internet.
+VidHop is like a Swiss knife for saving audiovisual content from the internet while building a metadata library locally on the device.
 
 [VidHop for Linux](https://raw.githubusercontent.com/wtechgo/vidhop-linux/master/install.sh) also exists. Sync functionality is built-in on both Linux and Android versions of VidHop though that 
 requires a working SSH connection between laptop and phone.
@@ -50,18 +51,19 @@ Each download also saves the video **metadata** and its thumbnail (video banner 
 playlist, the same happens for each video while also saving channel metadata. It's also possible to fetch **only** the
 metadata of a video, channel or playlist.
 
-**The metadata is what makes application powerful** as VidHop provides functions for users to query their collected metadata
+**The metadata is what makes the application powerful** as VidHop provides functions for users to query their collected metadata
 using search words or sentences. Effectively, VidHop will look for the search word in video titles and descriptions
 though the metadata contains other useful data like video, channel and thumbnail URLs. File extensions include mp4 (
 video), json (metadata) and jpg (thumbnails).
 
-Finally, VidHop provides many utilities for day-to-day use such as keeping a history, renaming of downloaded files,
-inspect video specs of files and URLs, remove the last download or play it...
+Finally, VidHop provides many utilities for day-to-day use such as keeping a history, renaming of downloaded files, 
+add custom metadata (vh_summary, vh_speakers, vh_categories,...), inspect video specs of files and URLs, 
+remove the last download or play it...
 
 ## Technical Information
 
-VidHop is in essence a collection of bash scripts users load in terminal via `bash.bashrc` or by calling the loader
-`. vidhop` or `source vidhop`. `bash.bashrc is the Termux equivalent of `.bashrc` in Linux.
+VidHop is in essence a collection of bash scripts that users load in their terminal via `bash.bashrc` 
+(the Termux equivalent of `~/.bashrc` in Linux), or manually by sourcing the loader with `. vidhop` or `source vidhop`.
 
 We enable a terminal in Android by installing [Termux from F-Droid](https://f-droid.org/en/packages/com.termux/).
 Installing Termux from Google Play is not recommended as this is an [old version](https://www.xda-developers.com/termux-terminal-linux-google-play-updates-stopped/).
@@ -71,23 +73,22 @@ VidHop uses [YT-DLP](https://github.com/yt-dlp/yt-dlp) (written in Python) for d
 
 Handling metadata JSON files happens with [JQ](https://github.com/stedolan/jq).
 
-Finally, VidHop (`install.sh`) installs a bunch of useful packages
-like `openssh, rsync, mediainfo, selenium and beautifulsoup4 (for scraping channel avatar images) and tor, proxychains-ng (for dealing with censored videos)`
-.
-
-`install.sh` resolved several issues, listed [here](#issues-installsh-resolved)
+VidHop stands on the shoulders of giants: packages and libraries, that need to be installed. On Termux/Android however, 
+if you ran the [installation script](https://github.com/wtechgo/vidhop-android/blob/master/install.sh), 
+all of that has been taken care of.
 
 ## VidHop Sync
 
 Phones have limited storage so users will want to transfer their downloads from their phone to their computer.
 
 Moreover, metadata collected on the computer has to be copied to the phone so users can query their video library 
-while on the move.
+on their phone.
 
 VidHop provides command `syncvidhop` for this scenario though SSH has to be configured such that laptop and phone can 
 establish an SSH connection.
 
-Note: Configuring VidHop Sync is not required for downloading videos, channels, metadata etc. to work.
+Note: Configuring VidHop Sync is not required to use VidHop for downloading videos, channels, metadata etc. That said, 
+to have `syncvidhop` working is pretty awesome.
 
 ### Configuration
 

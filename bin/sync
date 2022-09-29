@@ -215,7 +215,7 @@ function sendvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$VIDHOP_APP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_APP_DIR_WS"
+    "$VIDHOP_APP_DIR_PHONE/*" "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS"
 }
 
 function fetchvidhopbin() {
@@ -223,7 +223,7 @@ function fetchvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$USER_WS@$IP_WS:$VIDHOP_APP_DIR_WS/" "$VIDHOP_APP_DIR_PHONE"
+    "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS/" "$VIDHOP_APP_DIR_PHONE"
 }
 
 function sendbashrc() {

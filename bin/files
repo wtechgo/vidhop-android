@@ -239,8 +239,16 @@ function rmarchive() {
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
+function set_metadata_field_json_obj() {
+  key="$1" && value="$2"
+  json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$json")
+}
+
+# Sets JSON field with 'key' to 'value' and writes to $meta_file if available.
+# Usage: command "key" "value" ---------------------> uses "$json"
+#        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
 function set_metadata_field() {
-  [ "$#" = 0 ] || [ "$#" = 1 ]  && echo "no metadata field given to remove" && return
+  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "no metadata field given to remove" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # meta_file should be set if $json is set
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" &&
     meta_file="$(find_one_meta "$partial_filename")" &&
@@ -250,12 +258,10 @@ function set_metadata_field() {
   [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return
 
   [ -z "$metadata" ] && echo "no metadata to work with" && return
-#  json=$(jq 'del(."'"$key"'")' <<<"$metadata")
   json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$metadata")
 
-  [ -f "$meta_file" ] &&
-    jq . <<<"$json" >"$meta_file" ||
-    echo "no metadata file to write to"
+  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file" && return
+  echo "no metadata file to write to"
 }
 
 function setdescription() {
@@ -288,6 +294,29 @@ function setcreators() {
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
+function setcreators() {
+  set_metadata_field 'vh_creators' "$@"
+  echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
+}
+
+function set_downloaded() {
+  set_metadata_field_json_obj "vh_downloaded" "$1"
+}
+
+function set_downloaded_date() {
+  set_metadata_field_json_obj "vh_downloaded_date" "$(date +'%d-%m-%Y_%H:%M:%S')"
+}
+
+function set_thumb_file() {
+  set_metadata_field "vh_thumb_file" "$1"
+}
+
+function rm_metadata_field_json_obj() {
+  key="$1"
+  [ -z "$key" ] || [ -z "$json" ] && echo "could not remove metadata for key '$key'" && return
+  json=$(jq 'del(."'"$key"'")' <<<"$json")
+}
+
 function rm_metadata_field() {
   [ "$#" = 0 ] && echo "no metadata field given to remove" && return
   [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
@@ -301,9 +330,8 @@ function rm_metadata_field() {
   [ -z "$metadata" ] && echo "no metadata to work with" && return
   json=$(jq 'del(."'"$key"'")' <<<"$metadata")
 
-  [ -f "$meta_file" ] &&
-    jq . <<<"$json" >"$meta_file" ||
-    echo "no metadata file to write to"
+  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file" && return
+  echo "no metadata file to write to"
 }
 
 function rmdescription() {
@@ -334,6 +362,28 @@ function rmspeakers() {
 function rmcreators() {
   rm_metadata_field 'vh_creators' "$@"
   echo "'vh_creators' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
+function rmdownloaded() {
+  rm_metadata_field 'vh_downloaded'
+  echo "'vh_downloaded' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
+function rmdownloaded_date() {
+  rm_metadata_field "vh_downloaded_date"
+  echo "'vh_downloaded_date' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
+function rm_media_file() {
+  rm_metadata_field "vh_media_file"
+}
+
+function rm_meta_file() {
+  rm_metadata_field "vh_meta_file"
+}
+
+function rm_thumb_file() {
+  rm_metadata_field "vh_thumb_file"
 }
 
 function usage_specs() {

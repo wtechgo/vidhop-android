@@ -18,8 +18,8 @@ function dlv_help() {
 }
 
 function clear_vars_dlv() {
-  unset url standalone platform name json archive_file has_archive archive_content avatar_json \
-    avatar_json_file valid album artist pl_name pl_dir
+  unset url standalone platform name json json_file meta_file archive_file has_archive archive_content avatar_json \
+    avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
   rm "$log_json_file" 2>/dev/null
   return 0
 }
@@ -156,11 +156,11 @@ function fetch_video_subs() {
   english="$subs_dir/${name}.en.vtt"
   english_auto="$subsauto_dir/${name}.en.vtt"
   [ -f "$english" ] && /bin/cp "$english" "$(dirname "$subs_dir")"  # Hence we copy uploader provided subs next to the media file.
-  ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$(dirname "$subsauto_dir")"  # If we don't have the previous.
+  ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$(dirname "$subsauto_dir")" # If we don't have the previous.
 }
 
 function fetch_video_thumbnail() {
-    yt-dlp --write-thumbnail --convert-thumbnails jpg \
+  yt-dlp --write-thumbnail --convert-thumbnails jpg \
     -P "$vids_meta_dir/$platform" -o "$name.%(ext)s" \
     --no-download --verbose "$url"
 }
@@ -168,7 +168,18 @@ function fetch_video_thumbnail() {
 function print_metadata() {
   echo -e "Metadata JSON:"
   jq <<<"$json"
-  print_last
+  print_summary
+}
+
+function augment_json() {
+  [ -z "$meta_file" ] && meta_file="$json_file"
+  set_downloaded "$(is_media_download)"
+  set_downloaded_date
+  [ -f "$media_file" ] && set_metadata_field_json_obj "vh_media_file" "$media_file"
+  [ -d "$channel_dir" ] && set_metadata_field_json_obj "vh_channel_dir" "$channel_dir"
+  [ -d "$channels_meta_dir/$name/$platform" ] && set_metadata_field_json_obj "vh_channel_meta_dir" "$channels_meta_dir/$name/$platform"
+  [ -n "$meta_file" ] && set_metadata_field_json_obj "vh_meta_file" "$meta_file"
+  [ -f "$thumb_file" ] && set_metadata_field_json_obj "vh_thumb_file" "$thumb_file"
 }
 
 # Download video information. Video metadata and thumbnail.
@@ -184,10 +195,13 @@ function dlvi() {
 
   fetch_video_metadata "$url" # populates $json
   name="$(fetch_sanitized_title)"
-  jq <<<"$json" >"$vids_meta_dir/$platform/$name.json"
+  json_file="$vids_meta_dir/$platform/$name.json"
   fetch_video_subs
   fetch_video_thumbnail
+
   add_to_vhistory
+  augment_json
+  jq <<<"$json" >"$json_file"
 
   if [ "$standalone" = "true" ]; then
     print_metadata
@@ -208,7 +222,6 @@ function dlv() {
   mkdir "$vids_dir/$platform" 2>/dev/null
 
   dlvi "$url" "$standalone"
-
   yt-dlp -S ext:mp4:m4a --recode mp4 --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
   print_metadata
@@ -373,8 +386,9 @@ function dlci() {
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
-  jq <<<"$json" >"$json_file"
   add_to_chistory
+  augment_json
+  jq <<<"$json" >"$json_file"
 
   if [ "$standalone" = "true" ]; then # if dlc() did not call dlci(), output to screen, file and exit
     logInfo "write video IDs to downloaded archive and print result"
@@ -398,9 +412,11 @@ function dlc() {
 
   dlci "$url" "$standalone"
   [ ! $? ] && echo "download channel info failed (function: dlci)" && return
+  channel_dir="$channels_dir/$name/$platform"
+  set_channel_dir "$channel_dir" # augments $json
 
   # Download all videos from channel.
-  yt-dlp -S ext:mp4:m4a --recode mp4 -P "$channels_dir/$name/$platform" -o "%(title)s.%(ext)s" \
+  yt-dlp -S ext:mp4:m4a --recode mp4 -P "$channel_dir" -o "%(title)s.%(ext)s" \
     $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
     --replace-in-metadata "title" '"' "'" \
     --replace-in-metadata "title" '\*' '' \
@@ -416,7 +432,7 @@ function dlc() {
 
   save_channel_entries_to_archive
   print_metadata
-  cd "$channels_dir/$name/$platform" || return
+  cd "$channel_dir" || return
 }
 
 function fetch_playlist_metadata() {
@@ -541,6 +557,8 @@ function dlvpli() {
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
+  add_to_chistory
+  augment_json
   jq <<<"$json" >"$json_file"
 
   if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
@@ -583,6 +601,8 @@ function dlvpl() {
     --verbose "$url"
 
   save_channel_entries_to_archive
+  add_to_chistory
+  augment_json
   print_metadata
   cd "$channels_dir/$name/$platform" || return
 }
@@ -597,16 +617,17 @@ function dla() {
 
   name="$(fetch_song_filename | sed 's/NA - //')"
   fetch_video_metadata "$url" # populates json
-  jq <<<"$json" >"$music_meta_dir/$name.json"
-  add_to_ahistory
-
   # download mp3
   yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
     -P "$music_dir" -o "$name.%(ext)s" --verbose "$url"
-
   # download thumbnail
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$music_meta_dir" -o "$name.%(ext)s" --verbose "$url"
+
+  json_file="$music_meta_dir/$name.json"
+  add_to_ahistory
+  augment_json
+  jq <<<"$json" >"$json_file"
 
   print_metadata
   cd "$music_dir" || return
@@ -691,6 +712,7 @@ function dlapli() {
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
+  augment_json
   jq <<<"$json" >"$json_file"
 
   if [ "$standalone" = true ]; then # if dlc() did not call dlci(), output to screen, file and exit
@@ -751,9 +773,11 @@ function dlpod() {
   mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
 
   name="$(fetch_sanitized_title)"
+  json_file="$podcasts_meta_dir/$platform/$name.json"
   fetch_channel_metadata "$url"
-  jq <<<"$json" >"$podcasts_meta_dir/$platform/$name.json"
   add_to_phistory
+  augment_json
+  jq <<<"$json" >"$json_file"
 
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$podcasts_meta_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
@@ -767,6 +791,19 @@ function dlpod() {
   cd "$podcasts_dir/$platform" || return
 }
 
+function find_thumb_from_meta_filename() {
+  [ -z "$1" ] || [[ "$1" != *.json ]] && return
+  stripped_name=$(basename "$1" .json)
+  file="$thumbnails_dir/$platform/$stripped_name.jpg"
+  [ -f "$file" ] && echo "$file" && return
+  file="$thumbnails_dir/$platform/$stripped_name.jpeg"
+  [ -f "$file" ] && echo "$file" && return
+  file="$thumbnails_dir/$platform/$stripped_name.png"
+  [ -f "$file" ] && echo "$file" && return
+  file="$thumbnails_dir/$platform/$stripped_name.webp"
+  [ -f "$file" ] && echo "$file" && return
+}
+
 # Download thumbnail. Store the thumbnail of a single video plus its metadata.
 function dlt() {
   clear_vars_dlv
@@ -777,12 +814,16 @@ function dlt() {
   mkdir -p "$thumbnails_dir/$platform" "$thumbnails_meta_dir/$platform" 2>/dev/null
 
   name="$(fetch_sanitized_title)"
+  json_file="$thumbnails_meta_dir/$platform/$name.json"
   fetch_video_metadata "$url"
-  jq <<<"$json" >"$thumbnails_meta_dir/$platform/$name.json"
   add_to_thistory
+  augment_json
+  jq <<<"$json" >"$json_file"
 
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+  set_downloaded "true"
+  set_thumb_file "$(find_thumb_from_meta_filename "$json_file")"
 
   print_metadata
   cd "$thumbnails_dir/$platform" || return

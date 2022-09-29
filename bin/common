@@ -56,6 +56,13 @@ function is_single_download() {
     echo "true" || echo "false"
 }
 
+function is_media_download() {
+  [[ "$function" == dlv ]] || [[ "$function" == dlc ]] || [[ "$function" == dlt ]] ||
+    [[ "$function" == dla ]] || [[ "$function" == dlalbum ]] || [[ "$function" == dlpod ]] ||
+    [[ "$function" == dlvpl ]] || [[ "$function" == dlapl ]] &&
+    echo "true" || echo "false"
+}
+
 # shellcheck disable=SC2120
 function channel_url_from_obj() {
   [ -n "$json" ] &&
@@ -192,18 +199,17 @@ function sort_playlist_index_asc() {
   json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
 }
 
-function echo_underlined() {
-  echo -e "$1"
-  print_line_for_msg "$1"
-}
-
 function print_line_for_msg() {
   [ -z "$1" ] && return
   line=""
   for ((i = 1; i < $(echo "$1" | wc --chars); i++)); do
     line+="_"
   done
-  echo -e "$line"
+  echo -e "${line}\n"
+}
+
+function underline() {
+  echo -e "$1\n$(print_line_for_msg "$1")"
 }
 
 function repeat_char_full_screen() {

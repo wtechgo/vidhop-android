@@ -1,9 +1,11 @@
 #!/bin/bash
 
+shared="/data/data/com.termux/files/home/storage/shared"
+vidhop_dir="$shared/VidHop"
 vidhop_app_dir="$PREFIX/opt/vidhop"
 bin_dir="$vidhop_app_dir/bin"
 
-# overwrites $vidhop_app_dir and $bin_dir with values from config.ini (if needed).
+# overwrites $vidhop_dir, $vidhop_app_dir and $bin_dir with values from config.ini (if needed).
 [ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
 
 . "$bin_dir/vars" # overwrites all vars from config.ini except $vidhop_dir, $vidhop_app_dir, $bin_dir

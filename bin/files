@@ -424,8 +424,10 @@ function metadata() {
     found_meta_file="$(find_one_meta "$1")"
     [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
   else
-    [ -f "$meta_file" ] && jq . "$meta_file"
+    [ -f "$meta_file" ] && jq . "$meta_file" && return
+    [ -f "$json_file" ] && jq . "$meta_file" && return
   fi
+  echo "no metadata to show"
 }
 
 function treevidhopbefore() {

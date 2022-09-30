@@ -175,11 +175,11 @@ function augment_json() {
   [ -z "$meta_file" ] && meta_file="$json_file"
   set_downloaded "$(is_media_download)"
   set_downloaded_date
-  [ -f "$media_file" ] && set_metadata_field_json_obj "vh_media_file" "$media_file"
+  [ -n "$media_file" ] && set_metadata_field_json_obj "vh_media_file" "$media_file"
   [ -d "$channel_dir" ] && set_metadata_field_json_obj "vh_channel_dir" "$channel_dir"
   [ -d "$channels_meta_dir/$name/$platform" ] && set_metadata_field_json_obj "vh_channel_meta_dir" "$channels_meta_dir/$name/$platform"
   [ -n "$meta_file" ] && set_metadata_field_json_obj "vh_meta_file" "$meta_file"
-  [ -f "$thumb_file" ] && set_metadata_field_json_obj "vh_thumb_file" "$thumb_file"
+  [ -n "$thumb_file" ] && set_metadata_field_json_obj "vh_thumb_file" "$thumb_file"
 }
 
 # Download video information. Video metadata and thumbnail.

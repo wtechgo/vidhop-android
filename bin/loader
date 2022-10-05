@@ -14,6 +14,7 @@ bin_dir="$vidhop_app_dir/bin"
 . "$bin_dir/logger"
 . "$bin_dir/history"
 . "$bin_dir/files"
+. "$bin_dir/metadata"
 
 . "$bin_dir/dlv"
 . "$bin_dir/fvid"
@@ -89,18 +90,29 @@ function uninstallvidhop() {
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] || [ -z "$answer" ] && echo "aborted uninstall" && return
   [ "$answer" = "y" ] &&
-    rm "$PREFIX/bin/vidhop" &&
-    rm -rf "$PREFIX/opt/vidhop"
+    sudo rm "/usr/local/bin/vidhop" &&
+    rm -rf "/opt/vidhop"
+}
+
+function loader_help() {
+  echo " Title: loader"
+  echo " Description: VidHop management functions."
+  echo " Commands:"
+  echo "    updateytdlp => Updates YT-DLP with pip (Python package manager)."
+  echo "    install_loader => Enables users to reload with '. vidhop'"
+  echo "    installloader => Alias for the previous for Termux."
+  echo "    fetch_github => Download the newest VidHop code from GitHub."
+  echo "    updatevidhop => Default update."
+  echo "    updatevidhopbin => Update only files in vidhop/bin."
+  echo "    uninstallvidhop => Remove all VidHop executables, downloaded data in the VidHop directory will NOT be deleted."
 }
 
 function vidhophelp() {
   dlv_help && echo
   fvid_help && echo
   files_help && echo
+  metadata_help && echo
   history_help && echo
   sync_help && return
-}
-
-function replace_bashrc() {
-  cp "$vidhop_app_dir/bash.bashrc" "$PREFIX/etc/bash.bashrc"
+  loader_help && return
 }

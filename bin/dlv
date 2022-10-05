@@ -7,12 +7,15 @@ function dlv_help() {
   echo " Commands:"
   echo "    dlv <URL>     => download video at <URL> plus information (metadata, thumbnail)"
   echo "    dlvi <URL>    => download video information only at <URL>, no mp4 download"
-  echo "    dlc <URL>     => download channel, all videos, metadata and thumbnails"
-  echo "    dlci <URL>    => download channel information, same as dlc but no video downloads"
   echo "    dlvpl <URL>   => download video playlist"
   echo "    dlvpli <URL>  => download video playlist information"
-  echo "    dlpod <URL>   => download podcast, technically also audio but we differentiate podcasts from music"
+  echo "    dlc <URL>     => download channel, all videos, metadata and thumbnails"
+  echo "    dlci <URL>    => download channel information, same as dlc but no video downloads"
   echo "    dla <URL>     => download audio, as mp3 from music videos"
+  echo "    dlalbum <URL> => download a music album as mp3"
+  echo "    dlapl <URL>   => download audio playlist"
+  echo "    dlapli <URL>  => download audio playlist information"
+  echo "    dlpod <URL>   => download podcast, technically also audio but we differentiate podcasts from music"
   echo "    dlt <URL>     => download thumbnail, as jpg"
   return 0
 }
@@ -822,7 +825,6 @@ function dlt() {
 
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
-  set_downloaded "true"
   set_thumb_file "$(find_thumb_from_meta_filename "$json_file")"
 
   print_metadata

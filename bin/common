@@ -47,7 +47,7 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     tr '\`' "'" |
     sed 's/:/ -/g' |
     sed 's/\.\{2,\}/./g' |
-    xargs # xargs trims spaces string start & end
+    xargs -0 # xargs trims spaces string start & end
   # sed 's/\.\{2,\}//g' removes 2 or more dots
 }
 

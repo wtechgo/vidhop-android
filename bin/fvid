@@ -10,12 +10,9 @@ function fvid_help() {
   echo "    fvidc <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all channels metadata"
   echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata"
   echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata for <PLATFORM> e.g youtube"
+  echo "    fvidusermeta <SEARCH_TEXT>  => find videos where user added metadata contains <SEARCH_TEXT>, execute 'metadata_help' for more information."
   echo "    chani <CHANNEL_NAME> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME>"
   echo "    chani <CHANNEL_NAME> <PLATFORM> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME> with platform matching <PLATFORM>"
-  echo "    chancount <CHANNEL_NAME> => show the amount of videos for channel"
-  echo "    chancount <CHANNEL_NAME> <PLATFORM> => show the amount of videos for channel from platform (e.g. youtube)"
-  echo "    chanmeta <CHANNEL_NAME> => show channel metadata for channel"
-  echo "    chanmeta <CHANNEL_NAME> <PLATFORM> => show channel metadata for channel from platform"
   return 0
 }
 

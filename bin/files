@@ -6,14 +6,17 @@ function files_help() {
   echo " Commands:"
   echo "    play                            => play last downloaded video in default media player (MPV recommended)"
   echo "    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player (MPV recommended)"
+  echo "    renvid <PARTIAL_OLD_FILENAME> <NEW_FILENAME>  => rename all files of a video that matches <PARTIAL_OLD_FILENAME>"
+  echo "    renlast <NEW_FILENAME>          => rename all files of last downloaded video to <NEW_FILENAME>"
+  echo "    rmvid <PARTIAL_FILENAME>        => remove all files of a video who's name matches <PARTIAL_FILENAME>"
+  echo "    rmlast                          => remove all files of last downloaded video"
+  echo "    rmchan <PARTIAL_CHANNEL_NAME>   => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
+  echo "    metadata                        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
+  echo "    metadata <FILE_ABS_PATH>        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
+  echo "    metadata <PARTIAL_CHANNEL_NAME> => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
   echo "    specs                           => shows technical video information like codecs, resolution...of last downloaded video"
   echo "    specs <URL>                     => shows technical video information like codecs, resolution...of a video at <URL>"
   echo "    specs <PARTIAL_FILENAME>        => shows technical video information like codecs, resolution...of a video who's filename matches <PARTIAL_FILENAME>"
-  echo "    rmchan <PARTIAL_CHANNEL_NAME>   => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
-  echo "    rmlast                          => remove all files of last downloaded video"
-  echo "    renlast <NEW_FILENAME>          => rename all files of last downloaded video to <NEW_FILENAME>"
-  echo "    rmvid <PARTIAL_FILENAME>        => remove all files of a video who's name matches <PARTIAL_FILENAME>"
-  echo "    renvid <PARTIAL_OLD_FILENAME> <NEW_FILENAME>  => rename all files of a video that matches <PARTIAL_OLD_FILENAME>"
   return 0
 }
 
@@ -237,157 +240,6 @@ function rmarchive() {
     echo -e "tried to remove '$archive_to_be_removed' but file doesn't exist\nno downloaded archive file for url '$url'" &&
     return
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
-}
-
-function set_metadata_field_json_obj() {
-  key="$1" && value="$2"
-  json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$json")
-}
-
-# Sets JSON field with 'key' to 'value' and writes to $meta_file if available.
-# Usage: command "key" "value" ---------------------> uses "$json"
-#        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
-function set_metadata_field() {
-  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "no metadata field given to remove" && return
-  [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # meta_file should be set if $json is set
-  [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" &&
-    meta_file="$(find_one_meta "$partial_filename")" &&
-    result_find_one_meta="$?" &&
-    metadata=$(jq . "$meta_file")
-  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
-  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return
-
-  [ -z "$metadata" ] && echo "no metadata to work with" && return
-  json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$metadata")
-
-  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file" && return
-  echo "no metadata file to write to"
-}
-
-function setdescription() {
-  set_metadata_field 'vh_description' "$@"
-  echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function setsummary() {
-  set_metadata_field 'vh_summary' "$@"
-  echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function setcategories() {
-  set_metadata_field 'vh_categories' "$@"
-  echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function settopics() {
-  set_metadata_field 'vh_topics' "$@"
-  echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function setspeakers() {
-  set_metadata_field 'vh_speakers' "$@"
-  echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function setcreators() {
-  set_metadata_field 'vh_creators' "$@"
-  echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function setcreators() {
-  set_metadata_field 'vh_creators' "$@"
-  echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
-}
-
-function set_downloaded() {
-  set_metadata_field_json_obj "vh_downloaded" "$1"
-}
-
-function set_downloaded_date() {
-  set_metadata_field_json_obj "vh_downloaded_date" "$(date +'%d-%m-%Y_%H:%M:%S')"
-}
-
-function set_thumb_file() {
-  set_metadata_field "vh_thumb_file" "$1"
-}
-
-function rm_metadata_field_json_obj() {
-  key="$1"
-  [ -z "$key" ] || [ -z "$json" ] && echo "could not remove metadata for key '$key'" && return
-  json=$(jq 'del(."'"$key"'")' <<<"$json")
-}
-
-function rm_metadata_field() {
-  [ "$#" = 0 ] && echo "no metadata field given to remove" && return
-  [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
-  [ "$#" = 2 ] && key="$1" && partial_filename="$2" &&
-    meta_file="$(find_one_meta "$partial_filename")" &&
-    result_find_one_meta="$?" &&
-    metadata=$(jq . "$meta_file")
-  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
-  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return
-
-  [ -z "$metadata" ] && echo "no metadata to work with" && return
-  json=$(jq 'del(."'"$key"'")' <<<"$metadata")
-
-  [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file" && return
-  echo "no metadata file to write to"
-}
-
-function rmdescription() {
-  rm_metadata_field 'vh_description' "$@"
-  echo "'vh_description' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmsummary() {
-  rm_metadata_field 'vh_summary' "$@"
-  echo "'vh_summary' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmcategories() {
-  rm_metadata_field 'vh_categories' "$@"
-  echo "'vh_categories' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmtopics() {
-  rm_metadata_field 'vh_topics' "$@"
-  echo "'vh_topics' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmspeakers() {
-  rm_metadata_field 'vh_speakers' "$@"
-  echo "'vh_speakers' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmcreators() {
-  rm_metadata_field 'vh_creators' "$@"
-  echo "'vh_creators' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmdownloaded() {
-  rm_metadata_field 'vh_downloaded'
-  echo "'vh_downloaded' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rmdownloaded_date() {
-  rm_metadata_field "vh_downloaded_date"
-  echo "'vh_downloaded_date' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
-}
-
-function rm_media_file() {
-  rm_metadata_field "vh_media_file"
-}
-
-function rm_meta_file() {
-  rm_metadata_field "vh_meta_file"
-}
-
-function rm_thumb_file() {
-  rm_metadata_field "vh_thumb_file"
-}
-
-function usage_specs() {
-  echo -e "usage:\n  specs uses the media file of the last dlv execution\n  specs <URL>\n  specs <FILE>" && return
 }
 
 function specs() {

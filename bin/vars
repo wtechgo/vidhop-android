@@ -38,6 +38,8 @@ export_dir="$vidhop_dir/export"
 fvid_export_dir="$export_dir/fvid"
 wp_export_dir="$export_dir/wp"
 
+termux_screen_char_count=53
+
 # default applications
 video_app="termux-open"
 audio_app="termux-open"
@@ -45,7 +47,6 @@ picture_app="termux-open"
 picture_app_alt="termux-open"
 text_app="termux-open"
 
-termux_screen_char_count=53
 
 # .bashrc shortkeys
 alias loadconfigurator='. "$bin_dir/config'

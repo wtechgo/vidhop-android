@@ -18,9 +18,11 @@ A port for Windows is another idea.
 
 [An Introduction to VidHop](https://odysee.com/@WTechGo:e/Introduction-to-VidHop:0)
 
-[Installing VidHop form Scratch](https://odysee.com/@WTechGo:e/Install-VidHop-from-Scratch:c)
+[Installing VidHop from Scratch](https://odysee.com/@WTechGo:e/Install-VidHop-from-Scratch:c)
 
 [Sync VidHop between laptop and phone](https://odysee.com/@WTechGo:e/sync-vidhop-between-laptop-and-phone:1)
+
+[VidHop Docker on Windows](https://odysee.com/@WTechGo:e/VidHop-for-Docker-Install-demo-extra-information:a)
 
 ## Installation
 

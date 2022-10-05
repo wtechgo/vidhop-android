@@ -794,18 +794,6 @@ function dlpod() {
   cd "$podcasts_dir/$platform" || return
 }
 
-function find_thumb_from_meta_filename() {
-  [ -z "$1" ] || [[ "$1" != *.json ]] && return
-  stripped_name=$(basename "$1" .json)
-  file="$thumbnails_dir/$platform/$stripped_name.jpg"
-  [ -f "$file" ] && echo "$file" && return
-  file="$thumbnails_dir/$platform/$stripped_name.jpeg"
-  [ -f "$file" ] && echo "$file" && return
-  file="$thumbnails_dir/$platform/$stripped_name.png"
-  [ -f "$file" ] && echo "$file" && return
-  file="$thumbnails_dir/$platform/$stripped_name.webp"
-  [ -f "$file" ] && echo "$file" && return
-}
 
 # Download thumbnail. Store the thumbnail of a single video plus its metadata.
 function dlt() {
@@ -825,7 +813,6 @@ function dlt() {
 
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
-  set_thumb_file "$(find_thumb_from_meta_filename "$json_file")"
 
   print_metadata
   cd "$thumbnails_dir/$platform" || return

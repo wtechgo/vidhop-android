@@ -84,13 +84,6 @@ function channel_url_from_json_file() {
       else empty end' "$json_file" | tr -d '"'
 }
 
-function channel_url() {
-  channel_url="$(channel_url_from_obj)"
-  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url" && return
-  channel_url="$(channel_url_from_json_file)"
-  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url"
-}
-
 function channel_name_from_obj() {
   jq 'if .channel != null then .channel
       elif .uploader != null then .uploader
@@ -117,6 +110,13 @@ function channel_name_from_json_file() {
 function channel_name_from_filename() {
   [ ! -f "$json_file" ] && [ -f "$meta_file" ] && json_file="$meta_file"
   [ -n "$json_file" ] && basename "$json_file" ".json"
+}
+
+function channel_url() {
+  channel_url="$(channel_url_from_obj)"
+  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url" && return
+  channel_url="$(channel_url_from_json_file)"
+  [ -n "$channel_url" ] && [ "$channel_url" != "null" ] && echo "$channel_url"
 }
 
 function channel_name() {

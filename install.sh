@@ -37,6 +37,7 @@ yes | pkg install iproute2           # for fetching the current IP address
 yes | pkg install moreutils          # better for fetching the current IP address
 yes | pkg install python ffmpeg      # required for yt-dlp
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
+yes | pkg install libxml2 libxslt lxml  # dependencies for facebook-scraper (installed by pip a little lower
 
 # python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages
 echo "Installing yt-dlp packages..."
@@ -51,6 +52,8 @@ pip install -U selenium
 pip install -U beautifulsoup4
 pip install -U image
 pip install -U pillow
+pip install -U facebook-scraper
+pip install -U snscrape
 ## perhaps migrate to pipenv virtual env later
 # pacman -S pipenv
 #pipenv install

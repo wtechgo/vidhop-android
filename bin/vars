@@ -7,6 +7,8 @@ shared="/data/data/com.termux/files/home/storage/shared"
 config_ini="$vidhop_app_dir/config.ini"
 config_ini_template="$vidhop_app_dir/config.ini.template"
 scrape_channel_avatar_img_py="$bin_dir/scrape_channel_avatar_img.py"
+facebook_scraper="$bin_dir/facebook-scraper.py"
+twitter_scraper="$bin_dir/twitter-scraper.py"
 
 # media
 vids_dir="$vidhop_dir/videos"
@@ -21,6 +23,9 @@ channels_meta_dir="$meta_dir/channels"
 music_meta_dir="$meta_dir/music"
 podcasts_meta_dir="$meta_dir/podcasts"
 thumbnails_meta_dir="$meta_dir/thumbnails"
+# social media
+social_media_dir="$vidhop_dir/social_media"
+
 # log
 log_dir="$vidhop_dir/log"
 log_file="$log_dir/vidhop.log"

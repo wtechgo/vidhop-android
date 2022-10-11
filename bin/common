@@ -14,6 +14,7 @@ function create_app_dirs() {
     "$export_dir" \
     "$log_dir" \
     "$downloaded_dir" \
+    "$social_media_dir" \
     2>/dev/null
   touch "$meta_dir/.nomedia" 2>/dev/null
 }

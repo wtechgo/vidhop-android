@@ -826,12 +826,22 @@ function dlfbpost() {
   username=$(jq .username <<<"$json" | tr -d '"')
   timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
   json_file="${social_media_dir}/facebook/${username}/${timestamp}.json"
-  mkdir "${social_media_dir}/facebook/${username}" 2>/dev/null
+  mkdir -p "${social_media_dir}/facebook/${username}" 2>/dev/null
   jq . <<<"$json" > "$json_file"
+  cd "${social_media_dir}/facebook/${username}"
+  jq . <<<"$json"
 }
 
 function dltweet() {
   url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
   json=$(python "$twitter_scraper" --url "$url")
+  text="$(jq '.content' <<<"$json")"
+  shortened_text=$(echo "$text"  | tr -d '"' | cut -c-70)
+  username=$(jq .username <<<"$json" | tr -d '"')
+  timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
+  json_file="${social_media_dir}/twitter/${username}/${timestamp}.json"
+  mkdir -p "${social_media_dir}/twitter/${username}" 2>/dev/null
+  jq . <<<"$json" > "$json_file"
+  cd "${social_media_dir}/twitter/${username}"
   jq . <<<"$json"
 }

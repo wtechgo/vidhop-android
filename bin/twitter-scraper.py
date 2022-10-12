@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+
 import snscrape.modules.twitter as sntwitter
 from snscrape.base import ScraperException
 
@@ -8,12 +10,16 @@ class TwitterScraper:
     def extract_id_from_url(self, url: str) -> str:
         if url.find("twitter.com") == -1:
             raise ValueError("not a twitter url")
-        return url.rsplit('/', 1)[-1]
+        tweet_id = url.split("?")[0].split('status/')[1]
+        return tweet_id
 
     def fetch_tweet(self, url: str) -> dict:
         tweet_id = self.extract_id_from_url(url)
         try:
-            gen = sntwitter.TwitterTweetScraper(tweetId=tweet_id, mode=sntwitter.TwitterTweetScraperMode.SINGLE).get_items()
+            gen = sntwitter.TwitterTweetScraper(
+                tweetId=tweet_id,
+                mode=sntwitter.TwitterTweetScraperMode.SINGLE
+            ).get_items()
             tweet = list(gen)[0]
             return {
                 # All SnScrape attributes.

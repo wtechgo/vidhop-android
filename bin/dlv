@@ -822,10 +822,10 @@ function dlfbpost() {
   url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
   json="$(python "$facebook_scraper" --url "$url")"
   text="$(jq '.text' <<<"$json")"
-  shortened_text=$(echo "$text"  | tr -d '"' | cut -c-70)
+  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -80)"
   username=$(jq .username <<<"$json" | tr -d '"')
   timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
-  json_file="${social_media_dir}/facebook/${username}/${timestamp}.json"
+  json_file="${social_media_dir}/facebook/${username}/${shortened_text}_${timestamp}.json"
   mkdir -p "${social_media_dir}/facebook/${username}" 2>/dev/null
   jq . <<<"$json" > "$json_file"
   cd "${social_media_dir}/facebook/${username}"
@@ -833,13 +833,14 @@ function dlfbpost() {
 }
 
 function dltweet() {
+  set -x
   url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
   json=$(python "$twitter_scraper" --url "$url")
   text="$(jq '.content' <<<"$json")"
-  shortened_text=$(echo "$text"  | tr -d '"' | cut -c-70)
+  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -80)"
   username=$(jq .username <<<"$json" | tr -d '"')
   timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
-  json_file="${social_media_dir}/twitter/${username}/${timestamp}.json"
+  json_file="${social_media_dir}/twitter/${username}/${shortened_text}_${timestamp}.json"
   mkdir -p "${social_media_dir}/twitter/${username}" 2>/dev/null
   jq . <<<"$json" > "$json_file"
   cd "${social_media_dir}/twitter/${username}"

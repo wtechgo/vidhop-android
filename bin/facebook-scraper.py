@@ -7,6 +7,12 @@ from facebook_scraper import get_posts
 # https://github.com/kevinzg/facebook-scraper
 # https://github.com/bisguzar/twitter-scraper
 class FacebookScraper:
+    def should_redirect(self, url: str):
+        if 'facebook.com/photo/?fbid' in url:
+            return True
+        else:
+            return False
+
     def silence_warning(self):
         # Suppresses the following 2 warnings.
         language_error = "/home/freetalk/.local/share/virtualenvs/vidhop-4Px9w5UP/lib/python3.10/site-packages/facebook_scraper/facebook_scraper.py:855: UserWarning: Facebook language detected as nl_BE - for best results, set to en_US"
@@ -24,6 +30,11 @@ class FacebookScraper:
             )
         )
         post = posts[0]
+        if self.should_redirect(url):
+            post_url = post.get('post_url', None)
+            self.fetch_post(post_url)
+            return
+
         print(json.dumps(post, sort_keys=True, default=str))
 
 

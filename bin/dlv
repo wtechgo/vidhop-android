@@ -833,7 +833,6 @@ function dlfbpost() {
 }
 
 function dltweet() {
-  set -x
   url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
   json=$(python "$twitter_scraper" --url "$url")
   text="$(jq '.content' <<<"$json")"

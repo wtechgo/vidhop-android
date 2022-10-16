@@ -35,7 +35,7 @@ function add_to_vhistory() {
   channel_name="$(channel_name_from_obj)"
   channel_url="$(channel_url)"
   media_file="$vids_dir/$platform/$name.mp4"
-  meta_file="$vids_meta_dir/$platform/$name.json"
+  meta_file="$vids_meta_dir/$platform/$name/metadata.json"
   vh_downloaded="$(is_media_download)"
   vh_downloaded_date="$(date +'%d-%m-%Y_%H:%M:%S')"
   upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"

@@ -54,10 +54,6 @@ pip install -U image
 pip install -U pillow
 pip install -U facebook-scraper
 pip install -U snscrape
-## perhaps migrate to pipenv virtual env later
-# pacman -S pipenv
-#pipenv install
-#pipenv shell
 
 echo "Installing VidHop..."
 vidhop_app_dir="$PREFIX/opt/vidhop" # $PREFIX points to /data/data/com.termux/files/usr

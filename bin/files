@@ -122,15 +122,19 @@ function renlast() {
 
 function rmvid() {
   [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
+  unset name answer results
   name="$1"
+  [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
 
   results=$(find "$vidhop_dir" -iname "*$name*")
   [ -z "$results" ] && echo found no matches && return
   echo "$results"
 
-  echo -n "delete these files permanently? Y/n: " && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] || [ "$answer" = "N" ] && return
+  if [ -z "$answer" ]; then
+    echo -n "delete these files permanently? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
+  fi
 
   find "$vidhop_dir" -iname "*$name*" -exec rm -rf {} \;
   echo "deleted '$name.mp4|.json|.jpg.|.png|.webp'"
@@ -143,10 +147,21 @@ function rmlast() {
   rmvid "$(lasttitle)"
 }
 
+function find_archive_file_from_audio_channel_name() {
+  name="$1"
+  found_json=$(find "$music_meta_dir" -type f -iwholename "*$name**metadata.json")
+  [ -z "$found_json" ] && return
+  [ "$(wc -l <<<"$found_json")" -gt 1 ] && echo -e "found more than one file:\n$results" && return 1
+
+  channel_url=$(jq '.original_url' "$found_json")
+  archive_filename="$downloaded_dir/$(url_to_filename "$channel_url")"
+  echo "$archive_filename"
+}
+
 function find_archive_file_from_channel_name() {
   name="$1"
-  found_json=$(find "$channels_meta_dir" -type f -iname "*$name*.json")
-  [ -z "$found_json" ] && return 0
+  found_json=$(find "$channels_meta_dir" -type f -iwholename "*$name**metadata.json")
+  [ -z "$found_json" ] && return
   [ "$(wc -l <<<"$found_json")" -gt 1 ] && echo -e "found more than one file:\n$results" && return 1
 
   channel_url=$(channel_url_from_json_file "$found_json")
@@ -172,20 +187,28 @@ function rmarchiveforurl() {
 
 function rmchan() {
   [ -z "$1" ] && echo "usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
-  unset answer found_channel_dir found_downloaded_file
-
+  unset answer found_channel_dir found_downloaded_file found_music_channel_dir found_music_channel_meta_dir
   name="$1"
   [ -n "$2" ] && answer="$2"
-  found_channel_dir=$(find "$channels_dir" -type d -iname "*$name*")
-  found_channel_meta_dir=$(find "$channels_meta_dir" -type d -iname "*$name*")
-  found_downloaded_file=$(find_archive_file_from_channel_name "$name" || echo "")
+  found_channel_dir=$(find "$channels_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_channel_meta_dir=$(find "$channels_meta_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_music_channel_dir=$(find "$music_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_music_channel_meta_dir=$(find "$music_meta_dir" -maxdepth 1 -type d -iname "*$name*")
+  found_downloaded_file=$(find_archive_file_from_channel_name "$name")
+  found_music_downloaded_file=$(find_archive_file_from_audio_channel_name "$name")
 
   logInfo "downloaded archive file: $found_downloaded_file"
-  [ ! -d "$found_channel_dir" ] && [ ! -d "$found_channel_meta_dir" ] && [ ! -f "$found_downloaded_file" ] && echo found no matches && return
+  [ ! -d "$found_channel_dir" ] && [ ! -d "$found_channel_meta_dir" ] &&
+    [ ! -d "$found_music_channel_dir" ] && [ ! -d "$found_music_channel_meta_dir" ] &&
+    [ ! -f "$found_downloaded_file" ] && [ ! -f "$found_music_downloaded_file" ] &&
+    echo found no matches && return
   echo "found files:"
   [ -d "$found_channel_dir" ] && echo -e "$found_channel_dir"
   [ -d "$found_channel_meta_dir" ] && echo -e "$found_channel_meta_dir"
+  [ -d "$found_music_channel_dir" ] && echo -e "$found_music_channel_dir"
+  [ -d "$found_music_channel_meta_dir" ] && echo -e "$found_music_channel_meta_dir"
   [ -f "$found_downloaded_file" ] && echo -e "$found_downloaded_file"
+  [ -f "$found_music_downloaded_file" ] && echo -e "$found_music_downloaded_file"
 
   if [ -z "$answer" ]; then
     echo "caution: rmchan will remove all media and metadata files of '$name' for all platforms"
@@ -197,7 +220,10 @@ function rmchan() {
   # remove files
   [ -d "$found_channel_dir" ] && rm -rf "$found_channel_dir" && echo "deleted channel media directory: $found_channel_dir"
   [ -d "$found_channel_meta_dir" ] && rm -rf "$found_channel_meta_dir" && echo "deleted channel metadata directory: $found_channel_meta_dir"
+  [ -d "$found_music_channel_dir" ] && rm -rf "$found_music_channel_dir" && echo "deleted channel media directory: $found_music_channel_dir"
+  [ -d "$found_music_channel_meta_dir" ] && rm -rf "$found_music_channel_meta_dir" && echo "deleted channel metadata directory: $found_music_channel_meta_dir"
   [ -f "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
+  [ -f "$found_music_downloaded_file" ] && rm "$found_music_downloaded_file" && echo "deleted downloaded archive file: $found_music_downloaded_file"
 }
 
 function rmartist() {

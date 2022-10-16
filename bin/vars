@@ -7,8 +7,8 @@ shared="/data/data/com.termux/files/home/storage/shared"
 config_ini="$vidhop_app_dir/config.ini"
 config_ini_template="$vidhop_app_dir/config.ini.template"
 scrape_channel_avatar_img_py="$bin_dir/scrape_channel_avatar_img.py"
-facebook_scraper="$bin_dir/facebook-scraper.py"
-twitter_scraper="$bin_dir/twitter-scraper.py"
+facebook_scraper="$bin_dir/facebookscraper.py"
+twitter_scraper="$bin_dir/twitterscraper.py"
 
 # media
 vids_dir="$vidhop_dir/videos"
@@ -82,15 +82,15 @@ alias llpods='ls -l $podcasts_dir'
 alias lldownloaded='ls -l $downloaded_dir'
 alias lllogs='ls -l $log_dir'
 
-alias nanodlv='nano $bin_dir/dlv'
-alias nanofvid='nano $bin_dir/fvid'
-alias nanosync='nano $bin_dir/sync'
-alias nanofiles='nano $bin_dir/files'
-alias nanovars='nano $bin_dir/vars'
-alias nanocommon='nano $bin_dir/common'
-alias nanohistory='nano $bin_dir/history'
-alias nanoloader='nano $bin_dir/loader'
-alias nanoconfigini='nano $vidhop_app_dir/config.ini'
+alias nanodlv='nano $bin_dir/dlv; . vidhop'
+alias nanofvid='nano $bin_dir/fvid; . vidhop'
+alias nanosync='nano $bin_dir/sync; . vidhop'
+alias nanofiles='nano $bin_dir/files; . vidhop'
+alias nanovars='nano $bin_dir/vars; . vidhop'
+alias nanocommon='nano $bin_dir/common; . vidhop'
+alias nanohistory='nano $bin_dir/history; . vidhop'
+alias nanoloader='nano $bin_dir/loader; . vidhop'
+alias nanoconfigini='nano $vidhop_app_dir/config.ini; . vidhop'
 
 # color codes
 BLACK='\e[30m'

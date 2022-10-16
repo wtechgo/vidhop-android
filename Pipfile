@@ -9,6 +9,8 @@ selenium = "*"
 image = "*"
 pillow = "*"
 beautifulsoup4 = "*"
+snscrape = "*"
+facebook-scraper = "*"
 
 [requires]
 python_version = "3.10"

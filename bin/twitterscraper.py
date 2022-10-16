@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 
 import snscrape.modules.twitter as sntwitter
 from snscrape.base import ScraperException

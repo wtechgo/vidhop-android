@@ -26,6 +26,7 @@ bin_dir="$vidhop_app_dir/bin"
 
 function updateytdlp() {
   echo "> Updating YT-DLP via Python package manager..." && sleep 1
+  pip install -U pip
   python -m pip install yt-dlp -U
 }
 

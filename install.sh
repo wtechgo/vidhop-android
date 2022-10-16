@@ -37,7 +37,7 @@ yes | pkg install iproute2           # for fetching the current IP address
 yes | pkg install moreutils          # better for fetching the current IP address
 yes | pkg install python ffmpeg      # required for yt-dlp
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
-yes | pkg install libxml2 libxslt lxml  # dependencies for facebook-scraper (installed by pip a little lower
+yes | pkg install libxml2 libxslt    # dependencies for facebook-scraper (installed by pip a little lower
 
 # python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages
 echo "Installing yt-dlp packages..."

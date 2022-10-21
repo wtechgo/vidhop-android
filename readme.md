@@ -12,7 +12,7 @@ VidHop is like a Swiss knife for saving audiovisual content from the internet wh
 [VidHop for Linux](https://raw.githubusercontent.com/wtechgo/vidhop-linux/master/install.sh) also exists. Sync functionality is built-in on both Linux and Android versions of VidHop though that 
 requires a working SSH connection between laptop and phone.
 
-A port for Windows is another idea.
+Windows users can run [VidHop in Docker](https://github.com/wtechgo/vidhop-docker).
 
 ### Videos
 
@@ -27,7 +27,7 @@ A port for Windows is another idea.
 ## Installation
 
 1. Install [F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
-   Your browser will ask permission to install the .apk from unknown sources, in this case that is F-Droid which fine. 
+   Your browser will ask permission to install the .apk from unknown sources, in this case that is F-Droid which is fine. 
    Grant your browser the permission.
 2. Install [Termux](https://f-droid.org/en/packages/com.termux/) from F-Droid on Android.  
    You'll get the same notification as before, only this time the unknown source is Termux, grant it.

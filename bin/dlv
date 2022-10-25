@@ -212,7 +212,7 @@ function dlvi() {
 
   if [ "$standalone" = "true" ]; then
     print_metadata
-    cd "$vids_meta_dir/$platform" || return
+    cd "$vids_meta_dir/$platform/$name" || return
   fi
 }
 

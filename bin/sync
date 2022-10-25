@@ -205,9 +205,8 @@ function syncvidhop() {
     echo -e "\n> FETCHING vidhop files DRY RUN..." && dry_fetchvidhop &&
     syncvidhop && return
   [ "$answer" = "y" ] &&
-    echo -n "" &&
-    echo -e "\n> SENDING vidhop files DRY RUN..." && sendvidhop -exec &&
-    echo -e "\n> FETCHING vidhop files DRY RUN..." && fetchvidhop -exec
+    echo -e "\n> SENDING vidhop files..." && sendvidhop -exec &&
+    echo -e "\n> FETCHING vidhop files..." && fetchvidhop -exec
 }
 
 function sendvidhopbin() {

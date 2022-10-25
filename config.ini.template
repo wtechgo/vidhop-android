@@ -3,9 +3,12 @@
 
 ## App dirs.
 ## ---------
-#vidhop_dir=""   # Where VidHop stores downloaded media and metadata.
-#vidhop_app_dir=""   # Where VidHop's code resides.
-#bin_dir=""  # Overwrites loader.bin_dir before the loader loads in all other binaries.
+## Where VidHop stores downloaded media and metadata.
+#vidhop_dir=""
+## Where VidHop's code resides.
+#vidhop_app_dir=""
+## Overwrites loader.bin_dir before the loader loads in all other binaries.
+#bin_dir=""
 
 ## SSH settings.
 ### PHONE.

@@ -54,6 +54,7 @@ pip install -U image
 pip install -U pillow
 pip install -U facebook-scraper
 pip install -U snscrape
+pip install -U pywebcopy
 
 echo "Installing VidHop..."
 vidhop_app_dir="$PREFIX/opt/vidhop" # $PREFIX points to /data/data/com.termux/files/usr
@@ -77,20 +78,20 @@ echo '#!/bin/bash' >"$loader_bin"
 echo >>"$loader_bin"
 echo ". $loader" >>"$loader_bin"
 chmod +x "$loader_bin"
-echo -e "\n. vidhop" >>$PREFIX/etc/bash.bashrc
+echo -e "\n. vidhop" >>"$PREFIX/etc/bash.bashrc"
 
 
 echo "Configuring Termux for a streamlined VidHop experience..." && sleep 1
 echo "Removing Termux welcome message as it interferes with rsync (VidHop Sync)..." && sleep 1
-touch $HOME/.hushlogin
+touch "$HOME/.hushlogin"
 
 echo "Allowing Termux to open files in sd card (user storage space on Android) at $HOME/storage/shared..." && sleep 1
-! [ -d $HOME/.termux ] && mkdir $HOME/.termux
-echo 'allow-external-apps=true' >>$HOME/.termux/termux.properties
+! [ -d "$HOME/.termux" ] && mkdir "$HOME/.termux"
+echo 'allow-external-apps=true' >>"$HOME/.termux/termux.properties"
 
 echo "Configuring nano as Termux default text editor..." && sleep 1
-! [ -d $HOME/bin ] && mkdir $HOME/bin
-! [ -f $HOME/bin/termux-file-editor ] && ln -s $PREFIX/bin/nano $HOME/bin/termux-file-editor
+! [ -d "$HOME/bin" ] && mkdir "$HOME/bin"
+! [ -f "$HOME/bin/termux-file-editor" ] && ln -s "$PREFIX/bin/nano" "$HOME/bin/termux-file-editor"
 
 #echo -e "Info: '. vidhop' in bash.bashrc is the VidHop entry p"   #this line represents the width of Termux
 echo -e "${BLUE}installation added '. vidhop' to bash.bashrc${NC}"
@@ -117,13 +118,13 @@ echo -e "and for new Termux users." && unset answer
 echo -n 'Install VidHop bash.bashrc? Yes/No/Show: ' && read answer
 answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
 [ -z "$answer" ] || [ "$answer" = "y" ] || [ "$answer" = "yes" ] && unset answer &&
-  cp $vidhop_bashrc $bashrc
+  cp "$vidhop_bashrc" "$bashrc"
 [ "$answer" = "s" ] || [ "$answer" = "show" ] && unset answer &&
-  echo "file: $vidhop_bashrc" && cat $vidhop_bashrc && unset answer &&
+  echo "file: $vidhop_bashrc" && cat "$vidhop_bashrc" && unset answer &&
   echo -n 'Install VidHop bash.bashrc? Yes/No/Show: ' && read answer &&
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]') &&
   [ -z "$answer" ] || [ "$answer" = "y" ] || [ "$answer" = "yes" ] && unset answer &&
-  cp $vidhop_bashrc $bashrc
+  cp "$vidhop_bashrc" "$bashrc"
 
 echo
 echo "You can try a VidHop command now e.g.:"

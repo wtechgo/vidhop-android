@@ -969,3 +969,13 @@ function dltweet() {
   cd "${social_media_dir}/twitter/${username}"
   jq . <<<"$json"
 }
+
+function dlwebsite() {
+  [ -z "$1" ] || [ "$(is_url "$1")" = false ] && echo "not a valid url" && return
+  url="$1"
+  python "$website_scraper" "$url" "$websites_dir"
+}
+
+function dlw() {
+  dlwebsite "$1"
+}

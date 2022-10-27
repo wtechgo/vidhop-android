@@ -45,27 +45,29 @@ check_valid_platform() {
 function fetch_video_metadata() {
   url="$1"
   json=$(
-    yt-dlp --dump-single-json --verbose "$url" |
+    yt-dlp --dump-single-json --write-comments --verbose "$url" |
       jq '{
                   id: .id,
                   title: .title,
-                  thumbnail: .thumbnail,
+                  webpage_url: .webpage_url,
+                  original_url: .original_url,
                   description: .description,
-                  upload_date: .upload_date,
                   uploader: .uploader,
                   uploader_id: .uploader_id,
                   uploader_url: .uploader_url,
+                  upload_date: .upload_date,
                   channel: .channel,
                   channel_follower_count: .channel_follower_count,
                   channel_id: .channel_id,
                   channel_url: .channel_url,
+                  categories: .categories,
+                  tags: .tags,
                   duration: .duration,
+                  thumbnail: .thumbnail,
+                  comments: .comments,
                   view_count: .view_count,
                   average_rating: .average_rating,
                   age_limit: .age_limit,
-                  webpage_url: .webpage_url,
-                  categories: .categories,
-                  tags: .tags,
                   playable_in_embed: .playable_in_embed,
                   is_live: .is_live,
                   was_live: .was_live,
@@ -73,7 +75,6 @@ function fetch_video_metadata() {
                   release_timestamp: .release_timestamp,
                   like_count: .like_count,
                   availability: .availability,
-                  original_url: .original_url,
                   webpage_url_basename: .webpage_url_basename,
                   webpage_url_domain: .webpage_url_domain,
                   fulltitle: .fulltitle,

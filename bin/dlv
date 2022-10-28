@@ -21,8 +21,13 @@ function dlv_help() {
 }
 
 function clear_vars_dlv() {
-  unset url standalone platform name json json_file meta_file archive_file has_archive archive_content avatar_json \
-    avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
+  if [ "$(is_media_download)" = true ]; then # clear all vars
+    unset url standalone platform name json json_file meta_file archive_file has_archive archive_content avatar_json \
+      avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir dl_comments
+  else # it is a metadata download like dlvi, dlci..., keep: url, standalone,platform, dl_comments
+    unset name json json_file meta_file archive_file has_archive archive_content avatar_json \
+      avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
+  fi
   rm "$log_json_file" 2>/dev/null
   return 0
 }
@@ -45,7 +50,8 @@ check_valid_platform() {
 function fetch_video_metadata() {
   url="$1"
   json=$(
-    yt-dlp --dump-single-json --write-comments --verbose "$url" |
+    yt-dlp $([ "$dl_comments" = true ] && echo -n --write-comments) \
+      --dump-single-json --verbose "$url" |
       jq '{
                   id: .id,
                   title: .title,
@@ -191,10 +197,10 @@ function augment_json() {
 
 # Download video information. Video metadata and thumbnail.
 function dlvi() {
-  standalone="$2"
-  [ -z "$standalone" ] && clear_vars_dlv && standalone=true
-  url="$1" && [ -n "$3" ] && debug="$3"
-  function=$([ "$standalone" = "true" ] && echo dlvi || echo dlv)
+  [ -z "$function" ] && function=dlvi && standalone=true
+  clear_vars_dlv
+  [ $# = 1 ] && url="$1"
+  [ $# = 2 ] && dl_comments=true && url="$2"
   check_valid_platform "$url" || return 1
   platform=$(extract_platform_name "$url")
 
@@ -214,14 +220,16 @@ function dlvi() {
   if [ "$standalone" = "true" ]; then
     print_metadata
     cd "$vids_meta_dir/$platform/$name" || return
+    unset dl_comments
   fi
 }
 
 # Download video. Plus thumbnail and metadata.
 function dlv() {
-  [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
   clear_vars_dlv
-  url="$1"
+  [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
+  [ "$1" = "--comments" ] || [ "$1" = "-c" ] && dl_comments=true && url="$2"
+  [ "$#" = 1 ] && url="$1"
   standalone=false
   function=dlv
   check_valid_platform "$url" || return 1
@@ -229,11 +237,12 @@ function dlv() {
   platform=$(extract_platform_name "$url") || return 1
   mkdir "$vids_dir/$platform" 2>/dev/null
 
-  dlvi "$url" "$standalone"
+  dlvi "$url"
   yt-dlp -S ext:mp4:m4a --recode mp4 --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
   print_metadata
   cd "$vids_dir/$platform" || return
+  unset dl_comments
 }
 
 # CHANNELS
@@ -618,9 +627,10 @@ function dlvpl() {
 
 # Download audio. Save only the mp3 audio of a video plus metadata and thumbnail.
 function dla() {
-  clear_vars_dlv
-  url="$1"
   function=dla
+  clear_vars_dlv
+  [ $# = 1 ] && url="$1"
+  [ $# = 2 ] && dl_comments=true && url="$2"
   check_valid_platform "$url" || return 1
   mkdir -p "$music_meta_dir" 2>/dev/null
 
@@ -665,8 +675,8 @@ function dlaci() {
   [ "$has_archive" ] && reset_archive_file
 
   # Save metadata to the channel directory. Each channel in its own directory.
-  name=$(channel_name_from_obj | tr -d "'")            # if all downloaded before, no entries, no uploader, channelname = null
-  platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.  - entries[0].artist
+  name=$(channel_name_from_obj | tr -d "'") # if all downloaded before, no entries, no uploader, channelname = null
+  platform=$(extract_platform_name "$url")  # yields youtube or bitchute etc.  - entries[0].artist
   channel_dir="$music_dir/$name"
   channel_meta_dir="$music_meta_dir/$name"
   json_file="$channel_meta_dir/metadata.json"
@@ -891,9 +901,10 @@ function dlalbum() {
 
 # Download podcast. We differentiate podcasts from music.
 function dlpod() {
-  clear_vars_dlv
-  url="$1"
   function=dlpod
+  clear_vars_dlv
+  [ $# = 1 ] && url="$1"
+  [ $# = 2 ] && dl_comments=true && url="$2"
   check_valid_platform "$url" || return 1
   platform=$(extract_platform_name "$url")
   mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
@@ -919,11 +930,13 @@ function dlpod() {
 
 # Download thumbnail. Store the thumbnail of a single video plus its metadata.
 function dlt() {
+  function=dlt
   clear_vars_dlv
-  url="$1"
+  [ $# = 1 ] && url="$1"
+  [ $# = 2 ] && dl_comments=true && url="$2"
+
   check_valid_platform "$url" || return 1
   platform=$(extract_platform_name "$url")
-  function=dlt
   mkdir -p "$thumbnails_dir/$platform" "$thumbnails_meta_dir/$platform" 2>/dev/null
 
   name="$(fetch_sanitized_title)"

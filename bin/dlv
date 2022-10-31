@@ -21,13 +21,9 @@ function dlv_help() {
 }
 
 function clear_vars_dlv() {
-  if [ "$(is_media_download)" = true ]; then # clear all vars
-    unset url standalone platform name json json_file meta_file archive_file has_archive archive_content avatar_json \
-      avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir dl_comments
-  else # it is a metadata download like dlvi, dlci..., keep: url, standalone,platform, dl_comments
-    unset name json json_file meta_file archive_file has_archive archive_content avatar_json \
-      avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
-  fi
+  [ "$(is_media_download)" = true ] && unset url standalone platform name
+  unset name json json_file meta_file archive_file has_archive archive_content avatar_json \
+    avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
   rm "$log_json_file" 2>/dev/null
   return 0
 }

@@ -177,7 +177,7 @@ function url_to_channel_name() {
 function is_json_valid() {
   [ -f "$1" ] && echo false && return
   first=$(cat <<<"$1" | head -n 1)
-  [ "$first" = "{" ] || [ "$first" = "[" ] && echo true
+  [ "$first" = "{" ] || [ "$first" = "[" ] && echo true && return
   echo false
 }
 

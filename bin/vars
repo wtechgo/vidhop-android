@@ -46,6 +46,7 @@ fvid_export_dir="$export_dir/fvid"
 wp_export_dir="$export_dir/wp"
 
 termux_screen_char_count=53
+filename_char_count=80
 
 # default applications
 video_app="termux-open"

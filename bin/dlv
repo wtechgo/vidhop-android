@@ -113,7 +113,7 @@ function fetch_video_metadata() {
 
 # Download video information of one video: metadata and video thumbnail..
 function fetch_sanitized_title() {
-  yt-dlp --print "%(title)s" \
+  yt-dlp --print "%(title).${filename_char_count}s" \
     --replace-in-metadata "title" '"' "'" \
     --replace-in-metadata "title" '\*' '' \
     --replace-in-metadata "title" '/' '' \
@@ -128,7 +128,7 @@ function fetch_sanitized_title() {
 }
 
 function fetch_song_filename() {
-  yt-dlp --print "%(artist)s - %(title)s" \
+  yt-dlp --print "%(artist)s - %(title).${filename_char_count}s" \
     --replace-in-metadata "artist,title" '"' "'" \
     --replace-in-metadata "artist,title" '\*' '' \
     --replace-in-metadata "artist,title" '/' '' \
@@ -954,7 +954,7 @@ function dlfbpost() {
   url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
   json="$(python "$facebook_scraper" --url "$url")"
   text="$(jq '.text' <<<"$json")"
-  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -80)"
+  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -"$filename_char_count")"
   username=$(jq .username <<<"$json" | tr -d '"')
   timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
   json_file="${social_media_dir}/facebook/${username}/${shortened_text}_${timestamp}.json"
@@ -969,7 +969,7 @@ function dltweet() {
   url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
   json=$(python "$twitter_scraper" --url "$url")
   text="$(jq '.content' <<<"$json")"
-  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -80)"
+  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -"$filename_char_count")"
   username=$(jq .username <<<"$json" | tr -d '"')
   timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
   json_file="${social_media_dir}/twitter/${username}/${shortened_text}_${timestamp}.json"

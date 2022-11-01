@@ -24,12 +24,6 @@ bin_dir="$vidhop_app_dir/bin"
 
 [ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini" # overwrites sync vars with values from config.ini
 
-function updateytdlp() {
-  echo "> Updating YT-DLP via Python package manager..." && sleep 1
-  pip install -U pip
-  python -m pip install yt-dlp -U
-}
-
 function install_loader() {
   loader="$bin_dir/loader"
   loader_bin="$PREFIX/bin/vidhop"
@@ -41,7 +35,7 @@ function install_loader() {
   . vidhop
 }
 
-function installloader() {  # alias for phone hand typing
+function installloader() { # alias for phone hand typing
   install_loader
 }
 
@@ -54,19 +48,33 @@ function fetch_github() {
   . "$PREFIX/opt/vidhop/bin/loader"
 }
 
+function update_python_packages() {
+  echo "> Updating Python packages..." && sleep 1
+  pkg install python
+  pip install -U pip
+  pip install -U wheel
+  pip install -U yt-dlp
+  pip install -U requests
+  pip install -U selenium
+  pip install -U beautifulsoup4
+  pip install -U image
+  pip install -U pillow
+  pip install -U facebook-scraper
+  pip install -U snscrape
+  pip install -U pywebcopy
+}
+
 function update_system() {
   echo "> Updating & upgrading Termux system..." && sleep 1
-  yes | apt update
-  yes | apt upgrade
-  yes | pkg update
   yes | pkg upgrade
+  yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }
 
 function updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   update_system
+  update_python_packages
   fetch_github
-  updateytdlp
   install_loader
   echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
@@ -76,7 +84,7 @@ function updatevidhop() {
 function updatevidhopbin() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   fetch_github
-  updateytdlp
+  update_python_packages
   install_loader
   echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
@@ -99,7 +107,7 @@ function loader_help() {
   echo " Title: loader"
   echo " Description: VidHop management functions."
   echo " Commands:"
-  echo "    updateytdlp => Updates YT-DLP with pip (Python package manager)."
+  echo "    update_python_packages => Updates YT-DLP with pip (Python package manager)."
   echo "    install_loader => Enables users to reload with '. vidhop'"
   echo "    installloader => Alias for the previous for Termux."
   echo "    fetch_github => Download the newest VidHop code from GitHub."

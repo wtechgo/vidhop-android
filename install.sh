@@ -36,17 +36,14 @@ yes | pkg install ncurses-utils      # for installing tput, used in fvid
 yes | pkg install iproute2           # for fetching the current IP address
 yes | pkg install moreutils          # better for fetching the current IP address
 yes | pkg install python ffmpeg      # required for yt-dlp
+yes | pkg install jq                 # json processor
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
-yes | pkg install libxml2 libxslt    # dependencies for facebook-scraper (installed by pip a little lower
+yes | pkg install libxml2 libxslt    # dependencies for facebook-scraper (installed by pip a little lower)
 
-# python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages
-echo "Installing yt-dlp packages..."
+echo "Installing python packages..."  # python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages
 pip install -U pip
 pip install -U wheel
 pip install -U yt-dlp
-
-echo "Installing VidHop packages..."
-yes | pkg install jq
 pip install -U requests
 pip install -U selenium
 pip install -U beautifulsoup4

@@ -40,10 +40,7 @@ function add_to_vhistory() {
   vh_downloaded_date="$(date +'%d-%m-%Y_%H:%M:%S')"
   upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"
   # Set thumb file.
-  [ -f "$vids_meta_dir/$platform/$name.jpg" ] && thumb_file="$vids_meta_dir/$platform/$name.jpg"
-  [ -f "$vids_meta_dir/$platform/$name.jpeg" ] && thumb_file="$vids_meta_dir/$platform/$name.jpeg"
-  [ -f "$vids_meta_dir/$platform/$name.png" ] && thumb_file="$vids_meta_dir/$platform/$name.png"
-  [ -f "$vids_meta_dir/$platform/$name.webp" ] && thumb_file="$vids_meta_dir/$platform/$name.webp"
+  [ -f "$vids_meta_dir/$platform/$name.jpg" ] && thumb_file="$vids_meta_dir/$platform/$name/thumbnail.jpg"
 
   history_entry=$(
     cat <<JSON
@@ -63,7 +60,7 @@ JSON
   ) # $upload_date has no quotes
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$vhistory_file")
-  jq <<<"$new_history" >"$vhistory_file"
+  [ "$(is_json_valid "$new_history")" = true ] && jq <<<"$new_history" >"$vhistory_file"
   echo "$title" >>"$titles_file"
 }
 
@@ -101,7 +98,7 @@ JSON
   )
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$chistory_file")
-  jq <<<"$new_history" >"$chistory_file"
+  [ "$(is_json_valid "$new_history")" = true ] && jq <<<"$new_history" >"$chistory_file"
   echo "$title" >>"$titles_file"
 }
 
@@ -142,7 +139,7 @@ JSON
   )
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$ahistory_file")
-  jq <<<"$new_history" >"$ahistory_file"
+  [ "$(is_json_valid "$new_history")" = true ] && jq <<<"$new_history" >"$ahistory_file"
   echo "$title" >>"$titles_file"
 }
 
@@ -181,7 +178,7 @@ JSON
   )
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$thistory_file")
-  jq <<<"$new_history" >"$thistory_file"
+  [ "$(is_json_valid "$new_history")" = true ] && jq <<<"$new_history" >"$thistory_file"
   echo "$title" >>"$titles_file"
 }
 
@@ -216,7 +213,7 @@ JSON
   )
 
   new_history=$(jq --argjson history_entry "$history_entry" '. + [$history_entry]' "$phistory_file")
-  jq <<<"$new_history" >"$phistory_file"
+  [ "$(is_json_valid "$new_history")" = true ] && jq <<<"$new_history" >"$phistory_file"
   echo "$title" >>"$titles_file"
 }
 

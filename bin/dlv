@@ -21,7 +21,7 @@ function dlv_help() {
 }
 
 function clear_vars_dlv() {
-  [ "$(is_media_download)" = true ] && unset url standalone platform name function
+  [ "$(is_media_download)" = true ] && unset url standalone platform name
   unset json json_file meta_file archive_file has_archive archive_content avatar_json \
     avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
   rm "$log_json_file" 2>/dev/null
@@ -216,7 +216,7 @@ function dlvi() {
   if [ "$(is_media_download)" = false ]; then
     print_metadata
     cd "$vids_meta_dir/$platform/$name" || return
-    unset dl_comments
+    unset dl_comments function
   fi
 }
 
@@ -238,7 +238,7 @@ function dlv() {
 
   print_metadata
   cd "$vids_dir/$platform" || return
-  unset dl_comments
+  unset dl_comments function
 }
 
 # CHANNELS

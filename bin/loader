@@ -66,6 +66,7 @@ function update_python_packages() {
 
 function update_system() {
   echo "> Updating & upgrading Termux system..." && sleep 1
+  yes | pkg update
   yes | pkg upgrade
   yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }

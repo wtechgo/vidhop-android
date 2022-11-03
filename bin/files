@@ -62,62 +62,62 @@ function rename_file() {
 
 # Rename a video and its metadata.
 function renvid() {
-  cd "$vids_dir" || return 1
-  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>\n
-    you are in the videos dir now (for autocomplete)\n
-    OLD_NAME input works with and without file extensions" && return 0
-
-  old_name="$1"
+  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>" && return
+  [ "$(echo -n "$1" | wc -c)" -lt 5 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
+  old_name_search_term="$1"
   new_name="$2"
 
-  results=$(find "$vidhop_dir" -iname "*$old_name*")
-  [ -z "$results" ] && echo found no matches && return
-  echo "$results"
+  meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_term*/metadata.json")
+  [ "$(echo "$meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
 
+  old_meta_dir=$(dirname "$meta_file")
+  old_name=$(basename "$old_meta_dir" .json)
+  old_vid_dir="$(dirname "$(dirname "$meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
+  old_media_file="$old_vid_dir/$old_name.mp4"
+  old_media_file_sub="$old_vid_dir/$old_name.en.srt"
+
+  # show file found
+  [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
+  [ -f "$old_media_file" ] && echo "found '$old_media_file'"
+  [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
+  # ask confirmation to rename
   echo -n "rename these files? Y/n: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] && return
 
+  # rename subs
+  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" |
+    while read -r file; do
+      ext=$(get_sub_extension "$file")
+      mv "$file" "$old_meta_dir/subs/$new_name.$ext"
+    done
+  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" |
+    while read -r file; do
+      ext=$(get_sub_extension "$file")
+      mv "$file" "$old_meta_dir/subs/auto-generated/$new_name.$ext"
+    done
+  mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
+  # rename subs - end
+
+  mv "$old_media_file" "$old_vid_dir/$new_name.mp4"
+  mv "$old_meta_dir" "$(dirname "$old_meta_dir")/$new_name"
+  name="$new_name"
+
   # rename history entry
-  find "$vidhop_dir" -iname "*$old_name*" | while read -r old_name; do rename_file "$old_name" "$new_name"; done
-  json_file=$(find "$vidhop_dir" -iname "$new_name.json")
-  ! [ -f "$json_file" ] && echo "could not locate metadata json file at $json_file" && return
-  json=$(jq . "$json_file")
-  name=$(basename "$json_file" | sed "s/.json//g")
   if [ -f "$titles_file" ]; then
     head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
-    echo "$name" >>"$log_dir/titles.tmp.log"
+    echo "$new_name" >>"$log_dir/titles.tmp.log"
     mv "$log_dir/titles.tmp.log" "$titles_file"
   fi
+
+  echo "files have been renamed"
 }
 
 function renlast() {
   [ -z "$1" ] && echo "usage: renlast <NEW_NAME>" && return
-  [ "$(has_vhistory_vars)" = false ] && echo "no files in memory to rename" && return
-  new_name="$1" #  new_name=$(sanitize_filename "$1")
-
-  echo "> Rename:"
-  [ -f "$media_file" ] && echo "$media_file"
-  [ -f "$meta_file" ] && echo "$meta_file"
-  [ -f "$thumb_file" ] && echo "$thumb_file"
-  [ -f "$avatar_file" ] && echo "$avatar_file"
-  echo "> To:"
-  [ -f "$media_file" ] && path_newfile "$media_file" "$new_name"
-  [ -f "$meta_file" ] && path_newfile "$meta_file" "$new_name"
-  [ -f "$thumb_file" ] && path_newfile "$thumb_file" "$new_name"
-  [ -f "$avatar_file" ] && path_newfile "$avatar_file" "$new_name"
-
-  echo -n "Rename these files? Y/n: " && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] && return
-
-  [ -f "$media_file" ] && rename_file "$media_file" "$new_name" && media_file=$(path_newfile "$media_file" "$new_name")
-  [ -f "$meta_file" ] && rename_file "$meta_file" "$new_name" && meta_file=$(path_newfile "$meta_file" "$new_name")
-  [ -f "$thumb_file" ] && rename_file "$thumb_file" "$new_name" && thumb_file=$(path_newfile "$thumb_file" "$new_name")
-  [ -f "$avatar_file" ] && rename_file "$avatar_file" "$new_name" && avatar_file=$(path_newfile "$avatar_file" "$new_name")
-  [ -f "$title" ] &&
-    echo "> Renamed to:" &&
-    echo "$name" >>"$titles_file"
+  old_name=$(lasttitle)
+  new_name="$1"
+  renvid "$old_name" "$new_name"
 }
 
 function rmvid() {
@@ -136,8 +136,8 @@ function rmvid() {
     [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
   fi
 
-  find "$vidhop_dir" -iname "*$name*" -exec rm -rf {} \;
-  echo "deleted '$name.mp4|.json|.jpg.|.png|.webp'"
+  find "$vidhop_dir" -iname "*$name*" -prune -exec rm -rf {} \;
+  echo "deleted files for '$name'"
 
   head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
   mv "$log_dir/titles.tmp.log" "$titles_file"

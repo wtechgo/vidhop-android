@@ -159,10 +159,12 @@ function fetch_video_subs() {
   # The mechanism that forces VLC player to pick the best English subtitles available by default.
   # Extra info: Media Players prioritize a subs file that is next to a media file,
   # even if there is a subs directory too.
-  english="$subs_dir/${name}.en.srt"
-  english_auto="$auto_subs_dir/${name}.en.srt"
-  [ -f "$english" ] && /bin/cp "$english" "$vids_dir/$platform/$name.en.srt"
-  ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$vids_dir/$platform/$name.en.srt"
+  if [ "$(is_media_download)" = true ]; then
+    english="$subs_dir/${name}.en.srt"
+    english_auto="$auto_subs_dir/${name}.en.srt"
+    [ -f "$english" ] && /bin/cp "$english" "$vids_dir/$platform/$name.en.srt"
+    ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$vids_dir/$platform/$name.en.srt"
+  fi
 
   [ "$(is_dir_empty "$auto_subs_dir")" = true ] && rm -rf "$auto_subs_dir"
   [ "$(is_dir_empty "$subs_dir")" = true ] && rm -rf "$subs_dir"

@@ -4,6 +4,25 @@
 # Don't forget to start sshd on the workstation `systemctl start sshd`.
 # No permissions error was solved by disabling the firewall on computer.
 
+function sync_help() {
+  echo " Title: sync"
+  echo " Description: Sync files between phone and workstation."
+  echo " Commands:"
+  echo "   syncvidhop  => fetch VidHop files from workstation to phone and send files from phone to workstation"
+  echo "               => syncvidhop executes sendvidhop and fetchvidhop"
+  echo "   sendvidhop  => send files from phone to workstation"
+  echo "   fetchvidhop => fetch VidHop files from workstation to phone"
+  echo " Prerequisites:"
+  echo "   1. the IP-address and user have to be known in the 'sync' file, optionally via config.ini"
+  echo "   2. passwordless public SSH keys should be configured on phone and workstation (or you'll have to type passwords)"
+  echo "   3. start sshd on workstation and phone (Termux)"
+  echo " Notes:"
+  echo "   sendvidhop sends all VidHop files, keeps the metadata files and deletes media files to not clog up the phone"
+  echo "   fetchvidhop fetches only metadata files to enable video searches in Termux via the fvid command"
+  echo " Troubleshoot:"
+  echo "   No permissions error was solved by disabling the firewall on the workstation."
+}
+
 # WORKSTATION
 IP_WS="FILL_IN_IP_ADDRESS_FROM_WS_IN_CONFIG.INI"
 USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI"
@@ -25,29 +44,6 @@ SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
 
 function sshworkstation() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"
-}
-
-function sync_help() {
-  echo -e "
- Title: history
- Description: Sync files between phone and workstation.
- Commands:
-   syncvidhop  => fetch VidHop files from phone to workstation and send files from workstation to phone
-   sendvidhop  => send files from workstation to phone
-   fetchvidhop => fetch VidHop files from phone to workstation
-
- Usage:
-   1. start sshd on workstation and phone (Termux)
-   2. run sendvidhop to sync from phone to workstation
-   3. run fetchvidhop to sync from workstation to phone
-
- Notes:
-   sendvidhop sends all VidHop files, keeps the metadata (JSON) and deletes media files to not clog up the phone.
-   fetchvidhop fetches only metadata files (JSON) to enable video searches in Termux via the fvid command.
-
- Troubleshoot:
-   No permissions error was solved by disabling the firewall on the workstation."
-  return 0
 }
 
 # sendvidhop

@@ -108,13 +108,13 @@ function loader_help() {
   echo " Title: loader"
   echo " Description: VidHop management functions."
   echo " Commands:"
-  echo "    update_python_packages => Updates YT-DLP with pip (Python package manager)."
-  echo "    install_loader => Enables users to reload with '. vidhop'"
-  echo "    installloader => Alias for the previous for Termux."
-  echo "    fetch_github => Download the newest VidHop code from GitHub."
-  echo "    updatevidhop => Default update."
-  echo "    updatevidhopbin => Update only files in vidhop/bin."
-  echo "    uninstallvidhop => Remove all VidHop executables, downloaded data in the VidHop directory will NOT be deleted."
+  echo "    updatevidhop    => default update"
+  echo "    updatevidhopbin => is updatevidhop minus Termux system update"
+  echo "    uninstallvidhop => remove all VidHop executables, downloaded data in the VidHop directory will NOT be deleted"
+  echo "    installloader   => alias for install_loader"
+  echo "    install_loader  => enables users to reload with '. vidhop"
+  echo "    fetch_github    => download the newest VidHop code from GitHub"
+  echo "    update_python_packages => updates Python packages with pip (package manager)"
 }
 
 function vidhophelp() {
@@ -123,6 +123,6 @@ function vidhophelp() {
   files_help && echo
   metadata_help && echo
   history_help && echo
-  sync_help && return
+  sync_help && echo
   loader_help && return
 }

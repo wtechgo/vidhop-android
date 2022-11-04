@@ -4,18 +4,39 @@ function metadata_help() {
   echo " Title: metadata"
   echo " Description: Edit the metadata of downloads."
   echo " Commands:"
-  echo "    setdescription <your_description> => Set a description in the metadata JSON file."
-  echo "    setsummary <your_summary>         => Set a summary in the metadata JSON file."
-  echo "    setcategories <your_categories>   => Set categories in the metadata JSON file."
-  echo "    settopics <your_topics>           => Set topics in the metadata JSON file."
-  echo "    setspeakers <your_speakers>       => Set speakers in the metadata JSON file."
-  echo "    setcreators <your_creators>       => Set creators in the metadata JSON file."
-  echo "    rmdescription <your_description>  => Remove a description in the metadata JSON file."
-  echo "    rmsummary <your_summary>          => Remove a summary in the metadata JSON file."
-  echo "    rmcategories <your_categories>    => Remove categories in the metadata JSON file."
-  echo "    rmtopics <your_topics>            => Remove topics in the metadata JSON file."
-  echo "    rmspeakers <your_speakers>        => Remove speakers in the metadata JSON file."
-  echo "    rmcreators <your_creators>        => Remove creators in the metadata JSON file."
+  echo "    metadata                     => show metadata of last download"
+  echo "    metadata <FILE_ABS_PATH>     => show metadata for file with absolute path"
+  echo "    setdescription <DESCRIPTION> => set a description in the metadata JSON file of the last download"
+  echo "    setsummary <SUMMARY>         => set a summary in the metadata JSON file of the last download"
+  echo "    setcategories <CATEGORIES>   => set categories in the metadata JSON file of the last download"
+  echo "    settopics <TOPICS>           => set topics in the metadata JSON file of the last download"
+  echo "    setspeakers <SPEAKERS>       => set speakers in the metadata JSON file of the last download"
+  echo "    setcreators <CREATORS>       => set creators in the metadata JSON file of the last download"
+  echo "    settimestamps <CREATORS>     => set timestamps in the metadata JSON file of the last download"
+  echo "    addtimestamps <CREATORS>     => add (append) timestamps in the metadata JSON file of the last download"
+  echo "    rmdescription <DESCRIPTION>  => remove a description in the metadata JSON file of the last download"
+  echo "    rmsummary <SUMMARY>          => remove a summary in the metadata JSON file of the last download"
+  echo "    rmcategories <CATEGORIES>    => remove categories in the metadata JSON file of the last download"
+  echo "    rmtopics <TOPICS>            => remove topics in the metadata JSON file of the last download"
+  echo "    rmspeakers <SPEAKERS>        => remove speakers in the metadata JSON file of the last download"
+  echo "    rmcreators <CREATORS>        => remove creators in the metadata JSON file of the last download"
+  echo "    rmtimestamps <CREATORS>      => remove timestamps in the metadata JSON file of the last download"
+  echo "    setdescription <DESCRIPTION> [<PARTIAL_FILENAME>] => set a description in the metadata file that matches the partial filename"
+  echo "    rmdescription <DESCRIPTION> [<PARTIAL_FILENAME>]  => remove a description in the metadata file that matches the partial filename"
+  echo "                                                note  => the two previous examples including [<PARTIAL_FILENAME>]"
+  echo "                                                         expose the mechanism applicable to all other 'set' and 'rm' metadata methods"
+}
+
+function metadata() {
+  if [ -n "$1" ]; then
+    [ -f "$1" ] && jq . "$1" && return
+    found_meta_file="$(find_one_meta "$1")"
+    [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
+  else
+    [ -f "$meta_file" ] && jq . "$meta_file" && return
+    [ -f "$json_file" ] && jq . "$meta_file" && return
+  fi
+  echo "no metadata file found"
 }
 
 function set_metadata_field_json_obj() {
@@ -27,7 +48,7 @@ function set_metadata_field_json_obj() {
 # Usage: command "key" "value" ---------------------> uses "$json"
 #        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
 function set_metadata_field() {
-  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "no metadata field given to set" && return
+  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" && # three arguments implies we need to find a metadata FILE.
     meta_file="$(find_one_meta "$partial_filename")" &&
@@ -40,58 +61,72 @@ function set_metadata_field() {
   json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$metadata")
 
   [ -f "$meta_file" ] && jq . <<<"$json" >"$meta_file" && return
-  echo "no metadata file to write to"
+  echo "no metadata file to write to" && return 1
 }
 
 function setdescription() {
+[ "$#" = 0 ] && echo -e "usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_description' "$@" || return
   echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setsummary() {
+[ "$#" = 0 ] && echo -e "usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_summary' "$@" || return
   echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
+function setremarks() {
+[ "$#" = 0 ] && echo -e "usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
+  set_metadata_field 'vh_remarks' "$@" || return
+  echo "'vh_remarks' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
+}
+
 function setcategories() {
+[ "$#" = 0 ] && echo -e "usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_categories' "$@" || return
   echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function settopics() {
+[ "$#" = 0 ] && echo -e "usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setspeakers() {
+[ "$#" = 0 ] && echo -e "usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_speakers' "$@" || return
   echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcreators() {
+[ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcreators() {
+[ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function settimestamp() {
+function settimestamps() {
+[ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field "vh_timestamps" "$1" "$2" || return
   echo "'vh_timestamps' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function addtimestamp() {
-  [ -z "$1" ] && echo -e "usage: addtimestamp <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
-    echo "example: addtimestamp '01:11:01 = talking about interesting topic X'" && return
+function addtimestamps() {
+  [ -z "$1" ] && echo -e "usage: addtimestamps <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
+    echo "example: addtimestamps \"01:11:01 = talking about interesting topic X, 01:23:45 = well that escalated quickly\"" && return
   [ -n "$json" ] && metadata="$json"
   [ -z "$metadata" ] && [ -n "$2" ] && json_file=$(find_one_meta "$2") && metadata=$(jq . "$json_file")
   [ -z "$metadata" ] && echo "no metadata to work with" && return 1
 
   timestamps=$(jq '.vh_timestamps' <<<"$metadata" | tr -d '"')
-  [ "$timestamps" = null ] && settimestamp "$1" && return
+  [ "$timestamps" = null ] && settimestamps "$1" && return
   timestamps="${timestamps}, ${1}"  # append new timestamps to old ones
 
   set_metadata_field "vh_timestamps" "$timestamps" "$2" || return
@@ -149,6 +184,11 @@ function rmcategories() {
   echo "'vh_categories' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
+function rmremarks() {
+  rm_metadata_field 'vh_remarks' "$@" || return
+  echo "'vh_remarks' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
 function rmtopics() {
   rm_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
@@ -164,7 +204,7 @@ function rmcreators() {
   echo "'vh_creators' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmtimestamp() {
+function rmtimestamps() {
   rm_metadata_field 'vh_timestamps' "$@" || return
   echo "'vh_timestamps' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }

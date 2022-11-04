@@ -4,20 +4,16 @@ function files_help() {
   echo " Title: files"
   echo " Description: Manage VidHop files."
   echo " Commands:"
-  echo "    play                            => play last downloaded video in default media player (MPV recommended)"
-  echo "    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player (MPV recommended)"
+  echo "    play                            => play last downloaded video in default media player e.g. MPV or VLC"
+  echo "    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player e.g. MPV or VLC"
   echo "    renvid <PARTIAL_OLD_FILENAME> <NEW_FILENAME>  => rename all files of a video that matches <PARTIAL_OLD_FILENAME>"
   echo "    renlast <NEW_FILENAME>          => rename all files of last downloaded video to <NEW_FILENAME>"
   echo "    rmvid <PARTIAL_FILENAME>        => remove all files of a video who's name matches <PARTIAL_FILENAME>"
   echo "    rmlast                          => remove all files of last downloaded video"
   echo "    rmchan <PARTIAL_CHANNEL_NAME>   => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
-  echo "    metadata                        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
-  echo "    metadata <FILE_ABS_PATH>        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
-  echo "    metadata <PARTIAL_CHANNEL_NAME> => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>"
   echo "    specs                           => shows technical video information like codecs, resolution...of last downloaded video"
   echo "    specs <URL>                     => shows technical video information like codecs, resolution...of a video at <URL>"
   echo "    specs <PARTIAL_FILENAME>        => shows technical video information like codecs, resolution...of a video who's filename matches <PARTIAL_FILENAME>"
-  return 0
 }
 
 function play() {
@@ -294,18 +290,6 @@ function specs() {
 
 function mediafile() {
   echo "$media_file"
-}
-
-function metadata() {
-  if [ -n "$1" ]; then
-    [ -f "$1" ] && jq . "$1" && return
-    found_meta_file="$(find_one_meta "$1")"
-    [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
-  else
-    [ -f "$meta_file" ] && jq . "$meta_file" && return
-    [ -f "$json_file" ] && jq . "$meta_file" && return
-  fi
-  echo "no metadata to show"
 }
 
 function treevidhopbefore() {

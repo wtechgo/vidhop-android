@@ -44,6 +44,15 @@ Windows users can run [VidHop in Docker](https://github.com/wtechgo/vidhop-docke
        dlv https://www.youtube.com/watch?v=-DT7bX-B1Mg && ls -l && sleep 3 && play
      ```
 
+## Update & Uninstall
+
+To update, execute `updatevidhop`.  
+This command will update Termux, update all Python packages used by VidHop and download new code from GitHub using `Git`.
+
+To uninstall, execute  `uninstallvidhop`.  
+This will remove `$PREFIX/opt/vidhop` and the loader. Your `sdcard/VidHop` directory will **not** be removed. You can delete 
+it manually with your file manager if necessary.
+
 ## Functional Information
 
 VidHop enables Android users to download videos, songs, thumbnails, complete channels and playlists from popular video
@@ -89,18 +98,24 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Title: dlv
  Description: Download video(s) and channels.
  Commands:
-    dlv <URL>     => download video at <URL> plus information (metadata, thumbnail)
-    dlvi <URL>    => download video information only at <URL>, no mp4 download
-    dlvpl <URL>   => download video playlist
-    dlvpli <URL>  => download video playlist information
-    dlc <URL>     => download channel, all videos, metadata and thumbnails
-    dlci <URL>    => download channel information, same as dlc but no video downloads
-    dla <URL>     => download audio, as mp3 from music videos
-    dlalbum <URL> => download a music album as mp3
-    dlapl <URL>   => download audio playlist
-    dlapli <URL>  => download audio playlist information
-    dlpod <URL>   => download podcast, technically also audio but we differentiate podcasts from music
-    dlt <URL>     => download thumbnail, as jpg
+    dlv <URL>     => download video at <URL> plus information (metadata, thumbnail) into /VidHop/videos
+    dlv -c <URL>  => download comments while doing dlv, appended to metadata.json into /VidHop/videos
+    dlvi <URL>    => download video information only at <URL>, no mp4 download into /VidHop/metadata/videos
+    dlvi -c <URL> => download comments while doing dlvi, appended to metadata.json into /VidHop/metadata/videos
+    dlvpl <URL>   => download video playlist into /VidHop/channels/<CHANNEL_NAME>/<PLAYLIST_NAME>
+    dlvpli <URL>  => download video playlist information into /VidHop/metadata/channels/<CHANNEL_NAME>/<PLAYLIST_NAME>
+    dlc <URL>     => download channel, all videos, metadata and thumbnails into /VidHop/channels
+    dlci <URL>    => download channel information, same as dlc but no video downloads into /VidHop/metadata/channels
+    dla <URL>     => download audio, as mp3 from music videos into /VidHop/music
+    dlalbum <URL> => download a music album as mp3 into /VidHop/music/<ALBUM_NAME>
+    dlapl <URL>   => download audio playlist into /VidHop/music/<CHANNEL_NAME>/<PLAYLIST_NAME>
+    dlapli <URL>  => download audio playlist information into /VidHop/metadata/music/<CHANNEL_NAME>/<PLAYLIST_NAME>
+    dlpod <URL>   => download podcast or audio tape into /VidHop/podcasts
+    dlt <URL>     => download thumbnail and metadata as jpg into /VidHop/thumbnails
+    dlfbpost <URL>  => download facebook post metadata, no images into /VidHop/social_media
+    dltweet <URL>   => download twitter tweet metadata, no images into /VidHop/social_media
+    dlwebsite <URL> => download page or complete website with images into /VidHop/website
+    dlw <URL>       => alias for dlwebsite
 
  Title: fvid
  Description: Searches for <SEARCH_WORD> in all videos and channels metadata.
@@ -118,16 +133,13 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Title: files
  Description: Manage VidHop files.
  Commands:
-    play                            => play last downloaded video in default media player (MPV recommended)
-    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player (MPV recommended)
+    play                            => play last downloaded video in default media player e.g. MPV or VLC
+    play <PARTIAL_FILENAME>         => play video with filename that matches <PARTIAL_FILENAME> in default media player e.g. MPV or VLC
     renvid <PARTIAL_OLD_FILENAME> <NEW_FILENAME>  => rename all files of a video that matches <PARTIAL_OLD_FILENAME>
     renlast <NEW_FILENAME>          => rename all files of last downloaded video to <NEW_FILENAME>
     rmvid <PARTIAL_FILENAME>        => remove all files of a video who's name matches <PARTIAL_FILENAME>
     rmlast                          => remove all files of last downloaded video
     rmchan <PARTIAL_CHANNEL_NAME>   => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>
-    metadata                        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>
-    metadata <FILE_ABS_PATH>        => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>
-    metadata <PARTIAL_CHANNEL_NAME> => remove all files of a channel that matches <PARTIAL_CHANNEL_NAME>
     specs                           => shows technical video information like codecs, resolution...of last downloaded video
     specs <URL>                     => shows technical video information like codecs, resolution...of a video at <URL>
     specs <PARTIAL_FILENAME>        => shows technical video information like codecs, resolution...of a video who's filename matches <PARTIAL_FILENAME>
@@ -135,34 +147,64 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Title: metadata
  Description: Edit the metadata of downloads.
  Commands:
-    setdescription <your_description> => Set a description in the metadata JSON file.
-    setsummary <your_summary>         => Set a summary in the metadata JSON file.
-    setcategories <your_categories>   => Set categories in the metadata JSON file.
-    settopics <your_topics>           => Set topics in the metadata JSON file.
-    setspeakers <your_speakers>       => Set speakers in the metadata JSON file.
-    setcreators <your_creators>       => Set creators in the metadata JSON file.
-    rmdescription <your_description>  => Remove a description in the metadata JSON file.
-    rmsummary <your_summary>          => Remove a summary in the metadata JSON file.
-    rmcategories <your_categories>    => Remove categories in the metadata JSON file.
-    rmtopics <your_topics>            => Remove topics in the metadata JSON file.
-    rmspeakers <your_speakers>        => Remove speakers in the metadata JSON file.
-    rmcreators <your_creators>        => Remove creators in the metadata JSON file.
+    metadata                     => show metadata of last download
+    metadata <FILE_ABS_PATH>     => show metadata for file with absolute path
+    setdescription <DESCRIPTION> => set a description in the metadata JSON file of the last download
+    setsummary <SUMMARY>         => set a summary in the metadata JSON file of the last download
+    setcategories <CATEGORIES>   => set categories in the metadata JSON file of the last download
+    settopics <TOPICS>           => set topics in the metadata JSON file of the last download
+    setspeakers <SPEAKERS>       => set speakers in the metadata JSON file of the last download
+    setcreators <CREATORS>       => set creators in the metadata JSON file of the last download
+    settimestamps <CREATORS>     => set timestamps in the metadata JSON file of the last download
+    addtimestamps <CREATORS>     => add (append) timestamps in the metadata JSON file of the last download
+    rmdescription <DESCRIPTION>  => remove a description in the metadata JSON file of the last download
+    rmsummary <SUMMARY>          => remove a summary in the metadata JSON file of the last download
+    rmcategories <CATEGORIES>    => remove categories in the metadata JSON file of the last download
+    rmtopics <TOPICS>            => remove topics in the metadata JSON file of the last download
+    rmspeakers <SPEAKERS>        => remove speakers in the metadata JSON file of the last download
+    rmcreators <CREATORS>        => remove creators in the metadata JSON file of the last download
+    rmtimestamps <CREATORS>      => remove timestamps in the metadata JSON file of the last download
+    setdescription <DESCRIPTION> [<PARTIAL_FILENAME>] => set a description in the metadata file that matches the partial filename
+    rmdescription <DESCRIPTION> [<PARTIAL_FILENAME>]  => remove a description in the metadata file that matches the partial filename
+                                                note  => the two previous examples including [<PARTIAL_FILENAME>]
+                                                         expose the mechanism applicable to all other 'set' and 'rm' metadata methods
 
  Title: history
  Description: Show history of actions in VidHop.
  Commands:
-    vhistory => shows the history of the videos you or metadata download
-    chistory => shows the history of the channels you or metadata download
-    ahistory => shows the history of the audio you or metadata download
-    phistory => shows the history of the podcasts you or metadata download
-    thistory => shows the history of the thumbnails you or metadata download
+    vhistory => shows the history of the videos you downloaded
+    chistory => shows the history of the channels you downloaded
+    ahistory => shows the history of the audio you downloaded
+    phistory => shows the history of the podcasts you downloaded
+    thistory => shows the history of the thumbnails you downloaded
 
  Title: sync
  Description: Sync files between phone and workstation.
  Commands:
-    syncvidhop  => fetch VidHop files from phone to workstation and send files from workstation to phone
-    sendvidhop  => send files from workstation to phone
-    fetchvidhop => fetch VidHop files from phone to workstation
+   syncvidhop  => fetch VidHop files from workstation to phone and send files from phone to workstation
+               => syncvidhop executes sendvidhop and fetchvidhop
+   sendvidhop  => send files from phone to workstation
+   fetchvidhop => fetch VidHop files from workstation to phone
+ Prerequisites:
+   1. the IP-address and user have to be known in the 'sync' file, optionally via config.ini
+   2. passwordless public SSH keys should be configured on phone and workstation (or you'll have to type passwords)
+   3. start sshd on workstation and phone (Termux)
+ Notes:
+   sendvidhop sends all VidHop files, keeps the metadata files and deletes media files to not clog up the phone
+   fetchvidhop fetches only metadata files to enable video searches in Termux via the fvid command
+ Troubleshoot:
+   No permissions error was solved by disabling the firewall on the workstation.
+
+ Title: loader
+ Description: VidHop management functions.
+ Commands:
+    updatevidhop    => default update
+    updatevidhopbin => is updatevidhop minus Termux system update
+    uninstallvidhop => remove all VidHop executables, downloaded data in the VidHop directory will NOT be deleted
+    installloader   => alias for install_loader
+    install_loader  => enables users to reload with '. vidhop
+    fetch_github    => download the newest VidHop code from GitHub
+    update_python_packages => updates Python packages with pip (package manager)
 ```
 
 ## Sync
@@ -276,6 +318,17 @@ ssh -i "$HOME/.ssh/id_vidhop" $USER_WS@$IP_WS
 5. Alternatively, you can run `sendvidhop` or `fetchvidhop` for one-directional file sync.
 
 Here are the [Termux docs for configuring SSH](https://wiki.termux.com/wiki/Remote_Access) just in case.
+
+## Config.ini
+
+The update mechanism (`git reset --hard`) will overwrite your configuration inside the `sync` files. 
+To workaround this issue, you can put your SSH configuration (IP-address & user) in `config.ini`. 
+The variables defined in `config.ini` will overwrite the defaults.
+
+Though `config.ini` was created predominantly to counter the update issue, other customization can also be defined there, 
+like the location of your VidHop media directory.
+
+You can copy and, or rename `config.ini.template` to `config.ini` and customize it to match your needs. 
 
 ## Censored videos
 

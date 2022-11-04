@@ -4,12 +4,11 @@ function history_help() {
   echo " Title: history"
   echo " Description: Show history of actions in VidHop."
   echo " Commands:"
-  echo "    vhistory => shows the history of the videos you or metadata download"
-  echo "    chistory => shows the history of the channels you or metadata download"
-  echo "    ahistory => shows the history of the audio you or metadata download"
-  echo "    phistory => shows the history of the podcasts you or metadata download"
-  echo "    thistory => shows the history of the thumbnails you or metadata download"
-  return 0
+  echo "    vhistory => shows the history of the videos you downloaded"
+  echo "    chistory => shows the history of the channels you downloaded"
+  echo "    ahistory => shows the history of the audio you downloaded"
+  echo "    phistory => shows the history of the podcasts you downloaded"
+  echo "    thistory => shows the history of the thumbnails you downloaded"
 }
 
 function clear_history_vars() {
@@ -220,10 +219,10 @@ JSON
 function format_oneliner_history() {
   mode="$1" file="$2"
   if [ "$mode" = -c ]; then
-    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.upload_date) | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
+    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | reverse | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
   else
     echo -e "${GREEN}$(
-      jq 'unique_by(.url) | sort_by(.upload_date) | .[] | ""
+      jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | reverse | .[] | ""
      + "> " + .channel_name + ": "
      + .title + " | "
      + .url + " | "

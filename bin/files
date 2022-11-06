@@ -63,12 +63,13 @@ function renvid() {
   old_name_search_term="$1"
   new_name="$2"
 
-  meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_term*/metadata.json")
-  [ "$(echo "$meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
+  old_meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_term*/metadata.json")
+  [ "$(echo "$old_meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
+  [ "$old_meta_file" = "." ] && echo "metadata file not found" && return
 
-  old_meta_dir=$(dirname "$meta_file")
+  old_meta_dir=$(dirname "$old_meta_file")
   old_name=$(basename "$old_meta_dir" .json)
-  old_vid_dir="$(dirname "$(dirname "$meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
+  old_vid_dir="$(dirname "$(dirname "$old_meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
   old_media_file="$old_vid_dir/$old_name.mp4"
   old_media_file_sub="$old_vid_dir/$old_name.en.srt"
 
@@ -82,22 +83,30 @@ function renvid() {
   [ "$answer" = "n" ] && return
 
   # rename subs
-  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" |
+  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" 2>/dev/null |
     while read -r file; do
       ext=$(get_sub_extension "$file")
       mv "$file" "$old_meta_dir/subs/$new_name.$ext"
     done
-  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" |
+  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" 2>/dev/null |
     while read -r file; do
       ext=$(get_sub_extension "$file")
       mv "$file" "$old_meta_dir/subs/auto-generated/$new_name.$ext"
     done
-  mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
+  [ -f "$old_media_file_sub" ] && mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
   # rename subs - end
 
-  mv "$old_media_file" "$old_vid_dir/$new_name.mp4"
-  mv "$old_meta_dir" "$(dirname "$old_meta_dir")/$new_name"
+  [ -f "$old_media_file" ] &&
+    media_file="$old_vid_dir/$new_name.mp4" &&
+    mv "$old_media_file" "$media_file" &&
+    echo -e "renamed: '$old_media_file'\n     to: '$media_file'"
+  [ -d "$old_meta_dir" ] &&
+    meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
+    mv "$old_meta_dir" "$meta_dir" &&
+    echo -e "renamed: '$old_meta_dir'\n     to: '$old_meta_dir' (metadata directory)"
+  # set vars for metadata command & rerun of renvid
   name="$new_name"
+  meta_file="$meta_dir/metadata.json"
 
   # rename history entry
   if [ -f "$titles_file" ]; then

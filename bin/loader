@@ -42,6 +42,7 @@ function installloader() { # alias for phone hand typing
 function fetch_github() {
   echo "> Updating VidHop code at $vidhop_app_dir..."
   echo "> Fetching from GitHub..." && sleep 1
+  cd "$vidhop_app_dir"
   git fetch --all
   git reset --hard origin/master
   sleep 2

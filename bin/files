@@ -114,8 +114,6 @@ function renvid() {
     echo "$new_name" >>"$log_dir/titles.tmp.log"
     mv "$log_dir/titles.tmp.log" "$titles_file"
   fi
-
-  echo "files have been renamed"
 }
 
 function renlast() {

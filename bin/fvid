@@ -54,6 +54,10 @@ function oneliner_channel_entries() {
 }
 
 function format_oneliner() {
+  [ -n "$1" ] && local json="$1"
+  [ -n "$2" ] && [ "$2" = "videos" ] && echo -e "${NC}Videos search results:${GREEN}"
+  [ -n "$2" ] && [ "$2" = "channels" ] && echo -e "${NC}Channels search results:${GREEN}"
+
   channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
   jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
           | "> " +
@@ -63,6 +67,7 @@ function format_oneliner() {
             .title + " | " +
             .webpage_url + " | " +
             .upload_date' <<<"$json" | tr -d '"'
+  [ -n "$2" ] && [ "$2" = "videos" ] && echo -e "${NC}Still searching through channels...${GREEN}"
 }
 
 function format_oneliner_reverse() { # reverse means ascending which suits 'newest first' in the console
@@ -99,7 +104,7 @@ function oneliner_export_reverse() {
 function opinionated_print() {
   [ "$more" = "true" ] && format_more && return
   [ "$reverse" = "true" ] && echo -e "${GREEN}$(format_oneliner_reverse)" && return
-  echo -e "${GREEN}$(format_oneliner)"
+  echo -e "${GREEN}$(format_oneliner "$1" "$2")"
 }
 
 function save_fvid() {
@@ -129,10 +134,10 @@ function say() {
     clearLastLine
     file="$(echo "$2" | tr -d "'" | sed "s/.json//g")" # remove quotes and '.json' from filename
     # 1. remove VidHop root from path; 2. trim down to 'screensize - ".json" (5 chars)'; 3. append '.json'
-    echo "$(echo -n "${file#$subtract}" | cut -c -"$(("$termux_screen_char_count" - 5))").json"
+    echo "${NC}$(echo -en "${NC}${file#$subtract}" | cut -c -"$(("$workstation_screen_char_count" - 5))").json"
     return
   fi
-  echo -e "$1"
+  echo -e "${NC}$1"
 }
 
 function find_one_meta() {
@@ -161,23 +166,20 @@ function fvidv() {
   2) return 0 ;; # fvid --help was called and shown, exit program.
   esac
 
-  say "searching in vidhop videos metadata at $vids_meta_dir..."
-  say "searching in single videos metadata...\n"
+  say "searching in videos metadata at $vids_meta_dir..."
   while read -r vidjson; do
-    subtract="$vids_meta_dir/" && say -o "$vidjson"
-    json+=$(
+    videos+=$(
       jq --arg text "$text" '
             select(
                 ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
                 ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
             )' "$vidjson"
     )
-  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
-  echo "search done"
+  done < <(find "$vids_meta_dir" -type f -iname "*.json")
 
-  json=$(jq -s '{ entries: . }' <<<"$json")
-  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
-  opinionated_print
+  videos=$(jq -s '{ entries: . }' <<<"$videos")
+  [ "$(jq '.entries | length' <<<"$videos")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print "$videos" "videos"
 }
 
 function fvidc() {
@@ -187,22 +189,28 @@ function fvidc() {
   2) return 0 ;; # fvid --help was called and shown, exit program.
   esac
 
-  say "searching in channels metadata at $channels_meta_dir...\n"
+  say "searching in channels metadata at $channels_meta_dir..."
   while read -r chanjson; do
-    subtract="$channels_meta_dir/" && say -o "$chanjson"
-    json+=$(
+    channels+=$(
       jq --arg text "$text" '.entries[] |
               select(
                   ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
                   ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
               )' "$chanjson"
     )
-  done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json") && clearLastLine
-  echo "search done"
+  done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json")
 
-  json=$(jq -s '{ entries: . }' <<<"$json")
-  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
-  opinionated_print
+  channels=$(jq -s '{ entries: . }' <<<"$channels")
+  [ "$(jq '.entries | length' <<<"$channels")" -eq 0 ] && echo "found nothing" && return
+  opinionated_print "$channels" "channels"
+}
+
+function fvid() {
+  set +m
+  fvidv "$1" &
+  fvidc "$1" &
+  wait
+  set -m
 }
 
 function fvidcv() {
@@ -245,9 +253,9 @@ function fvidf() { # find video files (on disk)
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "$result" &&
     unset result && found_something="true"
 
-  result=$(find "$shared/Movies" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
+  result=$(find -L "$HOME/Videos" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Videos in 'Movies' directory result:" && echo -e "$result" &&
+    echo -e "> Videos in user home directory result:" && echo -e "$result" &&
     unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"
@@ -299,47 +307,6 @@ function fvidusermeta() {
   json=$(jq -s '{ entries: . }' <<<"$json")
   [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
   print_usermeta
-}
-
-function fvid() {
-  init_vars "$@" || return
-  case $? in # exit code of init_vars
-  1) echo "failed to initiate vars (function init_vars)" ;;
-  2) return 0 ;; # fvid --help was called and shown, exit program.
-  esac
-
-  say "searching in VidHop metadata at $vidhop_dir/metadata..."
-  say "searching in single videos metadata at $vids_meta_dir...\n"
-  while read -r vidjson; do
-    subtract="$vids_meta_dir/" && say -o "$vidjson"
-    json+=$(
-      jq --arg text "$text" '
-            select(
-                ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
-                ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
-            )' "$vidjson"
-    )
-  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
-  echo "done searching videos"
-
-  say "searching in channels metadata at $channels_meta_dir...\n"
-  while read -r chanjson; do
-    subtract="$channels_meta_dir/" && say -o "$chanjson"
-    json+=$(
-      jq --arg text "$text" '.entries[] |
-              select(
-                  ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
-                  ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
-              )' "$chanjson"
-    )
-  done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json") && clearLastLine
-  echo "done searching channels"
-  echo "search done"
-
-  json=$(jq -s '{ entries: . }' <<<"$json")
-  [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
-  opinionated_print
-  save_fvid
 }
 
 # Show the metadata of a single video.

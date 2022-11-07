@@ -219,10 +219,10 @@ JSON
 function format_oneliner_history() {
   mode="$1" file="$2"
   if [ "$mode" = -c ]; then
-    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | reverse | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
+    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.epoch) | reverse | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
   else
     echo -e "${GREEN}$(
-      jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | reverse | .[] | ""
+      jq 'unique_by(.url) | sort_by(.epoch) | reverse | .[] | ""
      + "> " + .channel_name + ": "
      + .title + " | "
      + .url + " | "
@@ -259,6 +259,7 @@ function thistory() {
 
 function lasttitle() {
   [ -n "$name" ] && echo "$name" && return
+  [ -n "$meta_file" ] && [ -f "$meta_file" ] && basename "$meta_file" .json && return
   [ -n "$media_file" ] && [ -f "$media_file" ] && basename "$media_file" .mp4 && return
   [ -f "$titles_file" ] && tail -n 1 "$titles_file"
 }

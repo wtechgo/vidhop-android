@@ -202,7 +202,7 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
     updatevidhopbin => is updatevidhop minus Termux system update
     uninstallvidhop => remove all VidHop executables, downloaded data in the VidHop directory will NOT be deleted
     installloader   => alias for install_loader
-    install_loader  => enables users to reload with '. vidhop
+    install_loader  => enables users to reload with '. vidhop'
     fetch_github    => download the newest VidHop code from GitHub
     update_python_packages => updates Python packages with pip (package manager)
 ```

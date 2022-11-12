@@ -134,7 +134,9 @@ function addtimestamps() {
 }
 
 function set_downloaded() {
-  set_metadata_field_json_obj "vh_downloaded" "$1"
+  [ "$#" -eq 2 ] && value="$2" || value="$1"
+  set_metadata_field_json_obj "vh_downloaded" "$value"
+  [ "$1" = "-f" ] || [ "$1" = "--file" ] && jq <<<"$json" > "$meta_file"
 }
 
 function set_downloaded_date() {

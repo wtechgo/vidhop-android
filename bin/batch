@@ -38,6 +38,17 @@ function jobs_done() {
 
 # An alias for import from txt files.
 function syncchannels() {
+  list="$import_dir/channels.txt"
+  [ -n "$1" ] && list="$1"
+  [ ! -f "$1" ] && echo "no file found at path '$1' which should point to a file containing solely channel urls, abort" && return
+
+  while read -r url; do
+    dlci "$url"
+  done <"$list"
+}
+
+# An alias for import from txt files.
+function syncchannels() {
   declare -a channel_lists=(
     "$import_dir/youtube_channels_1.txt"
     "$import_dir/youtube_channels_2.txt"
@@ -160,29 +171,6 @@ function update_archives_from_json_metadata() {
     save_channel_entries_to_archive
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
 }
-
-function fetch_avatars_by_json() {
-  while read -r json_file; do
-    echo processing "$json_file"...
-    channel_name=$(channel_name_from_json_file "$json_file")
-    channel_url=$(channel_url_from_json_file "$json_file")
-    python "$scrape_channel_avatar_img_py" --channel-url "$channel_url" --channel-name "$channel_name"
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
-}
-
-function merge_avatar_json() { # jq merge overwrites previous fields.
-  while read -r json_file; do
-    echo processing "$json_file"...
-    channel_name=$(channel_name_from_json_file "$json_file")
-    avatar_json_file=$(find "$channels_meta_dir/$channel_name" -iname "avatar*json")
-    avatar_json=$(jq . "$avatar_json_file")
-    [ -z "$avatar_json" ] && continue
-
-    json=$(jq '.' "$json_file")
-    jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
-}
-
 function inspect_field_all_channels() {
   while read -r json_file; do
     jq '.categories' "$json_file"
@@ -211,4 +199,26 @@ function list_channel_avatars() {
     ll "$channelDir/$channelDir.webp" 2>/dev/null
     ll "$channelDir/$channelDir.png" 2>/dev/null
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
+}
+
+function fetch_avatars_by_json() {
+  while read -r json_file; do
+    echo processing "$json_file"...
+    channel_name=$(channel_name_from_json_file "$json_file")
+    channel_url=$(channel_url_from_json_file "$json_file")
+    python "$scrape_channel_avatar_img_py" --channel-url "$channel_url" --channel-name "$channel_name"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
+}
+
+function merge_avatar_json() { # jq merge overwrites previous fields.
+  while read -r json_file; do
+    echo processing "$json_file"...
+    channel_name=$(channel_name_from_json_file "$json_file")
+    avatar_json_file=$(find "$channels_meta_dir/$channel_name" -iname "avatar*json")
+    avatar_json=$(jq . "$avatar_json_file")
+    [ -z "$avatar_json" ] && continue
+
+    json=$(jq '.' "$json_file")
+    jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
+  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
 }

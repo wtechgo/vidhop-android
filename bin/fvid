@@ -178,7 +178,7 @@ function fvidv() {
   done < <(find "$vids_meta_dir" -type f -iname "*.json")
 
   videos=$(jq -s '{ entries: . }' <<<"$videos")
-  [ "$(jq '.entries | length' <<<"$videos")" -eq 0 ] && echo "found nothing" && return
+  [ "$(jq '.entries | length' <<<"$videos")" -eq 0 ] && echo "found nothing in videos metadata" && return
   opinionated_print "$videos" "videos"
 }
 
@@ -201,16 +201,14 @@ function fvidc() {
   done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json")
 
   channels=$(jq -s '{ entries: . }' <<<"$channels")
-  [ "$(jq '.entries | length' <<<"$channels")" -eq 0 ] && echo "found nothing" && return
+  [ "$(jq '.entries | length' <<<"$channels")" -eq 0 ] && echo "found nothing in channels metadata" && return
   opinionated_print "$channels" "channels"
 }
 
 function fvid() {
-  set +m
-  fvidv "$1" &
-  fvidc "$1" &
+  (fvidv "$1" &)
+  (fvidc "$1" &)
   wait
-  set -m
 }
 
 function fvidcv() {

@@ -202,6 +202,10 @@ function strip_extension() {
   echo "${file//.$ext/}" # remove the extension e.g. remove .json from abs path
 }
 
+function epoch2date() {
+  date --date @"$1"
+}
+
 function sort_upload_date_desc() {
   [ -z "$json" ] && echo no json variable availble, abort sort && return 1
   entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")

@@ -219,10 +219,10 @@ JSON
 function format_oneliner_history() {
   mode="$1" file="$2"
   if [ "$mode" = -c ]; then
-    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.epoch) | reverse | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
+    echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
   else
     echo -e "${GREEN}$(
-      jq 'unique_by(.url) | sort_by(.epoch) | reverse | .[] | ""
+      jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | .[] | ""
      + "> " + .channel_name + ": "
      + .title + " | "
      + .url + " | "

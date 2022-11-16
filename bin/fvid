@@ -212,8 +212,8 @@ function fvid() {
 }
 
 function fvidcv() {
-  if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT>" && return 0; fi
-  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT>" && return 0; fi
+  if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
+  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
   platform="$3"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")

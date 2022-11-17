@@ -58,7 +58,7 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     sed 's/ - Topic//' |
     sed 's/ - Videos//' |
     xargs -0 | # removes leading and trailing single spaces
-    xargs  # removes leading and trailing single quotes
+    xargs # removes leading and trailing single quotes
   # sed 's/\.\{2,\}//g' removes 2 or more dots
 }
 
@@ -193,7 +193,7 @@ function get_sub_extension() {
   lang=$(echo -n "$1" | rev | cut -d '.' -f 2 | rev)
   ext="$lang.$sub_type"
   echo "$ext"
-#  [ "$(echo -n "$ext" | wc --chars)" -gt 4 ] && echo "function get_extension failed: result larger than return 4 chars" && return 1
+  #  [ "$(echo -n "$ext" | wc --chars)" -gt 4 ] && echo "function get_extension failed: result larger than return 4 chars" && return 1
 }
 
 function strip_extension() {

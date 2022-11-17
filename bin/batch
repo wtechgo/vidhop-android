@@ -185,9 +185,9 @@ function sort_channel_entries_desc() {
 
     json=$(jq . "$json_file")
     entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")
-    json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")   # workaround for --argjson value too large
+    json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries") # workaround for --argjson value too large
 
-    jq <<<"$json" > "$json_file"
+    jq <<<"$json" >"$json_file"
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
 }
 

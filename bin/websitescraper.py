@@ -2,8 +2,11 @@ import sys
 from pywebcopy import save_website
 
 url = sys.argv[1]
-project_folder = sys.argv[2]
-project_name = url.split('/')[2]
+websites_dir = sys.argv[2]
+
+name = url.split('/')[3].split('?')[0]  # selects first segment after the domain, throws away query parameters.
+project_folder = f"{websites_dir}/{name}"
+project_name = 'site'
 
 save_website(
     url=url,

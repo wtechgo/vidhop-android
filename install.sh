@@ -38,6 +38,7 @@ yes | pkg install moreutils          # better for fetching the current IP addres
 yes | pkg install python ffmpeg      # required for yt-dlp
 yes | pkg install jq                 # json processor
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
+yes | pkg install termux-services    # enables management of services, used in the Tor workflow
 yes | pkg install libxml2 libxslt    # dependencies for facebook-scraper (installed by pip a little lower)
 
 echo "Installing python packages..."  # python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages

@@ -202,6 +202,10 @@ function strip_extension() {
   echo "${file//.$ext/}" # remove the extension e.g. remove .json from abs path
 }
 
+function myip() {
+  curl 'https://api.ipify.org?format=text'
+}
+
 function epoch2date() {
   date --date @"$1"
 }

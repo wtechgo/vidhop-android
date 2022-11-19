@@ -996,3 +996,27 @@ function dlwebsite() {
 function dlw() {
   dlwebsite "$1"
 }
+
+function dlcensored() {
+  [ ! "$(command -v tor)" ] && echo "tor not installed, run 'pkg install tor'" and try again && return
+  [ ! "$(command -v proxychains4)" ] && echo "proxychains-ng not installed, run 'pkg install proxychains-ng'" and try again && return
+  [ ! "$(command -v sv)" ] && echo "sv not installed, run 'pkg install sv'" and try again && return
+  [ -z "$1" ] && echo "usage: dlcensored <URL>" && return || url="$1"
+
+  echo "fetching public IP address via https://api.ipify.org..."  # show current, public IP
+  echo "your IP-address is $(myip)" && sleep 2
+
+  echo "starting Tor..." && sleep 3
+  sv up tor
+
+  echo "fetching anonymous IP address via https://api.ipify.org..."
+  ip_tor="$(proxychains4 bash -c "curl 'https://api.ipify.org?format=text'")"
+  echo "your anonymous IP-address is $ip_tor (inside the Tor network)" && sleep 3 # shown anonymous IP
+
+  echo "starting video download..."
+  proxychains4 bash -c ". vidhop; dlv $url"
+
+  echo "stopping Tor..." && sleep 2
+  sv down tor
+  echo "download finished"
+}

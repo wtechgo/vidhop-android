@@ -210,6 +210,11 @@ function epoch2date() {
   date --date @"$1"
 }
 
+function clean_failed_downloads() {
+  find "$vidhop_dir" -name .json -exec rm {} \;
+  find "$vidhop_dir" -name null -prune -exec rm -rf {} \;
+}
+
 function sort_upload_date_desc() {
   [ -z "$json" ] && echo no json variable availble, abort sort && return 1
   entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")

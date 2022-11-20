@@ -127,3 +127,27 @@ function vidhophelp() {
   sync_help && echo
   loader_help && return
 }
+
+function install_odysee_workaround() {
+  sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
+    "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py" \
+    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
+
+  cat "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py"
+
+  rm "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "Odysee 405 HTTP error fixed"
+}
+
+function revert_odysee_workaround() {
+  sed 's;https://api.na-backend.odysee.com/api/v1/proxy;https://api.lbry.tv/api/v1/proxy;' \
+    "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py" \
+    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
+
+  cat "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py"
+
+  rm "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "Odysee 405 HTTP error fix reverted"
+}

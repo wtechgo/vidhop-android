@@ -67,7 +67,7 @@ function format_oneliner() {
             .title + " | " +
             .webpage_url + " | " +
             .upload_date' <<<"$json" | tr -d '"'
-  [ -n "$2" ] && [ "$2" = "videos" ] && echo -e "${NC}Still searching through channels...${GREEN}"
+  [ -n "$2" ] && [ "$2" = "videos" ] && [ "$function" = fvid ] && echo -e "${NC}Still searching through channels...${GREEN}"
 }
 
 function format_oneliner_reverse() { # reverse means ascending which suits 'newest first' in the console
@@ -161,6 +161,7 @@ function find_one_meta() {
 
 function fvidv() {
   init_vars "$@" || return
+  clean_failed_downloads
   case $? in # exit code of init_vars
   1) echo "failed to initiate vars (function init_vars)" ;;
   2) return 0 ;; # fvid --help was called and shown, exit program.
@@ -168,6 +169,10 @@ function fvidv() {
 
   say "searching in videos metadata at $vids_meta_dir..."
   while read -r vidjson; do
+    # match the filename to the search text with spaces replaced by *
+    [[ "$(echo "$vidjson" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')" == *"$(echo "$text" | tr ' ' '-')"* ]] &&
+     videos+=$(jq . "$vidjson") && continue
+    # search after matches inside the json file
     videos+=$(
       jq --arg text "$text" '
             select(
@@ -184,6 +189,7 @@ function fvidv() {
 
 function fvidc() {
   init_vars "$@" || return
+  clean_failed_downloads
   case $? in # exit code of init_vars
   1) echo "failed to initiate vars (function init_vars)" ;;
   2) return 0 ;; # fvid --help was called and shown, exit program.
@@ -206,12 +212,17 @@ function fvidc() {
 }
 
 function fvid() {
-  (fvidv "$1" &)
-  (fvidc "$1" &)
+  function=fvid
+  set +m
+  fvidv "$1" &
+  fvidc "$1" &
   wait
+  set -m
+  unset function
 }
 
 function fvidcv() {
+  clean_failed_downloads
   if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
   if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
   platform="$3"

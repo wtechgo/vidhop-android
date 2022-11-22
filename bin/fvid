@@ -214,8 +214,8 @@ function fvidc() {
 function fvid() {
   function=fvid
   set +m
-  fvidv "$1" &
-  fvidc "$1" &
+  (fvidv "$1" &)
+  (fvidc "$1" &)
   wait
   set -m
   unset function

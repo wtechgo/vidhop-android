@@ -140,7 +140,7 @@ function set_downloaded() {
 }
 
 function set_downloaded_date() {
-  set_metadata_field_json_obj "vh_downloaded_date" "$(date +'%d-%m-%Y_%H:%M:%S')"
+  set_metadata_field_json_obj "vh_downloaded_date" "$(date +%s)"
 }
 
 function set_thumb_file() {

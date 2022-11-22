@@ -75,6 +75,7 @@ function real_sendvidhop() {
     --exclude="export/" \
     --include="*/" \
     --include="*.mp4" \
+    --include="*.webm" \
     --include="*.jpg" \
     --include="*.jpeg" \
     --include="*.png" \
@@ -111,6 +112,7 @@ function dry_sendvidhop() {
     --exclude="export/" \
     --include="*/" \
     --include="*.mp4" \
+    --include="*.webm" \
     --include="*.jpg" \
     --include="*.jpeg" \
     --include="*.png" \
@@ -278,7 +280,7 @@ screen_rec="$SHARED_DIR_PHONE/Movies/Screen Recorder"
 doc_exts="doc docx xls xlsx pdf txt md"
 img_exts="jpg png webp jpeg"
 audio_exts="mp3 m4a wav flacc aac"
-mov_exts="mp4 mkv mov avi"
+mov_exts="mp4 webm mkv mov avi"
 
 function senddownloads() {
   if [ "$1" == "-exec" ]; then
@@ -362,7 +364,7 @@ function senddownloads() {
 }
 
 function cleandownloads() {
-  exts="jpg png webp jpeg mp4 mkv mov avi doc docx xls xlsx pdf txt md mp3 m4a wav flacc aac"
+  exts="jpg png webp jpeg mp4 webm mkv mov avi doc docx xls xlsx pdf txt md mp3 m4a wav flacc aac"
 
   for ext in $exts; do
     rm -rf "$dl/*.$ext"

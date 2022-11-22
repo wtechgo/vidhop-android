@@ -111,6 +111,7 @@ function fetch_video_metadata() {
                   asr: .asr
             }'
   )
+  ext=$(yt-dlp --print ext "$url")
 }
 
 # SINGLE VIDEO
@@ -241,7 +242,7 @@ function dlv() {
   mkdir "$vids_dir/$platform" 2>/dev/null
 
   dlvi "$url"
-  yt-dlp -S ext:mp4:m4a --recode mp4 --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+  yt-dlp --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
   print_metadata
   cd "$vids_dir/$platform" || return
@@ -436,7 +437,7 @@ function dlc() {
   set_channel_dir "$channel_dir" # augments $json
 
   # Download all videos from channel.
-  yt-dlp -S ext:mp4:m4a --recode mp4 -P "$channel_dir" -o "%(title)s.%(ext)s" \
+  yt-dlp -P "$channel_dir" -o "%(title)s.%(ext)s" \
     $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
     --replace-in-metadata "title" '"' "'" \
     --replace-in-metadata "title" '\*' '' \
@@ -606,8 +607,7 @@ function dlvpl() {
   [ ! $? ] && echo "download channel info failed (function: dlvpli)" && return
 
   # Download all videos from channel.
-  yt-dlp -S ext:mp4:m4a --recode mp4 \
-    -P "$channels_dir/$name/$platform/$pl_name" -o "%(track_number)s. %(title)s.%(ext)s" \
+  yt-dlp -P "$channels_dir/$name/$platform/$pl_name" -o "%(track_number)s. %(title)s.%(ext)s" \
     $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
     --replace-in-metadata "title" '"' "'" \
     --replace-in-metadata "title" '\*' '' \

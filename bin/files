@@ -21,7 +21,7 @@ function play() {
   [ -f "$1" ] && media_file="$1" || search_text="$1"
 
   if [ -n "$search_text" ]; then
-    files=$(find "$vidhop_dir" -iname "*$1*mp4")
+    files=$(find "$vidhop_dir" -iname "*$1*mp4" -o -iname "*$1*webm")
     echo "$files"
     count=$(wc -l <<<"$files")
     [ "$files" = "" ] && count=0
@@ -35,6 +35,7 @@ function play() {
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
+  [[ "$media_file" == *.webm ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
   [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
   [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
@@ -71,11 +72,13 @@ function renvid() {
   old_name=$(basename "$old_meta_dir" .json)
   old_vid_dir="$(dirname "$(dirname "$old_meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
   old_media_file="$old_vid_dir/$old_name.mp4"
+  old_media_file_webm="$old_vid_dir/$old_name.webn"
   old_media_file_sub="$old_vid_dir/$old_name.en.srt"
 
   # show file found
   [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
+  [ -f "$old_media_file_webm" ] && echo "found '$old_media_file'"
   [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
   # ask confirmation to rename
   echo -n "rename these files? Y/n: " && read -r answer
@@ -100,6 +103,10 @@ function renvid() {
     media_file="$old_vid_dir/$new_name.mp4" &&
     mv "$old_media_file" "$media_file" &&
     echo -e "renamed: '$old_media_file'\n     to: '$media_file'"
+  [ -f "$old_media_file_webm" ] &&
+    media_file="$old_vid_dir/$new_name.webm" &&
+    mv "$old_media_file_webm" "$media_file" &&
+    echo -e "renamed: '$old_media_file_webm'\n     to: '$media_file'"
   [ -d "$old_meta_dir" ] &&
     meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
     mv "$old_meta_dir" "$meta_dir" &&

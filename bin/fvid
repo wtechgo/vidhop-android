@@ -252,12 +252,12 @@ function fvidf() { # find video files (on disk)
   unset result
   found_something="false"
 
-  result=$(find "$vids_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  result=$(find "$vids_dir" -type f -iname "*$text*.mp4" -o -iname "*$text*.webm" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Single video downloads in VidHop directory search result:" && echo -e "$result" &&
     unset result && found_something="true"
 
-  result=$(find "$channels_dir" -type f -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
+  result=$(find "$channels_dir" -type f -iname "*$text*.mp4" -o -iname "*$text*.webm" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "$result" &&
     unset result && found_something="true"
@@ -326,6 +326,7 @@ function vidi() { # video info
   [ -z "$text" ] && echo navigated to videos metadata directory so you can tab autocomplete && return 0
 
   name=$(basename "$text" ".mp4")
+  name=$(basename "$name" ".webm")
   json=$(find "$vids_meta_dir" -iname "*$name*.json" | head -n 1)
   [ -z "$json" ] && echo no match found && return 0
 

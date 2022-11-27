@@ -73,7 +73,7 @@ function renvid() {
   old_name=$(basename "$old_meta_dir" .json)
   old_vid_dir="$(dirname "$(dirname "$old_meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
   old_media_file="$old_vid_dir/$old_name.mp4"
-  old_media_file_webm="$old_vid_dir/$old_name.webn"
+  old_media_file_webm="$old_vid_dir/$old_name.webm"
   old_media_file_sub="$old_vid_dir/$old_name.en.srt"
 
   # show file found

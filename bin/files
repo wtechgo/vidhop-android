@@ -37,6 +37,7 @@ function play() {
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.webm ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
+  [[ "$media_file" == *.m4a ]] && "$audio_app" "$media_file" && return
   [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
   [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
 }

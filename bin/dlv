@@ -13,8 +13,8 @@ function dlv_help() {
   echo "    dlvpli <URL>  => download video playlist information into /VidHop/metadata/channels/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlc <URL>     => download channel, all videos, metadata and thumbnails into /VidHop/channels"
   echo "    dlci <URL>    => download channel information, same as dlc but no video downloads into /VidHop/metadata/channels"
-  echo "    dla <URL>     => download audio, as mp3 from music videos into /VidHop/music"
-  echo "    dlalbum <URL> => download a music album as mp3 into /VidHop/music/<ALBUM_NAME>"
+  echo "    dla <URL>     => download audio, as m4a from music videos into /VidHop/music"
+  echo "    dlalbum <URL> => download a music album as m4a into /VidHop/music/<ALBUM_NAME>"
   echo "    dlapl <URL>   => download audio playlist into /VidHop/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlapli <URL>  => download audio playlist information into /VidHop/metadata/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlpod <URL>   => download podcast or audio tape into /VidHop/podcasts"
@@ -628,7 +628,7 @@ function dlvpl() {
   cd "$channels_dir/$name/$platform" || return
 }
 
-# Download audio. Save only the mp3 audio of a video plus metadata and thumbnail.
+# Download audio. Save only the m4a audio of a video plus metadata and thumbnail.
 function dla() {
   function=dla
   clear_vars_dlv
@@ -639,8 +639,8 @@ function dla() {
 
   name="$(fetch_song_filename | sed 's/NA - //')"
   fetch_video_metadata "$url" # populates json
-  # download mp3
-  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
+  # download m4a
+  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime \
     -P "$music_dir" -o "$name.%(ext)s" --verbose "$url"
   # download thumbnail
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \
@@ -752,7 +752,7 @@ function dlac() {
   [ ! $? ] && echo "download channel info failed (function: dlaci)" && return
 
   # Download all videos from channel.
-  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
+  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime \
     -P "$channel_dir" -o "%(album)s/%(track_number|)s%(track_number&. |)s%(title)s.%(ext)s" \
     $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
     --replace-in-metadata "title" '"' "'" \
@@ -878,7 +878,7 @@ function dlapl() {
   [ ! $? ] && echo "download channel info failed (function: dlapli)" && return
 
   # Download all videos from channel.
-  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --embed-thumbnail --no-mtime \
+  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime \
     -P "$music_dir/$pl_dir" -o "%(playlist_index)s. %(title)s.%(ext)s" \
     $([ "$has_archive" = true ] && echo "--download-archive $archive_file") \
     --replace-in-metadata "title" '"' "'" \
@@ -923,7 +923,7 @@ function dlpod() {
     -P "$podcasts_meta_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
   echo thumbnail download completed
 
-  yt-dlp -S ext:mp3:m4a --recode mp3 -x --audio-format mp3 --no-mtime \
+  yt-dlp -f ba --recode m4a --no-mtime \
     -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
   echo audio download completed
 
@@ -991,6 +991,7 @@ function dlwebsite() {
   [ -z "$1" ] || [ "$(is_url "$1")" = false ] && echo "not a valid url" && return
   url="$1"
   python "$website_scraper" "$url" "$websites_dir"
+  cd "$websites_dir"
 }
 
 function dlw() {

@@ -60,6 +60,7 @@ function real_sendvidhop() {
     --include="*/" \
     --include="*.json" \
     --include="*.mp3" \
+    --include="*.m4a" \
     --exclude="*" \
     "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 
@@ -98,6 +99,7 @@ function dry_sendvidhop() {
     --include="*/" \
     --include="*.json" \
     --include="*.mp3" \
+    --include="*.m4a" \
     --exclude="*" \
     "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 

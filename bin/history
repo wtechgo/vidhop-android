@@ -109,7 +109,7 @@ function add_to_ahistory() {
   url="$url"
   channel_name="$(channel_name_from_obj)"
   channel_url="$(channel_url)"
-  media_file="$music_dir/$name.mp3"
+  media_file="$music_dir/$name.$ext"
   meta_file="$music_meta_dir/$name.json"
   vh_downloaded="$([ "$function" = "dla" ] && echo true || echo false)"
   vh_downloaded_date="$(date +%s)"

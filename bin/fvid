@@ -161,7 +161,6 @@ function find_one_meta() {
 
 function fvidv() {
   init_vars "$@" || return
-  clean_failed_downloads
   case $? in # exit code of init_vars
   1) echo "failed to initiate vars (function init_vars)" ;;
   2) return 0 ;; # fvid --help was called and shown, exit program.
@@ -171,7 +170,7 @@ function fvidv() {
   while read -r vidjson; do
     # match the filename to the search text with spaces replaced by *
     [[ "$(echo "$vidjson" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')" == *"$(echo "$text" | tr ' ' '-')"* ]] &&
-     videos+=$(jq . "$vidjson") && continue
+      videos+=$(jq . "$vidjson") && continue
     # search after matches inside the json file
     videos+=$(
       jq --arg text "$text" '
@@ -189,7 +188,6 @@ function fvidv() {
 
 function fvidc() {
   init_vars "$@" || return
-  clean_failed_downloads
   case $? in # exit code of init_vars
   1) echo "failed to initiate vars (function init_vars)" ;;
   2) return 0 ;; # fvid --help was called and shown, exit program.
@@ -213,16 +211,13 @@ function fvidc() {
 
 function fvid() {
   function=fvid
-  set +m
   (fvidv "$1" &)
   (fvidc "$1" &)
   wait
-  set -m
   unset function
 }
 
 function fvidcv() {
-  clean_failed_downloads
   if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
   if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
   platform="$3"
@@ -252,17 +247,18 @@ function fvidf() { # find video files (on disk)
   unset result
   found_something="false"
 
-  result=$(find "$vids_dir" -type f -iname "*$text*.mp4" -o -iname "*$text*.webm" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Single video downloads in VidHop directory search result:" && echo -e "$result" &&
     unset result && found_something="true"
 
-  result=$(find "$channels_dir" -type f -iname "*$text*.mp4" -o -iname "*$text*.webm" | sed "s/^/'/;s/$/'/" | sort)
+  result=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "$result" &&
     unset result && found_something="true"
 
-  result=$(find -L "$HOME/Videos" -type f -not -path "$vidhop_dir" -iname "*$text*.mp4" | sed "s/^/'/;s/$/'/" | sort)
+  result=$(find -L "$HOME/Videos" -not \( -path "$HOME/Videos/VidHop" -prune \) -not -path "*.srt" \
+    -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Videos in user home directory result:" && echo -e "$result" &&
     unset result && found_something="true"
@@ -554,4 +550,23 @@ function clear_wp() {
 
 function ls_wp() {
   ll -l "$wp_export_dir/merge"
+}
+
+# Find audio file.
+function faudf() {
+  text="$1"
+  unset result
+  found_something="false"
+
+  result=$(find "$music_dir" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> VidHop music directory search result:" && echo -e "$result" &&
+    unset result && found_something="true"
+
+  result=$(find "$music_dir_ws" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> User music directory search result:" && echo -e "$result" &&
+    unset result && found_something="true"
+
+  [ "$found_something" = "false" ] && echo "found nothing"
 }

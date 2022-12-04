@@ -20,6 +20,7 @@ bin_dir="$vidhop_app_dir/bin"
 . "$bin_dir/fvid"
 . "$bin_dir/batch"
 . "$bin_dir/sync" # from workstation to phone
+. "$bin_dir/ffmpeg"
 . "$bin_dir/debug"
 
 [ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini" # overwrites sync vars with values from config.ini
@@ -63,6 +64,11 @@ function update_python_packages() {
   pip install -U facebook-scraper
   pip install -U snscrape
   pip install -U pywebcopy
+}
+
+function updateytdlp() {
+  echo "> Updating YT-DLP..." && sleep 1
+  pip install -U yt-dlp
 }
 
 function update_system() {

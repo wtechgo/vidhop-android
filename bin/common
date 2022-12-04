@@ -202,6 +202,18 @@ function strip_extension() {
   echo "${file//.$ext/}" # remove the extension e.g. remove .json from abs path
 }
 
+function prefix_extension() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: replace_filename <FILE> <NEW_NAME>" && return
+  prefix="$2"
+  old_file="$1"
+  old_dir="$(dirname "$(realpath "$1")")"
+  old_name="$(strip_extension "$(basename "$1")")"
+  old_ext=$(get_extension "$1")
+  old_file_abs_path="$old_dir/$old_name.$old_ext"
+  new_file_abs_path="$old_dir/$old_name.$prefix.$old_ext"
+  echo "$new_file_abs_path"
+}
+
 function myip() {
   curl 'https://api.ipify.org?format=text'
 }

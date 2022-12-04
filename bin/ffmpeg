@@ -1,0 +1,41 @@
+#!/bin/bash
+
+function 264encode() {
+  [ -z "$1" ] &&
+    echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
+    echo " info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
+
+  src="$(realpath "$1")"
+  [ ! -f "$src" ] && echo "file not found '$src', abort" && return
+  dest="$(strip_extension "$src").mp4"                         # converts into the same location
+  [ -f "$dest" ] && dest="$(strip_extension "$dest")_x264.mp4" # append _264 if the destination is also mp4
+
+  ffmpeg -i "$src" -c:v libx264 -profile:v high -preset slow -f mp4 -tune film -crf 18 "$dest"
+  echo "file conversion to x264 completed"
+  ## instructions from https://lbry.com/faq/video-publishing-guide
+  #ffmpeg -i input.avi -c:v libx264 -crf 21 -preset faster -pix_fmt yuv420p -maxrate 5000K -bufsize 5000K -vf 'scale=if(gte(iw\,ih)\,min(1920\,iw)\,-2):if(lt(iw\,ih)\,min(1920\,ih)\,-2)' -movflags +faststart -c:a aac -b:a 160k output.mp4
+}
+
+function 265encode() {
+  [ -z "$1" ] &&
+    echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
+    echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
+
+  src="$(realpath "$1")"
+  [ ! -f "$src" ] && echo "file not found '$src', abort" && return
+  dest="$(strip_extension "$src").mp4"                         # converts into the same location
+  [ -f "$dest" ] && dest="$(strip_extension "$dest")_x265.mp4" # append _265 if the destination is also mp4
+
+  ffmpeg -i "$src" -c:v libx265 -preset ultrafast -crf 23 -vtag hvc1 "$dest"
+  echo "file conversion to x265 completed"
+}
+
+function replaceaudio() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
+  set -x
+  video_file="$1"
+  audio_file="$2"
+  backup_file="$(prefix_extension "$video_file" backup)"
+  cp "$video_file" "$backup_file"
+  ffmpeg -i "$backup_file" -i "$audio_file" -c copy -map 0:v:0 -map 1:a:0 "$video_file"
+}

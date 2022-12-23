@@ -39,47 +39,12 @@ function jobs_done() {
 # An alias for import from txt files.
 function syncchannels() {
   list="$import_dir/channels.txt"
-  [ -n "$1" ] && list="$1"
-  [ ! -f "$1" ] && echo "no file found at path '$1' which should point to a file containing solely channel urls, abort" && return
+  [ -n "$1" ] && list="$import_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$1' which should point to a file containing solely channel urls, abort" && return
 
   while read -r url; do
     dlci "$url"
   done <"$list"
-}
-
-# An alias for import from txt files.
-function syncchannels() {
-  declare -a channel_lists=(
-    "$import_dir/youtube_channels_1.txt"
-    "$import_dir/youtube_channels_2.txt"
-    "$import_dir/youtube_channels_3.txt"
-    "$import_dir/youtube_channels_4.txt"
-    "$import_dir/bitchute_channels_1.txt"
-    "$import_dir/bitchute_channels_2.txt"
-    "$import_dir/bitchute_channels_3.txt"
-  )
-
-  for list in "${channel_lists[@]}"; do
-    logInfo "load list $list ..."
-    while read -r url; do
-      dlci "$url" &
-    done <"$list"
-    logInfo "List loaded $list ..."
-
-    sleep 10
-
-    logInfo "start polling..."
-    while [ "$(can_add_jobs)" = false ]; do
-      logInfo "$(pgrep yt-dlp | wc -l) yt-dlp jobs remaining...."
-      echo "$(pgrep yt-dlp | wc -l) yt-dlp jobs remaining...."
-      echo polling again after 3 minutes...
-      sleep 180
-    done
-    logInfo "end polling..."
-    logInfo "List done $list ..."
-  done
-
-  echo "final 5 jobs running..."
 }
 
 # Download metadata for all channels that have a json file.

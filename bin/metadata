@@ -28,14 +28,13 @@ function metadata_help() {
 }
 
 function metadata() {
-  if [ -n "$1" ]; then
-    [ -f "$1" ] && jq . "$1" && return
-    found_meta_file="$(find_one_meta "$1")"
-    [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
-  else
-    [ -f "$meta_file" ] && jq . "$meta_file" && return
-    [ -f "$json_file" ] && jq . "$meta_file" && return
-  fi
+  # arg is a path to json file
+  [ -f "$1" ] && [[ "$1" == *.json ]] && jq . "$1" && return
+  # arg is a search term
+  [ -n "$1" ] && found_meta_file="$(find_one_meta "$1")" && [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
+  # open metadata file of last download
+  [ -f "$meta_file" ] && jq . "$meta_file" && return
+  [ -f "$json_file" ] && jq . "$meta_file" && return
   echo "no metadata file found"
 }
 
@@ -65,55 +64,55 @@ function set_metadata_field() {
 }
 
 function setdescription() {
-[ "$#" = 0 ] && echo -e "usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_description' "$@" || return
   echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setsummary() {
-[ "$#" = 0 ] && echo -e "usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_summary' "$@" || return
   echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setremarks() {
-[ "$#" = 0 ] && echo -e "usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_remarks' "$@" || return
   echo "'vh_remarks' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcategories() {
-[ "$#" = 0 ] && echo -e "usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_categories' "$@" || return
   echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function settopics() {
-[ "$#" = 0 ] && echo -e "usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setspeakers() {
-[ "$#" = 0 ] && echo -e "usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_speakers' "$@" || return
   echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcreators() {
-[ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function setcreators() {
-[ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 function settimestamps() {
-[ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field "vh_timestamps" "$1" "$2" || return
   echo "'vh_timestamps' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
@@ -127,7 +126,7 @@ function addtimestamps() {
 
   timestamps=$(jq '.vh_timestamps' <<<"$metadata" | tr -d '"')
   [ "$timestamps" = null ] && settimestamps "$1" && return
-  timestamps="${timestamps}, ${1}"  # append new timestamps to old ones
+  timestamps="${timestamps}, ${1}" # append new timestamps to old ones
 
   set_metadata_field "vh_timestamps" "$timestamps" "$2" || return
   echo "'vh_timestamps' was set to '$timestamps' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
@@ -136,7 +135,7 @@ function addtimestamps() {
 function set_downloaded() {
   [ "$#" -eq 2 ] && value="$2" || value="$1"
   set_metadata_field_json_obj "vh_downloaded" "$value"
-  [ "$1" = "-f" ] || [ "$1" = "--file" ] && jq <<<"$json" > "$meta_file"
+  [ "$1" = "-f" ] || [ "$1" = "--file" ] && jq <<<"$json" >"$meta_file"
 }
 
 function set_downloaded_date() {

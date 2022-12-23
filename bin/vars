@@ -17,6 +17,7 @@ channels_dir="$vidhop_dir/channels"
 music_dir="$vidhop_dir/music"
 podcasts_dir="$vidhop_dir/podcasts"
 thumbnails_dir="$vidhop_dir/thumbnails"
+record_dir="$vidhop_dir/record"
 websites_dir="$vidhop_dir/website"
 # user device media
 music_dir_phone="$shared/Music"
@@ -59,7 +60,7 @@ text_app="termux-open"
 
 
 # .bashrc shortkeys
-alias loadconfigurator='. "$bin_dir/config'
+alias loadconfig='. "$bin_dir/config'
 
 alias cdvidhop='cd $vidhop_dir'
 alias cdappdir='cd $vidhop_app_dir'

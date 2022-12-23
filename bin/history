@@ -260,7 +260,7 @@ function thistory() {
 function lasttitle() {
   [ -n "$name" ] && echo "$name" && return
   [ -n "$meta_file" ] && [ -f "$meta_file" ] && basename "$meta_file" .json && return
-  [ -n "$media_file" ] && [ -f "$media_file" ] && basename "$media_file" .mp4 && return
+  [ -n "$media_file" ] && [ -f "$media_file" ] && basename "$media_file" ".$ext" && return
   [ -f "$titles_file" ] && tail -n 1 "$titles_file"
 }
 

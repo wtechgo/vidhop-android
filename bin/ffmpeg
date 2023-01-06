@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO: https://github.com/CrypticSignal/better-ffmpeg-progress
 
 function 264encode() {
   [ -z "$1" ] &&
@@ -46,7 +47,6 @@ function 265encode1080p() {
 
 function replaceaudio() {
   [ -z "$1" ] || [ -z "$2" ] && echo "usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
-  set -x
   video_file="$1"
   audio_file="$2"
   backup_file="$(prefix_extension "$video_file" backup)"
@@ -62,11 +62,11 @@ function cutvideo() {
 }
 
 mp3+thumbnail2video() {
-  audio_file="$1"
-  image_file="$2"
+  audio_file="$(realpath "$1")"
+  image_file="$(realpath "$2")"
   output_file="$(strip_extension "$audio_file").mp4"
   [ -z "$output_file" ] && output_file="$3"
   [ -z "$audio_file" ] || [ -z "$image_file" ] || [ -z "$output_file" ] &&
     echo "usage: mp3+thumbnail2video <AUDIO_FILE> <IMAGE_FILE> [<OUTPUT_FILE>]" && return
-  ffmpeg -loop 1 -r 1 -i "$img_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
+  ffmpeg -loop 1 -r 1 -i "$image_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
 }

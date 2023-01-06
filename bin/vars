@@ -44,6 +44,7 @@ titles_file="$log_dir/titles.log"
 downloaded_dir="$log_dir/downloaded"
 # batch
 import_dir="$vidhop_dir/import"
+import_list_dir="$import_dir/list"
 export_dir="$vidhop_dir/export"
 fvid_export_dir="$export_dir/fvid"
 wp_export_dir="$export_dir/wp"
@@ -92,9 +93,13 @@ alias nanodlv='nano $bin_dir/dlv; . vidhop'
 alias nanofvid='nano $bin_dir/fvid; . vidhop'
 alias nanosync='nano $bin_dir/sync; . vidhop'
 alias nanofiles='nano $bin_dir/files; . vidhop'
-alias nanovars='nano $bin_dir/vars; . vidhop'
+alias nanobatch='nano $bin_dir/batch; . vidhop'
+alias nanohistory='nano $bin_dir/history; . vidhop'
+alias nanoffmpeg='nano $bin_dir/ffmpeg; . vidhop'
+alias nanofix='nano $bin_dir/fix; . vidhop'
 alias nanocommon='nano $bin_dir/common; . vidhop'
 alias nanohistory='nano $bin_dir/history; . vidhop'
+alias nanovars='nano $bin_dir/vars; . vidhop'
 alias nanoloader='nano $bin_dir/loader; . vidhop'
 alias nanoconfigini='nano $vidhop_app_dir/config.ini; . vidhop'
 

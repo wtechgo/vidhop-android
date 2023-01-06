@@ -1,5 +1,164 @@
 #!/bin/bash
 
+function batch_help() {
+  echo " Title: batch"
+  echo " Description: Do work in bulk aka batch processing."
+  echo " Commands:"
+  echo "    dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list"
+  echo "    dlaclist [<LIST_FILE_PATH>]RL> => download all URLs in list file at /VidHop/import/list/dlac.list"
+  echo "    dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list"
+  echo "    dlalbumlist [<LIST_FILE_PATH>> => download all URLs in list file at /VidHop/import/list/dlalbum.list"
+  echo "    dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list"
+  echo "    dlaplilist [<LIST_FILE_PATH>]  => download all URLs in list file at /VidHop/import/list/dlapli.list"
+  echo "    dlclist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlc.list"
+  echo "    dlcilist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlci.list"
+  echo "    dlpodlist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlpod.list"
+  echo "    dltlist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlt.list"
+  echo "    dlvlist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlv.list"
+  echo "    dlvilist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlvi.list"
+  echo "    dlvpllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlvpl.list"
+}
+
+function dlalist () {
+  list="$import_list_dir/dla.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dla "$url"
+  done <"$list"
+}
+
+function dlaclist () {
+  list="$import_list_dir/dlac.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlac "$url"
+  done <"$list"
+}
+
+function dlacilist () {
+  list="$import_list_dir/dlaci.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlaci "$url"
+  done <"$list"
+}
+
+function dlalbumlist () {
+  list="$import_list_dir/dlalbum.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlalbum "$url"
+  done <"$list"
+}
+
+function dlapllist () {
+  list="$import_list_dir/dlapl.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlapl "$url"
+  done <"$list"
+}
+
+function dlaplilist () {
+  list="$import_list_dir/dlapli.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlapli "$url"
+  done <"$list"
+}
+
+function dlclist () {
+  list="$import_list_dir/dlc.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlc "$url"
+  done <"$list"
+}
+
+function dlcilist () {
+  list="$import_list_dir/dlci.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlci "$url"
+  done <"$list"
+}
+
+function dlpodlist () {
+  list="$import_list_dir/dlpod.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlpod "$url"
+  done <"$list"
+}
+
+function dltlist () {
+  list="$import_list_dir/dlt.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlt "$url"
+  done <"$list"
+}
+
+function dlvlist () {
+  list="$import_list_dir/dlv.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlv "$url"
+  done <"$list"
+}
+
+function dlvilist () {
+  list="$import_list_dir/dlvi.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlvi "$url"
+  done <"$list"
+}
+
+function dlvpllist () {
+  list="$import_list_dir/dlvpl.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlvpl "$url"
+  done <"$list"
+}
+
+function dlvplilist () {
+  list="$import_list_dir/dlvpli.list"
+  [ -n "$1" ] && list="$import_list_dir/$1"
+  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+
+  while read -r url; do
+    dlvpli "$url"
+  done <"$list"
+}
+
 # Write urls from channels to file.
 function export_channel_urls() {
   youtube_channels_1="$import_dir/urls_export.txt"
@@ -34,17 +193,6 @@ function can_add_jobs() {
 
 function jobs_done() {
   [ "$(pgrep yt-dlp)" ] && echo false || echo true
-}
-
-# An alias for import from txt files.
-function syncchannels() {
-  list="$import_dir/channels.txt"
-  [ -n "$1" ] && list="$import_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$1' which should point to a file containing solely channel urls, abort" && return
-
-  while read -r url; do
-    dlci "$url"
-  done <"$list"
 }
 
 # Download metadata for all channels that have a json file.

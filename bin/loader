@@ -21,6 +21,7 @@ bin_dir="$vidhop_app_dir/bin"
 . "$bin_dir/batch"
 . "$bin_dir/sync" # from workstation to phone
 . "$bin_dir/ffmpeg"
+. "$bin_dir/fix"
 . "$bin_dir/debug"
 
 [ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini" # overwrites sync vars with values from config.ini
@@ -131,29 +132,6 @@ function vidhophelp() {
   metadata_help && echo
   history_help && echo
   sync_help && echo
+  batch_help && echo
   loader_help && return
-}
-
-function install_odysee_workaround() {
-  sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
-    "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py" \
-    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
-
-  cat "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp" \
-    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py"
-
-  rm "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
-  echo "Odysee 405 HTTP error fixed"
-}
-
-function revert_odysee_workaround() {
-  sed 's;https://api.na-backend.odysee.com/api/v1/proxy;https://api.lbry.tv/api/v1/proxy;' \
-    "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py" \
-    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
-
-  cat "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp" \
-    > "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py"
-
-  rm "/data/data/com.termux/files/usr/lib/python3.11/site-packages/yt_dlp/extractor/lbry.py.temp"
-  echo "Odysee 405 HTTP error fix reverted"
 }

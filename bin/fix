@@ -1,0 +1,73 @@
+#!/bin/bash
+
+function install_odysee_workaround() {
+  sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
+    "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py" \
+    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
+
+  cat "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py"
+
+  rm "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "Odysee 405 HTTP error fixed"
+}
+
+function restore_odysee_workaround() {
+  sed 's;https://api.na-backend.odysee.com/api/v1/proxy;https://api.lbry.tv/api/v1/proxy;' \
+    "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py" \
+    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
+
+  cat "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py"
+
+  rm "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "Odysee 405 HTTP error fix reverted"
+}
+
+function rename_platform_dir_name() {
+  old_name="$1"
+  new_name="$2"
+  [ -z "$old_name" ] || [ -z "$new_name" ] &&
+    echo "empty arg. \$old_name = $old_name, \$new_name = $new_name, abort" &&
+    return
+
+  # the old dir doesn't exist, nothing to do
+  [ ! -d "$old_name" ] && return
+
+  # the old dir exists and the new one doesn't, rename (mv) old to new name
+  [ ! -d "$new_name" ] && mv "$old_name" "$new_name"
+
+  # the old & the new exists, mv files from old to new and delete old dir
+  [ -d "$old_name" ] && [ -d "$new_name" ] &&
+    mv "$old_name"/* "$new_name" &&
+    rm "$old_name"
+
+  unset old_name new_name
+}
+
+function rename-platform-dirs() {
+  old_names=(bitchute youtube odysee)
+  new_names=(bitchute.com youtube.com odysee.com)
+  len=${#old_names[@]}
+
+  # videos
+  cd "$vids_dir"
+  for ((i = 0; i < len; i++)); do
+    [ ! -d "${old_names[$i]}" ] && continue
+    echo "processing $i"
+    [ ! -d "${new_names[$i]}" ] && mv "${old_names[$i]}" "${new_names[$i]}"
+    [ -d "${new_names[$i]}" ] &&
+      mv "${old_names[$i]}"/* "${new_names[$i]}" &&
+      rm "${old_names[$i]}"
+  done
+}
+
+function channels() {
+  while read -r channel; do
+    echo "$channel"
+  done < <(ls "$channels_meta_dir")
+
+  while read -r channel; do
+    echo "$channel"
+  done < <(ls "$channels_dir")
+}

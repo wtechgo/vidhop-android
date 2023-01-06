@@ -21,6 +21,24 @@ function create_app_dirs() {
 }
 create_app_dirs
 
+function create_import_files() {
+  touch "$vidhop_dir/import/list/dlac.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlaci.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlalbum.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlapl.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlapli.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlc.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlci.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlpod.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlt.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlv.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlvi.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlvpl.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dlvpli.list" 2>/dev/null
+  touch "$vidhop_dir/import/list/dla.list" 2>/dev/null
+}
+create_import_files
+
 function is_dir_empty() {
   [ -z "$1" ] && echo "usage: is_dir_empty <PATH>" && return 0
   [ ! -d "$1" ] && echo "'$1' is not a directory, abort" && return 1

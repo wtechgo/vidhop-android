@@ -335,27 +335,3 @@ function merge_avatar_json() { # jq merge overwrites previous fields.
     jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
 }
-
-function create-backup-vidhop() {
-  [ "$1" = -h ] || [ "$1" = --help ] &&
-    echo "usage: create-backup-vidhop" &&
-    echo " info: copy files from \$vidhop_dir to \$vidhop_backup_dir (ideally set in config.ini)" &&
-    echo &&
-    echo "usage: create-backup-vidhop <VIDHOP_BACKUP_DIR>" &&
-    echo " info: copy files from \$vidhop_dir to \$vidhop_backup_dir (ideally set in config.ini)" &&
-    echo && return
-  [ -n "$1" ] && vidhop_backup_dir="$1"
-  rsync -av "$vidhop_dir"/* "$vidhop_backup_dir" --exclude=".git/" --exclude=".idea"
-}
-
-function restore-backup-vidhop() {
-  [ "$1" = -h ] || [ "$1" = --help ] &&
-    echo "usage: restore-backup-vidhop" &&
-    echo " info: copy files from \$vidhop_backup_dir to \$vidhop_dir (ideally set in config.ini)" &&
-    echo &&
-    echo "usage: restore-backup-vidhop <VIDHOP_BACKUP_DIR>" &&
-    echo " info: copy files from \$vidhop_backup_dir to \$vidhop_dir (ideally set in config.ini)" &&
-    echo && return
-  [ -n "$1" ] && vidhop_backup_dir="$1"
-  rsync -av "$vidhop_backup_dir"/* "$vidhop_dir" --exclude=".git/" --exclude=".idea"
-}

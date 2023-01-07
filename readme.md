@@ -177,6 +177,23 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
     ahistory => shows the history of the audio you downloaded
     phistory => shows the history of the podcasts you downloaded
     thistory => shows the history of the thumbnails you downloaded
+    
+ Title: batch
+ Description: Do work in bulk aka batch processing.
+ Commands:
+    dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list
+    dlaclist [<LIST_FILE_PATH>]RL> => download all URLs in list file at /VidHop/import/list/dlac.list
+    dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list
+    dlalbumlist [<LIST_FILE_PATH>> => download all URLs in list file at /VidHop/import/list/dlalbum.list
+    dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list
+    dlaplilist [<LIST_FILE_PATH>]  => download all URLs in list file at /VidHop/import/list/dlapli.list
+    dlclist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlc.list
+    dlcilist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlci.list
+    dlpodlist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlpod.list
+    dltlist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlt.list
+    dlvlist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlv.list
+    dlvilist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlvi.list
+    dlvpllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlvpl.list
 
  Title: sync
  Description: Sync files between phone and workstation.
@@ -328,6 +345,7 @@ VidHop will look for `config.ini` at `/vidhop/config/config.ini`.
 You can copy and, or rename `config.ini.template` to `config.ini` and customize it to match your needs. 
 
 Configurations defined in `config.ini` will "survive" updates which would otherwise overwrite `sync` and `vars` files.
+
 ## Censored videos
 
 Censored videos are often still accessible via [Tor browser](https://www.torproject.org/download/). You can still use

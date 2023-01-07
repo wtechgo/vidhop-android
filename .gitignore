@@ -1,3 +1,9 @@
+log
+import
+export
+
+config/config.ini
+
 .idea
 
 ## Python default ignores

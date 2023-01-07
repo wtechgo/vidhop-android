@@ -319,17 +319,15 @@ ssh -i "$HOME/.ssh/id_vidhop" $USER_WS@$IP_WS
 
 Here are the [Termux docs for configuring SSH](https://wiki.termux.com/wiki/Remote_Access) just in case.
 
-## Config.ini
+## `config.ini` for user-specific settings
 
-The update mechanism (`git reset --hard`) will overwrite your configuration inside the `sync` files. 
-To workaround this issue, you can put your SSH configuration (IP-address & user) in `config.ini`. 
-The variables defined in `config.ini` will overwrite the defaults.
+The variables defined in `config.ini` will overwrite VidHop defaults defined in `/vidhop/bin/vars`.
 
-Though `config.ini` was created predominantly to counter the update issue, other customization can also be defined there, 
-like the location of your VidHop media directory.
+VidHop will look for `config.ini` at `/vidhop/config/config.ini`.
 
 You can copy and, or rename `config.ini.template` to `config.ini` and customize it to match your needs. 
 
+Configurations defined in `config.ini` will "survive" updates which would otherwise overwrite `sync` and `vars` files.
 ## Censored videos
 
 Censored videos are often still accessible via [Tor browser](https://www.torproject.org/download/). You can still use

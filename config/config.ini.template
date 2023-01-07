@@ -7,6 +7,7 @@
 #vidhop_dir=""
 ## Where VidHop's code resides.
 #vidhop_app_dir=""
+#vidhop_backup_dir=""
 ## Overwrites loader.bin_dir before the loader loads in all other binaries.
 #bin_dir=""
 

@@ -22,7 +22,7 @@ function batch_help() {
 function dlalist () {
   list="$import_list_dir/dla.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dla "$url"
@@ -32,7 +32,7 @@ function dlalist () {
 function dlaclist () {
   list="$import_list_dir/dlac.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlac "$url"
@@ -42,7 +42,7 @@ function dlaclist () {
 function dlacilist () {
   list="$import_list_dir/dlaci.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlaci "$url"
@@ -52,7 +52,7 @@ function dlacilist () {
 function dlalbumlist () {
   list="$import_list_dir/dlalbum.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlalbum "$url"
@@ -62,7 +62,7 @@ function dlalbumlist () {
 function dlapllist () {
   list="$import_list_dir/dlapl.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlapl "$url"
@@ -72,7 +72,7 @@ function dlapllist () {
 function dlaplilist () {
   list="$import_list_dir/dlapli.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlapli "$url"
@@ -82,7 +82,7 @@ function dlaplilist () {
 function dlclist () {
   list="$import_list_dir/dlc.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlc "$url"
@@ -92,7 +92,7 @@ function dlclist () {
 function dlcilist () {
   list="$import_list_dir/dlci.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlci "$url"
@@ -102,7 +102,7 @@ function dlcilist () {
 function dlpodlist () {
   list="$import_list_dir/dlpod.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlpod "$url"
@@ -112,7 +112,7 @@ function dlpodlist () {
 function dltlist () {
   list="$import_list_dir/dlt.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlt "$url"
@@ -122,7 +122,7 @@ function dltlist () {
 function dlvlist () {
   list="$import_list_dir/dlv.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlv "$url"
@@ -132,7 +132,7 @@ function dlvlist () {
 function dlvilist () {
   list="$import_list_dir/dlvi.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlvi "$url"
@@ -142,7 +142,7 @@ function dlvilist () {
 function dlvpllist () {
   list="$import_list_dir/dlvpl.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlvpl "$url"
@@ -152,7 +152,7 @@ function dlvpllist () {
 function dlvplilist () {
   list="$import_list_dir/dlvpli.list"
   [ -n "$1" ] && list="$import_list_dir/$1"
-  [ ! -f "$list" ] && echo "no file found at path '$import_list_dir/$1' which should point to a file containing only URLs, abort" && return
+  [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
   while read -r url; do
     dlvpli "$url"
@@ -334,4 +334,28 @@ function merge_avatar_json() { # jq merge overwrites previous fields.
     json=$(jq '.' "$json_file")
     jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
   done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
+}
+
+function create-backup-vidhop() {
+  [ "$1" = -h ] || [ "$1" = --help ] &&
+    echo "usage: create-backup-vidhop" &&
+    echo " info: copy files from \$vidhop_dir to \$vidhop_backup_dir (ideally set in config.ini)" &&
+    echo &&
+    echo "usage: create-backup-vidhop <VIDHOP_BACKUP_DIR>" &&
+    echo " info: copy files from \$vidhop_dir to \$vidhop_backup_dir (ideally set in config.ini)" &&
+    echo && return
+  [ -n "$1" ] && vidhop_backup_dir="$1"
+  rsync -av "$vidhop_dir"/* "$vidhop_backup_dir" --exclude=".git/" --exclude=".idea"
+}
+
+function restore-backup-vidhop() {
+  [ "$1" = -h ] || [ "$1" = --help ] &&
+    echo "usage: restore-backup-vidhop" &&
+    echo " info: copy files from \$vidhop_backup_dir to \$vidhop_dir (ideally set in config.ini)" &&
+    echo &&
+    echo "usage: restore-backup-vidhop <VIDHOP_BACKUP_DIR>" &&
+    echo " info: copy files from \$vidhop_backup_dir to \$vidhop_dir (ideally set in config.ini)" &&
+    echo && return
+  [ -n "$1" ] && vidhop_backup_dir="$1"
+  rsync -av "$vidhop_backup_dir"/* "$vidhop_dir" --exclude=".git/" --exclude=".idea"
 }

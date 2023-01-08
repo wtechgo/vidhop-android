@@ -46,12 +46,15 @@ Windows users can run [VidHop in Docker](https://github.com/wtechgo/vidhop-docke
 
 ## Update & Uninstall
 
-To update, execute `updatevidhop`.  
-This command will update Termux, update all Python packages used by VidHop and download new code from GitHub using `Git`.
+>To update, execute `updatevidhop`.  
+>>This command will update Termux, update all Python packages used by VidHop and download new code from GitHub using `git fetch`.
 
-To uninstall, execute  `uninstallvidhop`.  
-This will remove `$PREFIX/opt/vidhop` and the loader. Your `sdcard/VidHop` directory will **not** be removed. You can delete 
-it manually with your file manager if necessary.
+>To uninstall, execute  `uninstallvidhop`.  
+>>This will remove the code at `$PREFIX/opt/vidhop`, the loader at `$PREFIX/bin/vidhop` and the program will ask you 
+>>if you want to delete your VidHop media and metadata directory at `/sdcard/VidHop`.
+
+In case you were wondering what `$PREFIX` is, it's a default [environment variable in Termux](https://github.com/termux/termux-packages/wiki/Termux-file-system-layout) 
+that holds the path `/data/data/com.termux/files/usr`. That path is Termux' filesystem root, equivalent to `/` in Linux.
 
 ## Functional Information
 
@@ -182,9 +185,9 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Description: Do work in bulk aka batch processing.
  Commands:
     dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list
-    dlaclist [<LIST_FILE_PATH>]RL> => download all URLs in list file at /VidHop/import/list/dlac.list
+    dlaclist [<LIST_FILE_PATH>>] => download all URLs in list file at /VidHop/import/list/dlac.list
     dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list
-    dlalbumlist [<LIST_FILE_PATH>> => download all URLs in list file at /VidHop/import/list/dlalbum.list
+    dlalbumlist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlalbum.list
     dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list
     dlaplilist [<LIST_FILE_PATH>]  => download all URLs in list file at /VidHop/import/list/dlapli.list
     dlclist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dlc.list

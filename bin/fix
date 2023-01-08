@@ -39,35 +39,70 @@ function rename_platform_dir_name() {
 
   # the old & the new exists, mv files from old to new and delete old dir
   [ -d "$old_name" ] && [ -d "$new_name" ] &&
-    mv "$old_name"/* "$new_name" &&
-    rm "$old_name"
+    mv "$old_name"/* "$new_name"; mv "$old_name"/.* "$new_name"; rm -rf "$old_name"
 
   unset old_name new_name
 }
 
 function rename-platform-dirs() {
-  old_names=(bitchute youtube odysee)
-  new_names=(bitchute.com youtube.com odysee.com)
-  len=${#old_names[@]}
+  echo 'WARNING: Making a backup of your VidHop directory is recommended.'
+  echo -n 'Do you want to rename all platform names e.g. from youtube to youtube.com? y/N: ' && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "renaming platform names aborted" && return
 
-  # videos
+  old_names=(bitchute odysee rumble youtube facebook twitter itv tiktok rokfin brandnewtube telegram instagram archive vimeo dailymotion)
+  new_names=(bitchute.com odysee.com rumble.com youtube.com facebook.com twitter.com itv.com tiktok.com rokfin.com brandnewtube.com telegram.com instagram.com archive.org vimeo.com dailymotion.com)
+  size_old_names=$((${#old_names[@]} + 1))
+
+  # single DLs
   cd "$vids_dir"
-  for ((i = 0; i < len; i++)); do
-    [ ! -d "${old_names[$i]}" ] && continue
-    echo "processing $i"
-    [ ! -d "${new_names[$i]}" ] && mv "${old_names[$i]}" "${new_names[$i]}"
-    [ -d "${new_names[$i]}" ] &&
-      mv "${old_names[$i]}"/* "${new_names[$i]}" &&
-      rm "${old_names[$i]}"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
   done
-}
+  cd "$vids_meta_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
 
-function channels() {
-  while read -r channel; do
-    echo "$channel"
-  done < <(ls "$channels_meta_dir")
+  cd "$podcasts_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
+  cd "$podcasts_meta_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
 
+  cd "$thumbnails_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
+  cd "$thumbnails_meta_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
+
+  cd "$social_media_dir"
+  for ((i = 1; i < size_old_names; i++)); do
+    rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+  done
+
+  # channels
+  cd "$channels_dir"
   while read -r channel; do
-    echo "$channel"
+    cd "$channel"
+    for ((i = 1; i < size_old_names; i++)); do
+      rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+    done
+    cd "$channels_dir"
   done < <(ls "$channels_dir")
+
+  cd "$channels_meta_dir"
+  while read -r channel; do
+    cd "$channel"
+    for ((i = 1; i < size_old_names; i++)); do
+      rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
+    done
+    cd "$channels_meta_dir"
+  done < <(ls "$channels_meta_dir")
 }

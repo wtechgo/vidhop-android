@@ -106,10 +106,19 @@ function uninstallvidhop() {
   echo "It does not delete your downloads in the VidHop directory."
   echo -n 'Are you sure you want to uninstall VidHop? y/N: ' && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "aborted uninstall" && return
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "uninstall stopped" && return
   [ "$answer" = "y" ] &&
     sudo rm "/usr/local/bin/vidhop" &&
-    rm -rf "/opt/vidhop"
+    rm -rf "/opt/vidhop" &&
+    echo "VidHop software removed" && sleep 2
+  unset answer
+
+  echo 'WARNING: The following action will permanently delete your VidHop directory that contains all your downloaded media and metadata files.' && sleep 1
+  echo -n 'Do you want to delete your VidHop directory? y/N: ' && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "uninstall stopped" && return
+  [ "$answer" = "y" ] && rm -rf "$shared/VidHop" && echo "VidHop media and metadata directory deleted" && sleep 2
+  echo "VidHop uninstall completed"
 }
 
 function loader_help() {

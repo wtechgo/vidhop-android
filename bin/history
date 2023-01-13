@@ -192,10 +192,10 @@ function add_to_phistory() {
   avatar_file="$podcasts_meta_dir/$platform/$name/avatar_data.json"
   vh_downloaded="$([ "$function" = "dlpod" ] && echo true || echo false)"
   vh_downloaded_date="$(date +%s)"
-  [ -f "$podcasts_dir/$platform/$name/thumbnail.jpg" ] && thumb_file="$podcasts_dir/$platform/$name/thumbnail.jpg"
-  [ -f "$podcasts_dir/$platform/$name/thumbnail.jpeg" ] && thumb_file="$podcasts_dir/$platform/$name/thumbnail.jpeg"
-  [ -f "$podcasts_dir/$platform/$name/thumbnail.png" ] && thumb_file="$podcasts_dir/$platform/$name/thumbnail.png"
-  [ -f "$podcasts_dir/$platform/$name/thumbnail.webp" ] && thumb_file="$podcasts_dir/$platform/$name/thumbnail.webp"
+  [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.jpg" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.jpg"
+  [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.jpeg" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.jpeg"
+  [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.png" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.png"
+  [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.webp" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.webp"
 
   history_entry=$(
     cat <<JSON

@@ -137,9 +137,10 @@ function rmvid() {
   name="$1"
   [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
 
-  results=$(find "$vidhop_dir" -iname "*$name*")
-  [ -z "$results" ] && echo found no matches && return
-  echo "$results"
+  media_results=$(find "$vids_dir" -iname "*$name*")
+  meta_results=$(find "$vids_meta_dir" -iname "*$name*")
+  [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
+  echo "$media_results" && echo "$meta_results"
 
   if [ -z "$answer" ]; then
     echo -n "delete these files permanently? Y/n: " && read -r answer
@@ -147,7 +148,14 @@ function rmvid() {
     [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
   fi
 
-  find "$vidhop_dir" -iname "*$name*" -prune -exec rm -rf {} \;
+  while read -r file; do
+    rm -rf "$file"
+  done < <(echo "$media_results") && unset file
+
+  while read -r file; do
+    rm -rf "$file"
+  done < <(echo "$meta_results")
+
   echo "deleted files for '$name'"
 
   head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"

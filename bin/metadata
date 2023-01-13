@@ -113,7 +113,7 @@ function setcreators() {
 
 function settimestamps() {
   [ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
-  set_metadata_field "vh_timestamps" "$1" "$2" || return
+  set_metadata_field "vh_timestamps" "$@" || return
   echo "'vh_timestamps' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
@@ -128,7 +128,11 @@ function addtimestamps() {
   [ "$timestamps" = null ] && settimestamps "$1" && return
   timestamps="${timestamps}, ${1}" # append new timestamps to old ones
 
-  set_metadata_field "vh_timestamps" "$timestamps" "$2" || return
+  if [ -n "$2" ]; then
+    set_metadata_field "vh_timestamps" "$timestamps" "$2"
+  else
+    set_metadata_field "vh_timestamps" "$timestamps"
+  fi
   echo "'vh_timestamps' was set to '$timestamps' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 

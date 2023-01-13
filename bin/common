@@ -18,10 +18,13 @@ function create_app_dirs() {
     "$websites_dir" \
     2>/dev/null
   touch "$meta_dir/.nomedia" 2>/dev/null
+  touch "$websites_dir/.nomedia" 2>/dev/null
+  touch "$social_media_dir/.nomedia" 2>/dev/null
 }
 create_app_dirs
 
 function create_import_files() {
+  mkdir -p "$vidhop_dir/import/list" 2>/dev/null
   touch "$vidhop_dir/import/list/dlac.list" 2>/dev/null
   touch "$vidhop_dir/import/list/dlaci.list" 2>/dev/null
   touch "$vidhop_dir/import/list/dlalbum.list" 2>/dev/null

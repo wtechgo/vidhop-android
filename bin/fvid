@@ -149,7 +149,7 @@ function find_one_meta() {
     meta_file="$search_text"
   else
     # $meta_file search.
-    results=$(find "$vids_meta_dir" -type f -iwholename "*$platform*$search_text*.json")
+    results=$(find "$meta_dir" -type f -iwholename "*$platform*$search_text*metadata.json")
     [ -z "$results" ] && return 1
     count="$(wc -l <<<"$results")"
     [ "$count" -eq 1 ] && meta_file="$results" || return 2

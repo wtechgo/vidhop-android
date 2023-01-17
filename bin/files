@@ -18,7 +18,7 @@ function files_help() {
 
 function play() {
   [ -z "$media_file" ] && [ -z "$1" ] && echo "no media file available and no user input received" && return
-  [ -f "$1" ] && media_file="$1" || search_text="$1"
+  if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
     files=$(find "$vidhop_dir" -iname "*$1*mp4" -o -iname "*$1*webm")
@@ -32,6 +32,7 @@ function play() {
       unset files && return
     media_file="$files" && unset files
   fi
+  unset search_text
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return

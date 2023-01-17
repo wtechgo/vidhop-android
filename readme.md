@@ -185,7 +185,7 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Description: Do work in bulk aka batch processing.
  Commands:
     dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list
-    dlaclist [<LIST_FILE_PATH>>] => download all URLs in list file at /VidHop/import/list/dlac.list
+    dlaclist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlac.list
     dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list
     dlalbumlist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlalbum.list
     dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list

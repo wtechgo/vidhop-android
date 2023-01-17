@@ -168,8 +168,12 @@ function url_to_filename() {
     tr '.' '_' |
     tr '@' 'AT' |
     tr ':' '_' |
+    tr '=' '_' |
     tr -d '"' |
+    tr -d "'" |
     tr -d '\\' |
+    tr -d '$' |
+    tr -d '%' |
     tr '?' '_' |
     tr '&' '-'
 }
@@ -178,11 +182,16 @@ function url_to_channel_name() {
   url="$1"
   [ "$(is_url "$url")" = "false" ] && return 1
 
-  echo "$url" | cut -d/ -f 4 |
+  echo "$url" |
+    cut -d/ -f 4 |
     tr -d '@' |
+    tr -d '$' |
+    tr -d '%' |
     tr -d '?' |
     tr -d '"' |
+    tr -d "'" |
     tr -d '\\' |
+    tr '=' '_' |
     tr ':' '-' |
     tr '/' '-' |
     tr '.' '_'

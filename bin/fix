@@ -24,12 +24,17 @@ function restore_odysee_workaround() {
   echo "Odysee 405 HTTP error fix reverted"
 }
 
+# Only the most common platforms are being processed.
+# You can add missing platforms. Remember to add the old platform names AND the new platform name.
+old_names=(bitchute odysee rumble youtube facebook twitter itv tiktok rokfin brandnewtube telegram instagram archive vimeo dailymotion)
+new_names=(bitchute.com odysee.com rumble.com youtube.com facebook.com twitter.com itv.com tiktok.com rokfin.com brandnewtube.com telegram.com instagram.com archive.org vimeo.com dailymotion.com)
+size_old_names=$((${#old_names[@]} + 1))
+
 function rename_platform_dir_name() {
   old_name="$1"
   new_name="$2"
   [ -z "$old_name" ] || [ -z "$new_name" ] &&
-    echo "empty arg. \$old_name = $old_name, \$new_name = $new_name, abort" &&
-    return
+    echo "empty args: \$old_name = $old_name, \$new_name = $new_name, abort" && return
 
   # the old dir doesn't exist, nothing to do
   [ ! -d "$old_name" ] && return
@@ -44,15 +49,17 @@ function rename_platform_dir_name() {
   unset old_name new_name
 }
 
+# Applies for all platforms. We'll use the platform 'bitchute' as an example here.
+#
+# before:
+#  => VidHop/metadata/videos/<VIDEO_TITLE>/bitchute
+# after:
+#  => VidHop/metadata/videos/<VIDEO_TITLE>/bitchute.com
 function rename-platform-dirs() {
   echo 'WARNING: Making a backup of your VidHop directory is recommended.'
   echo -n 'Do you want to rename all platform names e.g. from youtube to youtube.com? y/N: ' && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] || [ -z "$answer" ] && echo "renaming platform names aborted" && return
-
-  old_names=(bitchute odysee rumble youtube facebook twitter itv tiktok rokfin brandnewtube telegram instagram archive vimeo dailymotion)
-  new_names=(bitchute.com odysee.com rumble.com youtube.com facebook.com twitter.com itv.com tiktok.com rokfin.com brandnewtube.com telegram.com instagram.com archive.org vimeo.com dailymotion.com)
-  size_old_names=$((${#old_names[@]} + 1))
 
   # single DLs
   cd "$vids_dir"
@@ -103,6 +110,65 @@ function rename-platform-dirs() {
     for ((i = 1; i < size_old_names; i++)); do
       rename_platform_dir_name "${old_names[$i]}" "${new_names[$i]}"
     done
+    cd "$channels_meta_dir"
+  done < <(ls "$channels_meta_dir")
+}
+
+# Applies for all platforms. We'll use the platform 'bitchute' as an example here.
+#
+# before:
+#  => VidHop/metadata/videos/bitchute/<VIDEO_TITLE>.json
+#  => VidHop/metadata/videos/bitchute/<VIDEO_TITLE>.jpeg
+# after:
+#  => VidHop/metadata/videos/bitchute/VIDEO_TITLE/metadata.json
+#  => VidHop/metadata/videos/bitchute/VIDEO_TITLE/thumbnail.jpeg
+function videosmeta-to-owndirectory() {
+  cd "$vids_meta_dir"
+
+  while read -r platform; do
+    cd "$platform"
+    while read -r file; do
+      dir_path="$(strip_extension "$file")"
+      mkdir -p "$dir_path"
+      mv "$dir_path.json" "$dir_path/metadata.json"
+      mv "$dir_path.jpg" "$dir_path/thumbnail.jpg" 2>/dev/null
+      mv "$dir_path.jpeg" "$dir_path/thumbnail.jpeg" 2>/dev/null
+      mv "$dir_path.png" "$dir_path/thumbnail.png" 2>/dev/null
+      mv "$dir_path.webp" "$dir_path/thumbnail.webp" 2>/dev/null
+      mv "$dir_cutpath.JPG" "$dir_path/thumbnail.JPG" 2>/dev/null
+      mv "$dir_path.JPEG" "$dir_path/thumbnail.JPEG" 2>/dev/null
+      mv "$dir_path.PNG" "$dir_path/thumbnail.PNG" 2>/dev/null
+      mv "$dir_path.WEBP" "$dir_path/thumbnail.WEBP" 2>/dev/null
+    done < <(ls "$vids_meta_dir/$platform"/*.json)
+    cd "$vids_meta_dir"
+  done < <(ls "$vids_meta_dir")
+}
+
+# Applies for all platforms. We'll use the platform 'bitchute' as an example here.
+#
+# rename VidHop/metadata/channels/<CHANNEL_NAME>/bitchute.com/<CHANNEL_NAME>.json
+#     to VidHop/metadata/channels/<CHANNEL_NAME>/bitchute.com/metadata.json
+# removes dir VidHop/metadata/channels/<CHANNEL_NAME>/bitchute
+#   keeps dir VidHop/metadata/channels/<CHANNEL_NAME>/bitchute.com
+function rename-channels-meta-json-files() {
+  cd "$channels_meta_dir"
+
+  while read -r channel_dir; do
+    cd "$channel_dir"
+
+    while read -r platform_dir; do
+      for ((i = 1; i < size_old_names; i++)); do
+        [ "$platform_dir" = "${old_names[$i]}" ] &&
+          rm -rf "$platform_dir" &&
+          echo "removed $channels_meta_dir/$channel_dir/$platform_dir"
+      done
+      for ((i = 1; i < size_old_names; i++)); do
+        [ "$platform_dir" = "${new_names[$i]}" ] &&
+          cd "$platform_dir" &&
+          find "$PWD" -iname "*.json" -exec mv {} metadata.json \; && cd ../..
+      done
+    done < <(ls)
+
     cd "$channels_meta_dir"
   done < <(ls "$channels_meta_dir")
 }

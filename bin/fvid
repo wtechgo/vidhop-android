@@ -48,8 +48,9 @@ function oneliner_channel_entries() {
   channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
   chani_entries=$(
     jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
-          | "> " + .title + " | " + .webpage_url + " | " + .upload_date' <<<"$json" | tr -d '"'
+          | "> " + .title + " | " + .webpage_url + " | " + .upload_date' <<<"$json" | tail -c +2 | head -c -2
   )
+  #  '| tail -c +2 | head -c -2' removes the leading and trailing quote. tr -d '"' lead to a bug stopping echo of strings with a quote.
   echo -e "${GREEN}$chani_entries"
 }
 

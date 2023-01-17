@@ -55,10 +55,23 @@ function replaceaudio() {
 }
 
 function cutvideo() {
-  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] &&
-    echo "usage: cutmedia <START_TIME> <END_TIME> <INPUT_FILE> <OUTPUT_FILE>]" &&
-    echo "    => time format like, 00:00:00" && return
-  ffmpeg -ss "$1" -to "$2" -i "$3" -c "$4"
+  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] && cat <<EOF && return
+usage: cutvideo <START_TIME> <END_TIME> <INPUT_FILE> <OUTPUT_FILE>
+
+time input formats:
+    formats to be used for <START_TIME> and <END_TIME>
+    h=hours, m=minutes, s=seconds, m=milliseconds
+
+    hh:mm:ss        example: 01:30:52
+    sss             example: 120
+
+    hh:mm:ss.mmm    example: 01:30:52.123
+    sss.mmm         example: 120.123
+
+If cutvideo fails, converting the input video from mkv to mp4 can help (via OBS > file > remux, or via ffmpeg).
+EOF
+
+  ffmpeg -ss "$1" -to "$2" -i "$3" -c copy "$4"
 }
 
 mp3+thumbnail2video() {

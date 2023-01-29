@@ -144,6 +144,24 @@ function videosmeta-to-owndirectory() {
   done < <(ls "$vids_meta_dir")
 }
 
+# Deletes all files (not directories) located directly in VidHop/metadata/videos/<PLATFORM>.
+# In this directory should only be directories according to the new structure in VidHop.
+#
+# Before:
+# => VidHop/metadata/videos/bitchute/<VIDEO_TITLE>.json
+# => VidHop/metadata/videos/bitchute/<VIDEO_TITLE>.jpeg
+# After
+# => VidHop/metadata/videos/bitchute.com/<VIDEO_TITLE>/metadata.json
+# => VidHop/metadata/videos/bitchute.com/<VIDEO_TITLE>/thumbnail.jpeg
+function delete-dangling-video-files() {
+  cd "$vids_meta_dir"
+  while read -r platform; do
+    cd "$platform"
+    find "$PWD" -type f -maxdepth 1 -exec rm {} \;
+    cd "$vids_meta_dir"
+  done < <(ls "$vids_meta_dir")
+}
+
 # Applies for all platforms. We'll use the platform 'bitchute' as an example here.
 #
 # rename VidHop/metadata/channels/<CHANNEL_NAME>/bitchute.com/<CHANNEL_NAME>.json

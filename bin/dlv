@@ -335,7 +335,7 @@ function dlci() {
   platform=$(extract_platform_name "$url") # yields youtube or bitchute etc.
 
   mkdir -p "$channels_meta_dir/$name/$platform" 2>/dev/null
-  json_file="$channels_meta_dir/$name/$platform/$name.json"
+  json_file="$channels_meta_dir/$name/$platform/metadata.json"
 
   # Merge scraped json with previous json on disk.
   if [ -f "$json_file" ]; then

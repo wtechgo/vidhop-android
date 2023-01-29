@@ -48,9 +48,9 @@ function oneliner_channel_entries() {
   channel_name_fallback="$(url_to_channel_name "$(jq .webpage_url <<<"$json" | tr -d '"')")"
   chani_entries=$(
     jq --arg 'channel_name_fallback' "$channel_name_fallback" '.entries | unique_by(.webpage_url) | sort_by(.upload_date) | .[]
-          | "> " + .title + " | " + .webpage_url + " | " + .upload_date' <<<"$json" | tail -c +2 | head -c -2
+          | "> " + .title + " | " + .webpage_url + " | " + .upload_date' <<<"$json" | sed 's/\\"/'\''/g' | tr -d '"'
   )
-  #  '| tail -c +2 | head -c -2' removes the leading and trailing quote. tr -d '"' lead to a bug stopping echo of strings with a quote.
+  #   | sed 's/\\"/'\''/g' | tr -d '"' removes the leading and trailing double quotes from each entry
   echo -e "${GREEN}$chani_entries"
 }
 
@@ -242,6 +242,32 @@ function fvidcv() {
   opinionated_print
 }
 
+function fvidfc() {
+  [ -z "$1" ] || [ -z "$2" ] &&
+    echo "  usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" && return
+  title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+
+  echo "searching through video files..."
+  results="$(
+    find "$vids_meta_dir" -type f -iwholename "*$title_search_text*metadata.json" |
+      while read -r json; do
+        jq -r --arg title_search_text "$title_search_text" --arg channel_search_text "$channel_search_text" '
+          if .vh_downloaded == "true"
+            and .title != null
+            and (if .uploader != null then .uploader | ascii_downcase | contains($channel_search_text) else empty end)
+          then .uploader + ": " + .title + "\n" + .webpage_url + "\n" + .vh_media_file + "\n"
+          elif .vh_downloaded == "true"
+            and .title != null
+            and (if .channel != null then .channel | ascii_downcase | contains($channel_search_text) else empty end)
+          then .channel + ": " + .title + "\n" + .webpage_url + "\n" + .vh_media_file + "\n"
+          else empty end' "$json"
+      done
+  )"
+  echo -e "${GREEN}$results${NC}"
+  echo "search completed"
+}
+
 # Output all video files whose name match your query.
 function fvidf() { # find video files (on disk)
   text="$1"
@@ -250,18 +276,18 @@ function fvidf() { # find video files (on disk)
 
   result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "$result" &&
+    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
   result=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Channel downloads in VidHop directory search result:" && echo -e "$result" &&
+    echo -e "> Channel downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
   result=$(find -L "$HOME/Videos" -not \( -path "$HOME/Videos/VidHop" -prune \) -not -path "*.srt" \
     -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Videos in user home directory result:" && echo -e "$result" &&
+    echo -e "> Videos in user home directory result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"

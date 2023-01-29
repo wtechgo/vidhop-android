@@ -17,7 +17,7 @@ function files_help() {
 }
 
 function play() {
-  [ -z "$media_file" ] && [ -z "$1" ] && echo "no media file available and no user input received" && return
+  [ -z "$1" ] && [ -z "$media_file" ] && echo "no media file available and no user input received" && return
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
@@ -31,8 +31,8 @@ function play() {
       echo -e "play requires 1 file but found $count $files\nyou can specifiy your search term further" &&
       unset files && return
     media_file="$files" && unset files
+    unset search_text
   fi
-  unset search_text
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
@@ -289,7 +289,7 @@ function rmarchive() {
 }
 
 function specs() {
-  [ "$1" = "-h" ] || [ "$1" = "--help" ] && usage_specs
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo -e "usage: specs <URL>\n       specs <FILE>" && return
   if [ "$(is_url "$1")" = true ]; then
     yt-dlp -F --force-ipv4 "$1"
     yt-dlp -J --force-ipv4 "$1" | jq '{
@@ -304,12 +304,13 @@ function specs() {
       vbr: .vbr,
       abr: .abr,
     }'
+    return
   elif [ -f "$1" ]; then
-    mediainfo "$1"
-  else
-    [ -z "$media_file" ] && echo "no media file from previous dlv execution to display" && usage_specs && return
-    mediainfo "$media_file"
+    mediainfo "$1" && return
+  elif [ -f "$media_file" ]; then
+    mediainfo "$media_file" && return
   fi
+  echo "input '$1' was not a valid URL or file"
 }
 
 function mediafile() {

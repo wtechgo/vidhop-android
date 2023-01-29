@@ -21,141 +21,183 @@ function batch_help() {
 
 function dlalist () {
   list="$import_list_dir/dla.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dla.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dla "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlaclist () {
   list="$import_list_dir/dlac.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlac.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlac "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlacilist () {
   list="$import_list_dir/dlaci.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlaci.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlaci "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlalbumlist () {
   list="$import_list_dir/dlalbum.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlalbum.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlalbum "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlapllist () {
   list="$import_list_dir/dlapl.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlapl.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlapl "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlaplilist () {
   list="$import_list_dir/dlapli.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlapli.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlapli "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlclist () {
   list="$import_list_dir/dlc.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlc.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlc "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlcilist () {
   list="$import_list_dir/dlci.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlci.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlci "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlpodlist () {
   list="$import_list_dir/dlpod.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlpod.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlpod "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dltlist () {
   list="$import_list_dir/dlt.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlt.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlt "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlvlist () {
   list="$import_list_dir/dlv.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlv.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlv "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlvilist () {
   list="$import_list_dir/dlvi.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlvi.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlvi "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlvpllist () {
   list="$import_list_dir/dlvpl.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlvpl.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlvpl "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
 function dlvplilist () {
   list="$import_list_dir/dlvpli.list"
-  [ -n "$1" ] && list="$import_list_dir/$1"
+  log="$import_list_dir/log/dlvpli.list.log"
+  [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
+  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
   while read -r url; do
     dlvpli "$url"
+    echo "$url" >> "$log"
   done <"$list"
 }
 
@@ -185,52 +227,6 @@ function export_channel_urls() {
 
   jq '.[].channel_url' <<<"$allchans" | tr -d '"' >"$youtube_channels_1"
   jq <<<"$allchans" >"$all_channels_json"
-}
-
-function can_add_jobs() {
-  [ "$(pgrep yt-dlp | wc -l)" -gt 6 ] && echo false || echo true
-}
-
-function jobs_done() {
-  [ "$(pgrep yt-dlp)" ] && echo false || echo true
-}
-
-# Download metadata for all channels that have a json file.
-function syncchannels_json_based() {
-  while read -r json_file; do
-    channel_url=$(channel_url_from_json_file "$json_file")
-    dlci "$channel_url" &# ! spawns multiple processes in the background
-  done < <(find "$channels_meta_dir" ! -name "avatar_*json" -type f -iname "*.json")
-}
-
-# Import URLs line per line from $meta_dir/import.txt.
-# Choose dlv or dlvi mode by passing it as and argument.
-# Example 1: import dlv  |  exemple 2: import dlvi
-# Note: -a import_file.txt is another possibility
-function import() {
-  mode=$([ -z "$1" ] && echo dlv || echo "$1")
-  urls="$import_dir/urls.txt"
-
-  if [[ $mode == "dlv" ]]; then
-    while read -r url; do
-      dlv "$url" &
-    done <"$urls"
-
-  elif [[ $mode == "dlvi" ]]; then
-    while read -r url; do
-      dlvi "$url" &
-    done <"$urls"
-
-  elif [[ $mode == "dlc" ]]; then
-    while read -r url; do
-      dlc "$url" &
-    done <"$urls"
-
-  elif [[ $mode == "dlci" ]]; then
-    while read -r url; do
-      dlci "$url" &
-    done <"$urls"
-  fi
 }
 
 # Merge subset metadata json of all channels and write one big file to channels metadata root directory.
@@ -272,66 +268,4 @@ function squashjson() {
   jq -s 'map(select(.title != null))' <<<"$json" >"$channels_meta_dir/all_channels".json # remove { null: null} objects
   jq -s <<<"$json" >"$import_dir/squashed.json"
   unset json
-}
-
-# Functions for manual data repair and troubleshoot.
-# --------------------------------------------------
-
-function update_archives_from_json_metadata() {
-  while read -r json_file; do
-    echo processing "$json_file"
-    json=$(jq . "$json_file")
-    save_channel_entries_to_archive
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
-}
-function inspect_field_all_channels() {
-  while read -r json_file; do
-    jq '.categories' "$json_file"
-  done < <(find "$channels_meta_dir" ! -name "avatar_*json" -type f -iname "*.json")
-}
-
-# does not work
-function sort_channel_entries_desc() {
-  echo starting sort all channel entries descending by upload date
-  while read -r json_file; do
-    unset json && echo processing "$json_file"...
-
-    json=$(jq . "$json_file")
-    entries=$(jq ".entries | sort_by(.upload_date) | reverse" <<<"$json")
-    json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries") # workaround for --argjson value too large
-
-    jq <<<"$json" >"$json_file"
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
-}
-
-function list_channel_avatars() {
-  while read -r channelDir; do
-    echo "channel: $channelDir"
-    # doesn't work because platform name is missing
-    ll "$channelDir/$channelDir.jpg" 2>/dev/null
-    ll "$channelDir/$channelDir.webp" 2>/dev/null
-    ll "$channelDir/$channelDir.png" 2>/dev/null
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" -type f -iname "*.json")
-}
-
-function fetch_avatars_by_json() {
-  while read -r json_file; do
-    echo processing "$json_file"...
-    channel_name=$(channel_name_from_json_file "$json_file")
-    channel_url=$(channel_url_from_json_file "$json_file")
-    python "$scrape_channel_avatar_img_py" --channel-url "$channel_url" --channel-name "$channel_name"
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar_data*json" -type f -iname "*.json")
-}
-
-function merge_avatar_json() { # jq merge overwrites previous fields.
-  while read -r json_file; do
-    echo processing "$json_file"...
-    channel_name=$(channel_name_from_json_file "$json_file")
-    avatar_json_file=$(find "$channels_meta_dir/$channel_name" -iname "avatar*json")
-    avatar_json=$(jq . "$avatar_json_file")
-    [ -z "$avatar_json" ] && continue
-
-    json=$(jq '.' "$json_file")
-    jq -s '.[0] += .[1] | .[0]' <<<"$json" <<<"$avatar_json" >"$json_file"
-  done < <(find "$channels_meta_dir" ! -name "all_channels*.json" ! -name "avatar*json" -type f -iname "*.json")
 }

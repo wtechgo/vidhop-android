@@ -12,9 +12,9 @@ from bs4 import BeautifulSoup
 
 def main(channel_url, channel_name, channels_meta_dir, is_playlist=False):
     platforms = [
-        "bitchute",
-        "odysee",
-        "youtube",
+        "bitchute.com",
+        "odysee.com",
+        "youtube.com",
         "youtu.be",
     ]
     platform = None
@@ -25,12 +25,12 @@ def main(channel_url, channel_name, channels_meta_dir, is_playlist=False):
         sys.exit(f"avatar scraper only supported for YouTube, Odysee & BitChute")
 
     def scrape_avatar_img_url(channel_URL):  # param is channel URL
-        if "bitchute" in channel_URL:
+        if "bitchute.com" in channel_URL:
             html = requests.get(channel_URL).text
             soup = BeautifulSoup(html, 'html.parser')
             link = soup.find(id="fileupload-large-icon-2")["data-src"]
             return link
-        if "odysee" in channel_URL:
+        if "odysee.com" in channel_URL:
             options = webdriver.FirefoxOptions()
             options.add_argument("--headless")
             options.add_argument("--disable-logging")  # attempt to replace service_log_path, does nothing
@@ -41,7 +41,7 @@ def main(channel_url, channel_name, channels_meta_dir, is_playlist=False):
             link = driver.find_element(By.CSS_SELECTOR, 'div.channel__primary-info img.channel-thumbnail__custom').get_attribute('src')
             driver.close()
             return link
-        if "youtube" in channel_URL or "youtu.be" in channel_URL:
+        if "youtube.com" in channel_URL or "youtu.be" in channel_URL:
             options = webdriver.FirefoxOptions()
             options.add_argument("--headless")
             options.add_argument("--disable-logging")  # attempt to replace service_log_path, does nothing
@@ -62,7 +62,7 @@ def main(channel_url, channel_name, channels_meta_dir, is_playlist=False):
 
     # Save image to disk.
     img = Image.open(requests.get(img_url, stream=True).raw)
-    rel_path_avatar_img = f"/{channel_name}/{platform}/{channel_name}.{img.format.lower()}"  # for avatar json
+    rel_path_avatar_img = f"/{channel_name}/{platform}/avatar_picture.{img.format.lower()}"  # for avatar json
     if is_playlist:
         rel_path_avatar_img = f"/{channel_name}/{channel_name}.{img.format.lower()}"  # for avatar json
     abs_path_avatar_img = f"{channels_meta_dir}{rel_path_avatar_img}"

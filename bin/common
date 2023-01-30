@@ -10,7 +10,8 @@ function create_app_dirs() {
     "$channels_meta_dir" \
     "$music_meta_dir" \
     "$podcasts_meta_dir" \
-    "$import_dir" \
+    "$import_list_dir/custom" \
+    "$import_list_dir/log/custom" \
     "$export_dir" \
     "$log_dir" \
     "$downloaded_dir" \
@@ -24,7 +25,6 @@ function create_app_dirs() {
 create_app_dirs
 
 function create_import_files() {
-  mkdir -p "$import_list_dir/log/custom" 2>/dev/null
   touch "$import_list_dir/dlac.list" 2>/dev/null
   touch "$import_list_dir/dlaci.list" 2>/dev/null
   touch "$import_list_dir/dlalbum.list" 2>/dev/null

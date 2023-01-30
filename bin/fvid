@@ -7,9 +7,10 @@ function fvid_help() {
   echo "    fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata"
   echo "    fvidv <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all videos metadata (shorter search time)"
   echo "    fvidf <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all video files on disk"
+  echo "    fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT> => find downloaded video files for channel in VidHop videos metadata dir, with video titles (filenames) that match <TITLE_SEARCH_TEXT> and a channels whose name matches <CHANNEL_SEARCH_TEXT>"
   echo "    fvidc <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all channels metadata"
-  echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata"
-  echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM> => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata for <PLATFORM> e.g youtube"
+  echo "    fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>] => find videos where title or description matches <SEARCH_TEXT> in channel with a name that matches <CHANNEL_NAME in a channels metadata for <PLATFORM> e.g youtube.com"
+  echo "    fvidcv <CHANNEL_JSON_ABS_PATH> <SEARCH_TEXT> =>  find videos where title or description matches <SEARCH_TEXT> in channel with provided metadata JSON file"
   echo "    fvidusermeta <SEARCH_TEXT>  => find videos where user added metadata contains <SEARCH_TEXT>, execute 'metadata_help' for more information."
   echo "    chani <CHANNEL_NAME> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME>"
   echo "    chani <CHANNEL_NAME> <PLATFORM> => channel information, lists all videos of a channel with name matching <CHANNEL_NAME> with platform matching <PLATFORM>"
@@ -219,20 +220,25 @@ function fvid() {
 }
 
 function fvidcv() {
-  if [ -n "$1" ]; then name="$1"; else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
-  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "usage: fvidcv <CHANNEL_NAME> <SEARCH_TEXT> [<PLATFORM>]" && return 0; fi
+  usage="usage: fvidcv <CHANNEL_SEARCH_TEXT> <SEARCH_TEXT> [<PLATFORM>]\n       fvidcv <ABS_PATH_CHANNEL_JSON> <SEARCH_TEXT>"
+  if [ -n "$1" ]; then channel_search_name="$1"; else echo "$usage"&& return 0; fi
+  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "$usage"&& return 0; fi
   platform="$3"
 
-  json_files=$(json_files_for_channel_name "$name" "$platform")
-  [ -z "$json_files" ] && echo no match found && return 0
-  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "fvidc" && return 0
-  json_file="$json_files" && unset json_files # only one entry in json_files
+  if [ -f "$channel_search_name" ]; then
+    json_file="$channel_search_name"
+  else
+    json_files=$(json_files_for_channel_name "$channel_search_name" "$platform")
+    [ -z "$json_files" ] && echo no match found && return 0
+    [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "fvidc" && return 0
+    json_file="$json_files" && unset json_files # only one entry in json_files
+  fi
 
   results_json=$(
-    jq --arg text "$text" '.entries[] |
+    jq --arg search_text "$search_text" '.entries[] |
               select(
-                  ( if .title != null then select(.title | ascii_downcase | contains($text)) else empty end ) or
-                  ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
+                  ( if .title != null then select(.title | ascii_downcase | contains($search_text)) else empty end ) or
+                  ( if .description != null then select(.description | ascii_downcase | contains($search_text)) else empty end )
               )' "$json_file"
   )
   echo "search done"
@@ -244,7 +250,10 @@ function fvidcv() {
 
 function fvidfc() {
   [ -z "$1" ] || [ -z "$2" ] &&
-    echo "  usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" && return
+    echo "  usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" &&
+    echo "   info: find downloaded video files for channel in VidHop videos metadata dir," &&
+    echo "         with video titles (filenames) that match <TITLE_SEARCH_TEXT>" &&
+    echo "         and a channels whose name matches <CHANNEL_SEARCH_TEXT>" && return
   title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
   channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
 
@@ -270,6 +279,7 @@ function fvidfc() {
 
 # Output all video files whose name match your query.
 function fvidf() { # find video files (on disk)
+  [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
   text="$1"
   unset result
   found_something="false"
@@ -382,14 +392,20 @@ function print_channel_data() {
 
 # Show all videos of a channel, one line per video.
 function chani() { # channel info
-  init_vars "$@" || return
-  [ -z "$text" ] && echo navigated to channels metadata directory so you can tab autocomplete && return 0
+  [ -z "$1" ] &&
+    echo "usage: chani <CHANNEL_SEARCH_TEXT>" &&
+    echo "       chani <ABS_FILE_PATH> [<PLATFORM>]" && return
 
-  json_files=$(json_files_for_channel_name "$text" "$platform")
-  [ -z "$json_files" ] && echo no match found && return 0
-  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chani" && return 0
-  json_file="$json_files" && unset json_files # only one entry in json_files
-  json=$(jq '.' "$json_file")
+  if [ -f "$1" ]; then
+    json_file="$1"
+    json=$(jq '.' "$1")
+  else
+    json_files=$(json_files_for_channel_name "$1" "$2")
+    [ -z "$json_files" ] && echo no match found && return 0
+    [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chani" && return 0
+    json_file="$json_files" && unset json_files # only one entry in json_files
+    json=$(jq '.' "$json_file")
+  fi
 
   print_channel_label
   oneliner_channel_entries

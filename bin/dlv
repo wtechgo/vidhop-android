@@ -18,6 +18,10 @@ function dlv_help() {
   echo "    dlapl <URL>   => download audio playlist into /VidHop/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlapli <URL>  => download audio playlist information into /VidHop/metadata/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlpod <URL>   => download podcast or audio tape into /VidHop/podcasts"
+  echo "    dlv720p <URL>  => download video in 1280x720 (HD)"
+  echo "    dlv1080p <URL> => download video in 1920x1080 (FHD)"
+  echo "    dlv1440p <URL> => download video in 2560x1440 (QHD)"
+  echo "    dlv2160p <URL> => download video in 3840x2160p (4K)"
   echo "    dlt <URL>     => download thumbnail and metadata as jpg into /VidHop/thumbnails"
   echo "    dlfbpost <URL>  => download facebook post metadata, no images into /VidHop/social_media"
   echo "    dltweet <URL>   => download twitter tweet metadata, no images into /VidHop/social_media"
@@ -230,11 +234,36 @@ function dlv() {
   mkdir "$vids_dir/$platform" 2>/dev/null
 
   dlvi "$url"
-  yt-dlp --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+  yt-dlp --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" \
+    $([ -n "$res" ] && echo " -S res:$res") --verbose "$url"
 
   print_metadata
   cd "$vids_dir/$platform" || return
   unset dl_comments function
+}
+
+function dlv720p() {
+  res=720
+  dlv "$@"
+  unset res
+}
+
+function dlv1080p() {
+  res=1080
+  dlv "$@"
+  unset res
+}
+
+function dlv1440p() {
+  res=1440
+  dlv "$@"
+  unset res
+}
+
+function dlv2160p() {
+  res=2160
+  dlv "$@"
+  unset res
 }
 
 # CHANNELS

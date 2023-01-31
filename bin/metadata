@@ -31,11 +31,27 @@ function metadata() {
   # arg is a path to json file
   [ -f "$1" ] && [[ "$1" == *.json ]] && jq . "$1" && return
   # arg is a search term
-  [ -n "$1" ] && found_meta_file="$(find_one_meta "$1")" && [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
+  [ -n "$1" ] && found_meta_file="$(find_one_vmeta "$1")" && [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
   # open metadata file of last download
   [ -f "$meta_file" ] && jq . "$meta_file" && return
   [ -f "$json_file" ] && jq . "$meta_file" && return
   echo "no metadata file found"
+}
+
+function channel-video-with-title() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: channel-video-with-title <CHANNEL_JSON_ABS_PATH> <TITLE_SEARCH_TEXT>" && return
+  json_file="$1"
+  search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  result="$(
+    jq -r --arg search_text "$search_text" --arg GREEN "$GREEN" --arg WHITE "$WHITE"  '
+      [.entries[] | select(.title | ascii_downcase | contains($search_text))] | unique_by(.webpage_url)[]
+      | "\ntitle: " + .title + "\nurl: " + .webpage_url + "\ndescription:\n" + .description' "$json_file"
+  )"
+  echo "${GREEN}${result}${NC}"
+}
+
+function filesize-channel-meta-files() {
+  find "$channels_meta_dir" -type f -iname "*metadata.json" -exec du -hs {} \;
 }
 
 function set_metadata_field_json_obj() {
@@ -50,11 +66,11 @@ function set_metadata_field() {
   [ "$#" = 0 ] || [ "$#" = 1 ] && echo "usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" && # three arguments implies we need to find a metadata FILE.
-    meta_file="$(find_one_meta "$partial_filename")" &&
-    result_find_one_meta="$?" &&
+    meta_file="$(find_one_vmeta "$partial_filename")" &&
+    result_find_one_vmeta="$?" &&
     metadata=$(jq . "$meta_file")
-  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
-  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return 1
+  [ "$result_find_one_vmeta" = 1 ] && echo "found no metadata for '$partial_filename'" && return
+  [ "$result_find_one_vmeta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return 1
 
   [ -z "$metadata" ] && echo "no metadata to work with" && return 1
   json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$metadata")
@@ -121,7 +137,7 @@ function addtimestamps() {
   [ -z "$1" ] && echo -e "usage: addtimestamps <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
     echo "example: addtimestamps \"01:11:01 = talking about interesting topic X, 01:23:45 = well that escalated quickly\"" && return
   [ -n "$json" ] && metadata="$json"
-  [ -z "$metadata" ] && [ -n "$2" ] && json_file=$(find_one_meta "$2") && metadata=$(jq . "$json_file")
+  [ -z "$metadata" ] && [ -n "$2" ] && json_file=$(find_one_vmeta "$2") && metadata=$(jq . "$json_file")
   [ -z "$metadata" ] && echo "no metadata to work with" && return 1
 
   timestamps=$(jq '.vh_timestamps' <<<"$metadata" | tr -d '"')
@@ -161,11 +177,11 @@ function rm_metadata_field() {
   [ "$#" = 0 ] && echo "no metadata field given to remove" && return
   [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
   [ "$#" = 2 ] && key="$1" && partial_filename="$2" &&
-    meta_file="$(find_one_meta "$partial_filename")" &&
-    result_find_one_meta="$?" &&
+    meta_file="$(find_one_vmeta "$partial_filename")" &&
+    result_find_one_vmeta="$?" &&
     metadata=$(jq . "$meta_file")
-  [ "$result_find_one_meta" = 1 ] && echo "found no metadata for '$partial_filename'" && return 1
-  [ "$result_find_one_meta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return 1
+  [ "$result_find_one_vmeta" = 1 ] && echo "found no metadata for '$partial_filename'" && return 1
+  [ "$result_find_one_vmeta" = 2 ] && echo "found more than 1 file, specify '$partial_filename' further" && return 1
 
   [ -z "$metadata" ] && echo "no metadata to work with" && return 1
   json=$(jq 'del(."'"$key"'")' <<<"$metadata")

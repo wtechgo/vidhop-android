@@ -190,3 +190,13 @@ function rename-channels-meta-json-files() {
     cd "$channels_meta_dir"
   done < <(ls "$channels_meta_dir")
 }
+
+function show-channel_jsonfiles-neq_metadatajson() {
+  find "$channels_meta_dir" -not -path "*metadata.json" -not -path "*avatar_data.json" \
+    -iname "*.json" -exec du -hs {} \;
+}
+
+function remove-channel_jsonfiles-neq_metadatajson() {
+  find "$channels_meta_dir" -not -path "*metadata.json" -not -path "*avatar_data.json" \
+    -iname "*.json" -exec rm {} \;
+}

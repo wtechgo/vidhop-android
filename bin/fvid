@@ -142,7 +142,7 @@ function say() {
   echo -e "${NC}$1"
 }
 
-function find_one_meta() {
+function find_one_vmeta() {
   search_text="$1"
   platform="$2"
 
@@ -221,8 +221,8 @@ function fvid() {
 
 function fvidcv() {
   usage="usage: fvidcv <CHANNEL_SEARCH_TEXT> <SEARCH_TEXT> [<PLATFORM>]\n       fvidcv <ABS_PATH_CHANNEL_JSON> <SEARCH_TEXT>"
-  if [ -n "$1" ]; then channel_search_name="$1"; else echo "$usage"&& return 0; fi
-  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "$usage"&& return 0; fi
+  if [ -n "$1" ]; then channel_search_name="$1"; else echo "$usage" && return 0; fi
+  if [ -n "$2" ]; then text=$(echo "$2" | tr '[:upper:]' '[:lower:]'); else echo "$usage" && return 0; fi
   platform="$3"
 
   if [ -f "$channel_search_name" ]; then

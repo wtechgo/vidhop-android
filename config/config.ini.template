@@ -1,5 +1,7 @@
 ## Copy or rename config.ini.template to config.ini and VidHop will read it.
 ## Fill in your personal information inside the double quotes.
+## Remove leading hashtags to uncomment that line and to make it active.
+## Add a hashtag at the beginning of a line to comment it and to make it inactive.
 
 ## App dirs.
 ## ---------
@@ -7,9 +9,13 @@
 #vidhop_dir=""
 ## Where VidHop's code resides.
 #vidhop_app_dir=""
-#vidhop_backup_dir=""
 ## Overwrites loader.bin_dir before the loader loads in all other binaries.
 #bin_dir=""
+
+## User dirs.
+## ----------
+#music_dir_ws=""
+#music_dir_phone=""
 
 ## SSH settings.
 ### PHONE.

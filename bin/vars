@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # You can change values here but it's not recommended as they will be overwritten when you update VidHop.
-# The solution is to set your values in /VidHop/config.ini.
+# The solution is to set your values in "$vidhop_app_dir/config/config.ini".
+# Copy-paste this command => nano "$vidhop_app_dir/config/config.ini"
 
 shared="/data/data/com.termux/files/home/storage/shared"
 [ -z "$vidhop_dir" ] && vidhop_dir="$shared/VidHop"
@@ -14,7 +15,7 @@ facebook_scraper="$bin_dir/facebookscraper.py"
 twitter_scraper="$bin_dir/twitterscraper.py"
 website_scraper="$bin_dir/websitescraper.py"
 
-# vidhop media
+# VidHop app dirs -- start
 vids_dir="$vidhop_dir/videos"
 channels_dir="$vidhop_dir/channels"
 music_dir="$vidhop_dir/music"
@@ -22,9 +23,6 @@ podcasts_dir="$vidhop_dir/podcasts"
 thumbnails_dir="$vidhop_dir/thumbnails"
 record_dir="$vidhop_dir/record"
 websites_dir="$vidhop_dir/website"
-# user device media
-music_dir_phone="$shared/Music"
-vidhop_backup_dir="SET_VALUE_IN_CONFIG_INI"
 # metadata
 meta_dir="$vidhop_dir/metadata"
 vids_meta_dir="$meta_dir/videos"
@@ -55,6 +53,7 @@ wp_export_dir="$export_dir/wp"
 
 termux_screen_char_count=53
 filename_char_count=180
+# VidHop app dirs -- end
 
 # default applications
 video_app="termux-open"
@@ -63,6 +62,11 @@ picture_app="termux-open"
 picture_app_alt="termux-open"
 text_app="termux-open"
 
+# User media (outside VidHop dir)
+music_dir_ws=""                 # set value in config.ini
+music_dir_phone="$shared/Music" # set value in config.ini
+vidhop_backup_dir=""            # set value in config.ini
+video_editor_projects_dir=""    # set value in config.ini e.g. kdenlive, davinci resolve, premiere...
 
 # .bashrc shortkeys
 alias loadconfig='. "$bin_dir/config'

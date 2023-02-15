@@ -18,11 +18,11 @@ function dlv_help() {
   echo "    dlapl <URL>   => download audio playlist into /VidHop/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlapli <URL>  => download audio playlist information into /VidHop/metadata/music/<CHANNEL_NAME>/<PLAYLIST_NAME>"
   echo "    dlpod <URL>   => download podcast or audio tape into /VidHop/podcasts"
+  echo "    dlt <URL>     => download thumbnail and metadata as jpg into /VidHop/thumbnails"
   echo "    dlv720p <URL>  => download video in 1280x720 (HD)"
   echo "    dlv1080p <URL> => download video in 1920x1080 (FHD)"
   echo "    dlv1440p <URL> => download video in 2560x1440 (QHD)"
-  echo "    dlv2160p <URL> => download video in 3840x2160p (4K)"
-  echo "    dlt <URL>     => download thumbnail and metadata as jpg into /VidHop/thumbnails"
+  echo "    dlv2160p <URL> => download video in 3840x2160 (4K)"
   echo "    dlfbpost <URL>  => download facebook post metadata, no images into /VidHop/social_media"
   echo "    dltweet <URL>   => download twitter tweet metadata, no images into /VidHop/social_media"
   echo "    dlwebsite <URL> => download page or complete website with images into /VidHop/website"
@@ -102,7 +102,8 @@ function fetch_video_metadata() {
                   asr: .asr
             }'
   )
-  ext=$(yt-dlp --print ext "$url")
+  [ "$function" = "dlpod" ] && ext=m4a || ext="$(yt-dlp --print ext "$url")"
+  [ "$function" = "dla" ] && ext=m4a
 }
 
 # SINGLE VIDEO
@@ -115,6 +116,7 @@ function fetch_sanitized_title() {
     --replace-in-metadata "title" '\*' '' \
     --replace-in-metadata "title" '/' '' \
     --replace-in-metadata "title" ':' ' -' \
+    --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
     --replace-in-metadata "title" '\?' '' \
@@ -130,6 +132,7 @@ function fetch_song_filename() {
     --replace-in-metadata "artist,title" '\*' '' \
     --replace-in-metadata "artist,title" '/' '' \
     --replace-in-metadata "artist,title" ':' ' -' \
+    --replace-in-metadata "artist,title" '#' '[ht]' \
     --replace-in-metadata "artist,title" '<' '' \
     --replace-in-metadata "artist,title" '>' '' \
     --replace-in-metadata "artist,title" '\?' '' \
@@ -338,6 +341,9 @@ function reset_archive_file() {
 # Download channel information (metadata and thumbnails of all videos and the avatar image.
 function dlci() {
   url="$1"
+  # Force dlci to only process /videos instead of /videos, /shorts and /live on YouTube.
+  [[ "$url" = *youtu.be* ]] || [[ "$url" = *youtube.com* ]] && [[ ! "$url" = */videos* ]] && old_url="$url" &&
+    url="$url/videos" && echo "changed URL from $old_url to $url"
   standalone="true"
   [ -n "$2" ] && standalone="$2"
   [ -n "$3" ] && debug="$3"

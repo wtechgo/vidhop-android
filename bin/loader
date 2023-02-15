@@ -14,10 +14,10 @@ bin_dir="$vidhop_app_dir/bin"
 . "$bin_dir/logger"
 . "$bin_dir/history"
 . "$bin_dir/files"
+. "$bin_dir/fvid"
 . "$bin_dir/metadata"
 
 . "$bin_dir/dlv"
-. "$bin_dir/fvid"
 . "$bin_dir/batch"
 . "$bin_dir/sync" # from workstation to phone
 . "$bin_dir/ffmpeg"

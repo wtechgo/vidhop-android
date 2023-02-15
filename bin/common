@@ -54,6 +54,11 @@ function extract_platform_name() {
   python -c 'print("'"$input"'".split("/")[2].replace("www.", ""))'
 }
 
+# Termux FS forbidden chars (Error: Operation not permitted).
+#
+# Identical to NTFS forbidden chars, see bin/common.sanitize_filename comments, however.
+# Hashtags (#) in filenames cause command 'termux-open' to do nothing. It just returns without an error.
+#
 # shellcheck disable=SC2120
 function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
   [ -n "$1" ] && echo "$1" | sanitize_filename && return
@@ -68,12 +73,12 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     tr '\`' "'" |
     tr '$' 'S' |
     sed 's/:/ -/g' |
+    sed 's/#/[ht]/g' |
     sed 's/\.\{2,\}/./g' |
     sed 's/ - Topic//' |
     sed 's/ - Videos//' |
-    xargs -0 | # removes leading and trailing single spaces
-    xargs # removes leading and trailing single quotes
-  # sed 's/\.\{2,\}//g' removes 2 or more dots
+    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+    # sed 's/\.\{2,\}//g' removes 2 or more dots
 }
 
 function is_single_download() {

@@ -21,7 +21,13 @@ function play() {
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
-    files=$(find "$vidhop_dir" -iname "*$1*mp4" -o -iname "*$1*webm")
+    files=$(
+      find "$vidhop_dir" -iname "*$search_text*mp4" \
+        -o -iname "*$search_text*webm" \
+        -o -iname "*$search_text*wmv" \
+        -o -iname "*$search_text*avi" \
+        -o -iname "*$search_text*m4v"
+    )
     echo "$files"
     count=$(wc -l <<<"$files")
     [ "$files" = "" ] && count=0
@@ -35,12 +41,20 @@ function play() {
   fi
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
+  # video
   [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
   [[ "$media_file" == *.webm ]] && "$video_app" "$media_file" && return
+  [[ "$media_file" == *.wmv ]] && "$video_app" "$media_file" && return
+  [[ "$media_file" == *.avi ]] && "$video_app" "$media_file" && return
+  [[ "$media_file" == *.m4v ]] && "$video_app" "$media_file" && return
+  # audio
   [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
   [[ "$media_file" == *.m4a ]] && "$audio_app" "$media_file" && return
+  # images
   [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
-  [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpg ]] && "$picture_app" "$media_file" && return
+  [[ "$media_file" == *.png ]] && "$picture_app_alt" "$media_file" && return
+  [[ "$media_file" == *.bmp ]] && "$picture_app_alt" "$media_file" && return
+  [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpeg ]] && "$picture_app" "$media_file" && return
 }
 
 function path_newfile() {
@@ -62,7 +76,7 @@ function rename_file() {
 # Rename a video and its metadata.
 function renvid() {
   [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>" && return
-  [ "$(echo -n "$1" | wc -c)" -lt 5 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
+  [ "$(echo -n "$1" | wc -c)" -lt 3 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
   old_name_search_term="$1"
   new_name="$2"
 

@@ -28,26 +28,15 @@ function metadata_help() {
 }
 
 function metadata() {
+  # open metadata file of last download
+  [ -z "$1" ] && [ -f "$meta_file" ] && jq . "$meta_file" && return
+  [ -z "$1" ] && [ -f "$json_file" ] && jq . "$json_file" && return
   # arg is a path to json file
   [ -f "$1" ] && [[ "$1" == *.json ]] && jq . "$1" && return
   # arg is a search term
-  [ -n "$1" ] && found_meta_file="$(find_one_vmeta "$1")" && [ -f "$found_meta_file" ] && jq . "$found_meta_file" && return
-  # open metadata file of last download
-  [ -f "$meta_file" ] && jq . "$meta_file" && return
-  [ -f "$json_file" ] && jq . "$meta_file" && return
-  echo "no metadata file found"
-}
-
-function channel-video-with-title() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: channel-video-with-title <CHANNEL_JSON_ABS_PATH> <TITLE_SEARCH_TEXT>" && return
-  json_file="$1"
-  search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
-  result="$(
-    jq -r --arg search_text "$search_text" --arg GREEN "$GREEN" --arg WHITE "$WHITE"  '
-      [.entries[] | select(.title | ascii_downcase | contains($search_text))] | unique_by(.webpage_url)[]
-      | "\ntitle: " + .title + "\nurl: " + .webpage_url + "\ndescription:\n" + .description' "$json_file"
-  )"
-  echo "${GREEN}${result}${NC}"
+  found_meta_file="$(find_one_vmeta "$1")"
+  error=$? && [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
+  jq . "$found_meta_file"
 }
 
 function filesize-channel-meta-files() {

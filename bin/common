@@ -77,8 +77,8 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     sed 's/\.\{2,\}/./g' |
     sed 's/ - Topic//' |
     sed 's/ - Videos//' |
+    sed -e "s/^'//" -e "s/'$//" |
     sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
-    # sed 's/\.\{2,\}//g' removes 2 or more dots
 }
 
 function is_single_download() {

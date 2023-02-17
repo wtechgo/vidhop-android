@@ -102,8 +102,7 @@ function fetch_video_metadata() {
                   asr: .asr
             }'
   )
-  [ "$function" = "dlpod" ] && ext=m4a || ext="$(yt-dlp --print ext "$url")"
-  [ "$function" = "dla" ] && ext=m4a
+  [ "$function" = "dla" ] || [ "$function" = "dlpod" ] && ext=m4a || ext="$(yt-dlp --print ext "$url")"
 }
 
 # SINGLE VIDEO

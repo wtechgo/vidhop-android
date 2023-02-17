@@ -169,7 +169,7 @@ function find_one_vmeta() {
 
   [ -f "$search_text" ] && echo "$search_text" && return
   result=$(find_one_file f "*$platform*$search_text*metadata.json" "$vids_meta_dir")
-  error=$? && if [ "$code" = 1 ]; then return 1; elif [ "$code" = 2 ]; then return 2; fi
+  error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
   echo "$result"
 }
 
@@ -180,7 +180,7 @@ function find_one_cmeta() {
 
   [ -f "$search_text" ] && echo "$search_text" && return
   result=$(find_one_file f "*$search_text*$platform*metadata.json" "$channels_meta_dir")
-  error=$? && if [ "$code" = 1 ]; then return 1; elif [ "$code" = 2 ]; then return 2; fi
+  error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
   echo "$result"
 }
 
@@ -434,7 +434,7 @@ function chani() { # channel info
     json=$(jq '.' "$search_text")
   else
     result=$(find_one_cmeta "$search_text" "$platform")
-    error=$? && [ ! "$code" = 0 ] && print_msg_for_error_code "$code" && return
+    error=$? && [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
     json=$(jq '.' "$result")
   fi
 

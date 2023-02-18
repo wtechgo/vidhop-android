@@ -215,5 +215,6 @@ function redownload-all-music() {
 }
 
 function diana() {
+  rm -f "$downloaded_dir/"*
   redownload-all-music
 }

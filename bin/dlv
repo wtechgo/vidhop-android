@@ -723,7 +723,7 @@ function dla() {
   name="$(fetch_song_filename | sed 's/NA - //')"
   fetch_music_metadata "$url" # populates json
   # download media
-  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata \
+  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
     -P "$music_dir" -o "$name.%(ext)s" --verbose "$url"
   # download thumbnail
   yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download \

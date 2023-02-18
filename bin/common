@@ -242,7 +242,7 @@ function prefix_extension() {
   echo "$new_file_abs_path"
 }
 
-function myip() {
+function myip-public() {
   curl 'https://api.ipify.org?format=text'
 }
 

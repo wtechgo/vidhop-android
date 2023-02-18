@@ -204,14 +204,15 @@ function remove-channel_jsonfiles-neq_metadatajson() {
 function redownload-all-music() {
   find "$music_meta_dir" -iwholename "*.json" |
     while read -r json; do
+      url="$(jq .webpage_url "$json" | tr -d '"')"
+      archive="$downloaded_dir/$(url_to_filename "$url")"
       is_list="$([ "$(jq .entries "$json")" = null ] && echo false || echo true)"
       type=$( ([ "$is_list" = true ] && echo "list/album") || echo "song")
 
       echo "processing $type: $(basename "$json")..."
-      url="$(jq .webpage_url "$json" | tr -d '"')"
+      rm "$archive" 2>/dev/null
       if [ "$is_list" = true ]; then dlapl "$url"; else dla "$url"; fi
     done
-  echo "finished re-downloading all music"
 }
 
 function diana() {

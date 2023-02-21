@@ -1,14 +1,13 @@
 #!/bin/bash
 
-shared="/data/data/com.termux/files/home/storage/shared"
-vidhop_dir="$shared/VidHop"
-vidhop_app_dir="$PREFIX/opt/vidhop"
-bin_dir="$vidhop_app_dir/bin"
+bin_dir="$PREFIX/opt/vidhop/bin"
+# overwrites vars variables $vidhop_dir, $vidhop_app_dir and $bin_dir with values from config.ini.
+# overwrites sync variables $IP_PHONE, $USER_PHONE, $USER_WS, $TERMUX_RC_WS.
+config_ini="$PREFIX/opt/vidhop/config/config.ini"
+[ -n "$1" ] && config_ini="$1"
+[ -f "$config_ini" ] && . "$config_ini"
 
-# overwrites $vidhop_dir, $vidhop_app_dir and $bin_dir with values from config.ini (if needed).
-[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini"
-
-. "$bin_dir/vars" # overwrites all vars from config.ini except $vidhop_dir, $vidhop_app_dir, $bin_dir
+. "$bin_dir/vars"
 . "$bin_dir/config"
 . "$bin_dir/common"
 . "$bin_dir/logger"
@@ -19,12 +18,31 @@ bin_dir="$vidhop_app_dir/bin"
 
 . "$bin_dir/dlv"
 . "$bin_dir/batch"
-. "$bin_dir/sync" # from workstation to phone
+. "$bin_dir/sync"
 . "$bin_dir/ffmpeg"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
 
-[ -f "$vidhop_app_dir/config.ini" ] && . "$vidhop_app_dir/config.ini" # overwrites sync vars with values from config.ini
+function switch_env() {
+  [ "$1" = -h ] || [ "$1" = --help ] &&
+    echo "   usage: switch_env <PATH>" &&
+    echo "            <PATH> is the path of the targeted VidHop directory e.g. /PATH/TO/FUN/VidHop" &&
+    echo "          switch_env" &&
+    echo "            fetches <PATH> from 'vidhop_dir_alt' var in config.ini if it exists" &&
+    echo "            fetches <PATH> from \$PWD (present working directory)" &&
+    echo "    info: Points the VidHop media directory to <PATH> to create a new environment." &&
+    echo "          The default VidHop media directory will stay untouched." &&
+    echo "scenario: You don't want to mix videos you download for work with those you download for fun." &&
+    echo "          You can accomplish that by doing 'switch_env /PATH/TO/FUN_DIR" && return
+  unset vidhop_dir
+
+  [ -n "$1" ] && vidhop_dir="$(realpath "$1")"
+  [ -z "$1" ] && [ -n "$vidhop_dir_alt" ] && vidhop_dir="$vidhop_dir_alt"
+  [ -z "$1" ] && vidhop_dir="$PWD/VidHop"
+
+  mkdir -p "$vidhop_dir" 2>/dev/null
+  . vidhop
+}
 
 function install_loader() {
   loader="$bin_dir/loader"

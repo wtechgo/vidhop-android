@@ -18,6 +18,7 @@ function files_help() {
 
 function play() {
   [ -z "$1" ] && [ -z "$media_file" ] && echo "no media file available and no user input received" && return
+  unset search_text
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
@@ -34,10 +35,9 @@ function play() {
 
     [ "$count" -eq 0 ] && echo "found nothing for '$search_text'" && unset files && return
     [ "$count" -gt 1 ] &&
-      echo -e "play requires 1 file but found $count $files\nyou can specifiy your search term further" &&
+      echo -e "play requires 1 file but found $count\n$files\nyou can specifiy your search term further" &&
       unset files && return
     media_file="$files" && unset files
-    unset search_text
   fi
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Sync VidHop data from phone to workstation using rsync.
-# Don't forget to start sshd on the workstation `systemctl start sshd`.
-# No permissions error was solved by disabling the firewall on computer.
+# Sync VidHop data from phone to workstation using rsync and vice versa.
+# These functions are intended to be used on the workstation.
+# Don't forget to start sshd on the workstation.
+# Allow SSH through your firewall in case of permission errors.
 
 function sync_help() {
   echo " Title: sync"
@@ -23,24 +24,18 @@ function sync_help() {
   echo "   No permissions error was solved by disabling the firewall on the workstation."
 }
 
+# Define your SSH variables in /VidHop/config/config.ini
+
 # WORKSTATION
-IP_WS="FILL_IN_IP_ADDRESS_FROM_WS_IN_CONFIG.INI"
-USER_WS="FILL_IN_USER_FROM_WORKSTATION_IN_CONFIG.INI"
-USER_HOME_WS="/home/$USER_WS" # used by `senddownloads` and `fetchdownloads`, NOT `syncvidhop`
-[ -f "$config_ini" ] && . "$config_ini" # overwrite $USER_WS & $USER_HOME_WS
-VIDHOP_DIR_WS="$USER_HOME_WS/Videos/VidHop" # target
-VIDHOP_APP_DIR_WS="/opt/vidhop"
-TERMUX_RC_WS="FILL_IN_PATH_OF_BASH.BASHRC_ON_WS_TO_SEND_TO_PHONE_IN_CONFIG.INI" # to be copied to $PREFIX/etc/bash.bashrc
+# -----------
 SSH_PORT_WS=22
-[ -f "$config_ini" ] && . "$config_ini" # overwrite $VIDHOP_APP_DIR_WS and $VIDHOP_BIN_DIR_WS
 
 # PHONE
+# -----
 SHARED_DIR_PHONE="/data/data/com.termux/files/home/storage/shared"
 VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
-VIDHOP_APP_DIR_PHONE="/data/data/com.termux/files/usr/opt/vidhop"
 TERMUX_RC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
 SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
-[ -f "$config_ini" ] && . "$config_ini"
 
 function sshworkstation() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"
@@ -62,7 +57,7 @@ function real_sendvidhop() {
     --include="*.mp3" \
     --include="*.m4a" \
     --exclude="*" \
-    "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
+    "$vidhop_dir/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 
   echo -e "\n" && echo "sending media files and delete from phone..."
   rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
@@ -216,7 +211,7 @@ function sendvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$VIDHOP_APP_DIR_PHONE/"* "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS"
+    "$vidhop_app_dir/"* "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS"
 }
 
 function fetchvidhopbin() {
@@ -224,7 +219,7 @@ function fetchvidhopbin() {
     --exclude=".git/" \
     --exclude=".gitignore" \
     --exclude=".idea/" \
-    "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS/"* "$VIDHOP_APP_DIR_PHONE"
+    "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS/"* "$vidhop_app_dir"
 }
 
 function sendbashrc() {
@@ -267,16 +262,16 @@ function sshconfig() {
 # sync downloaded files
 # ---------------------
 # img media directories
-dl="$SHARED_DIR_PHONE/Download"
-pictures="$SHARED_DIR_PHONE/Pictures"
+dl="$shared/Download"
+pictures="$shared/Pictures"
 screenshots="$pictures/Screenshots"
 fb1="$pictures/Facebook"
 messenger="$pictures/Messenger"
 twitter="$pictures/Twitter"
-fb2="$SHARED_DIR_PHONE/DCIM/Facebook"
+fb2="$shared/DCIM/Facebook"
 # mov media directories
-youcut="$SHARED_DIR_PHONE/Movies/youcut"
-screen_rec="$SHARED_DIR_PHONE/Movies/Screen Recorder"
+youcut="$shared/Movies/youcut"
+screen_rec="$shared/Movies/Screen Recorder"
 
 # file extensions
 doc_exts="doc docx xls xlsx pdf txt md"

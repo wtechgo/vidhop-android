@@ -280,13 +280,14 @@ function fvidcv() {
 }
 
 function fvidfc() {
-  [ -z "$1" ] || [ -z "$2" ] &&
+  [ -z "$1" ] &&
     echo "  usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" &&
     echo "   info: find downloaded video files for channel in VidHop videos metadata dir," &&
     echo "         with video titles (filenames) that match <TITLE_SEARCH_TEXT>" &&
     echo "         and a channels whose name matches <CHANNEL_SEARCH_TEXT>" && return
-  title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
-  channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  [ $# = 1 ] && title_search_text="*" && channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  [ $# = 2 ] && title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')" &&
+    channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
 
   echo "searching through video files..."
   results="$(
@@ -315,9 +316,10 @@ function fvidf() { # find video files (on disk)
   unset result
   found_something="false"
 
-  result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  result=$(find -L "$HOME/Videos" -not \( -path "$HOME/Videos/VidHop" -prune \) -not -path "*.srt" \
+    -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
+    echo -e "> Videos in user home directory result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
   result=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
@@ -325,10 +327,9 @@ function fvidf() { # find video files (on disk)
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
-  result=$(find -L "$HOME/Videos" -not \( -path "$HOME/Videos/VidHop" -prune \) -not -path "*.srt" \
-    -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
+  result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> Videos in user home directory result:" && echo -e "${GREEN}$result${NC}" &&
+    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"

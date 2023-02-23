@@ -35,9 +35,10 @@
 #VIDHOP_APP_DIR_WS=""
 
 ## Projects module.
-## Uncomment 5 lines bellow (delete hashtag) to activate the module with default configuration, or modify to preference.
+## Uncomment 6 lines bellow (delete hashtag) to activate the module with default configuration, or modify to preference.
+#shared="/data/data/com.termux/files/home/storage/shared"
 #name_projects_root_dir="Projects"  # Typically, only this value needs to be changed.
-#projects_dir="$HOME/$name_projects_root_dir"
-#projects_videos_dir="$HOME/Videos/$name_projects_root_dir"
-#projects_images_dir="$HOME/Pictures/$name_projects_root_dir"
-#projects_documents_dir="$HOME/Documents/$name_projects_root_dir"
+#projects_dir="$shared/$name_projects_root_dir"
+#projects_videos_dir="$shared/Movies/$name_projects_root_dir"
+#projects_images_dir="$shared/Pictures/$name_projects_root_dir"
+#projects_documents_dir="$shared/Documents/$name_projects_root_dir"

@@ -1,0 +1,212 @@
+#!/bin/bash
+# While reading the code, differentiate between "projects" in plural, which is the directory
+# that holds all individual projects which are referred to in singular as "project".
+
+project_markdown_scaffold() {
+  cat <<EOF
+# $project_name
+
+## Videos
+
+[]()
+
+[]()
+
+## Websites
+
+[]()
+
+[]()
+
+## Studies & Books
+
+[]()
+
+[]()
+
+## Glossary
+
+| Term | Definition |
+| ---- | ---------- |
+|      |            |
+EOF
+}
+
+# A find helper function that returns one file in happy path and an error otherwise.
+function find_one() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
+  if [ -n "$3" ]; then search_dir="$3"; else search_dir="$projects_dir"; fi
+  search_text="$2"
+  type="$1"
+
+  [ -f "$search_text" ] && echo "$search_text" && return
+  result=$(find "$search_dir" -type "$type" -iwholename "*$search_text*")
+  unset search_text
+
+  [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
+  [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
+  [ "$(wc -l <<<"$result")" -eq 1 ] && echo -e "$result"
+}
+
+# Command to create a new project e.g. Nanotechnology.
+project() {
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "invalid input '$1'" && return
+  project_name="$1"
+  project_dir="$projects_dir/$project_name"
+  [ -d "$project_dir" ] && echo "project with name '$project_name' already exists, abort" && return
+  # create dirs and symbolic links
+  mkdir "$project_dir"
+  mkviddir4project "$project_name"  # symlink to the newly created video dir for this project
+  mkimgdir4project "$project_name"  # symlink to the newly created images dir for this project
+  mkdir "$project_dir/site"
+  mkdir "$project_dir/doc"
+  # create a markdown document with some boilerplate
+  document_file="$project_dir/doc/$project_name.md"
+  project_markdown_scaffold >> "$document_file"
+  # open document with text editor
+  cd "$project_dir"
+  "$text_app" "$document_file"
+}
+
+# Creates a directory with the name of a singular project in the videos directory.
+# Example with default behavior:
+# You create a new project 'Nanotechnology' which will create directory $HOME/Projects/Nanotechnology.
+# mkviddir4project will create $HOME/Videos/Projects/Nanotechnology.
+# mkviddir4project will also create a symbolic link $HOME/Projects/Nanotechnology/vid
+# that points to $HOME/Videos/Projects/Nanotechnology.
+mkviddir4project() {
+  mkdir -p "$(realpath "$projects_videos_dir")/$project_name" 2>/dev/null
+  ln -s "$(realpath "$projects_videos_dir")/$project_name" "$projects_dir/$project_name/vid"
+}
+
+# See mkviddir4project.
+mkimgdir4project() {
+  mkdir -p "$(realpath "$projects_images_dir")/$project_name" 2>/dev/null
+  ln -s "$(realpath "$projects_images_dir")/$project_name" "$projects_dir/$project_name/img"
+}
+
+# Create a symbolic link to video file (arg) in the videos directory of a project.
+# Example: linkvid4project "$HOME/Videos/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
+# Result: Symbolic link "$HOME/Videos/Projects/Nanotechnology/DNA self-assembly.mp4"
+#         points to "$HOME/Videos/VidHop/videos/youtube.com/DNA self-assembly.mp4".
+linkvid4project() {
+  [ -z "$1" ] && echo -e "usage: linkvid4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
+  [ $# = 1 ] && file="$media_file" && project_name="$1"
+  [ $# = 2 ] && file="$(realpath "$1")" && project_name="$2"
+  [ ! -f "$file" ] && echo "$file is not a file" && return
+
+  project_dir="$projects_dir/$project_name"
+  [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
+
+  link_path="$project_dir/vid/$(basename "$file")"
+  ln -s "$file" "$link_path" || echo "failed to create link from '$file' to '$link_path'" && echo return
+  echo "created link from '$file' to '$link_path'"
+}
+
+# Command to create a new subproject e.g. Nanotechnology/Graphene.
+subproject() { # create a new project in dir /data/projects/wickedtruths.org
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage subproject <PROJECT_NAME> <SUBPROJECT_NAME>" && return
+  [ -z "$2" ] || [ "$2" = "." ] || [ "$2" = ".." ] || [ "$2" = "/" ] && echo "usage subproject <PROJECT_NAME> <SUBPROJECT_NAME>" && return
+  project_name="$1"
+  project_dir="$projects_dir/$project_name"
+  subproject_name="$2"
+  subproject_dir="$project_dir/$subproject_name"
+  [ ! -d "$project_dir" ] && echo "project '$project_dir' does not exist" &&
+    echo "will create $subproject_dir and parent dir in 4 seconds" &&
+    echo "press CTRL-C if you want to abort" && sleep 4 && return
+
+  # create dirs and symbolic links
+  mkdir -p "$subproject_dir"
+  mkviddir4subproject "$project_name" "$subproject_name"  # symlink to the newly created video dir for this project
+  mkimgdir4subproject "$project_name" "$subproject_name"  # symlink to the newly created images dir for this project
+  mkdir "$subproject_dir/site"
+  mkdir "$subproject_dir/doc"
+  # create a markdown document with some boilerplate
+  document_file="$subproject_dir/doc/$subproject_name.md"
+  project_markdown_scaffold >> "$document_file"
+  # open document with text editor
+  cd "$subproject_dir"
+  "$text_app" "$document_file"
+}
+
+# See mkviddir4project.
+mkviddir4subproject() {
+  mkdir -p "$(realpath "$projects_videos_dir")/$project_name/$subproject_name" 2>/dev/null
+  ln -s "$(realpath "$projects_videos_dir")/$project_name/$subproject_name" \
+    "$(realpath "$projects_dir")/$project_name/$subproject_name/vid"
+}
+
+# See mkviddir4project.
+mkimgdir4subproject() {
+  mkdir -p "$(realpath "$projects_images_dir")/$project_name/$subproject_name" 2>/dev/null
+  ln -s "$(realpath "$projects_images_dir")/$project_name/$subproject_name" \
+    "$(realpath "$projects_dir")/$project_name/$subproject_name/img"
+}
+
+# Find files in projects root directory (all projects).
+fproj() {
+  [ -z "$1" ] && echo -e "usage: fproj <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
+  search_text="$1"
+  project_dir="$projects_dir/$2"
+  [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
+  # Display with relative paths.
+  pwd="$PWD"
+  cd "$projects_dir"
+  find -L . -type f -iname "*$search_text*" -printf '"%p"\n'
+}
+
+# Identical as fproj but returns absolute paths.
+absfproj() {
+  [ -z "$1" ] && echo -e "usage: fprojabs <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
+  search_text="$1"
+  project_dir="$projects_dir/$2"
+  [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
+  find -L "$project_dir" -type f -iname "*$search_text*" -printf '"%p"\n'
+}
+
+# Remove a project.
+rmproject() {
+  [ -z "$1" ] && echo "usage: rmproject <PARTIAL_PROJECT_NAME>" && return
+  result="$(find "$projects_dir" -maxdepth 1 -type d -name "$1")"
+  [ "$(wc -w <<<"$result")" -eq 0 ] && echo -e "found no match for '$1', abort" && return 1
+  [ "$(wc -l <<<"$result")" -gt 1 ] && echo -e "found multiple possibilities for '$1', abort\n$result" && return 2
+
+  project_dir="$result"
+  project_name="$(basename "$project_dir")"
+  project_vids_dir="$projects_videos_dir/$project_name"
+  project_imgs_dir="$projects_images_dir/$project_name"
+
+  echo "The following directories will be removed for project '$project_name':"
+  echo "$project_dir"
+  echo "$project_vids_dir"
+  echo "$project_imgs_dir"
+
+  unset answer keep
+  echo -e "Y(es) = Remove All\nK(eep) = Remove project dir but Keep Videos & images\nN(o) = No, abort"
+  echo -n "Remove project? Y/k/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "y" ] && keep=false
+  [ "$answer" = "k" ] && keep=true
+  [ "$answer" = "n" ] && return
+
+  [ $keep = false ] && # remove videos & images directories
+    echo "removing videos dir at $project_vids_dir" && rm -r "$project_vids_dir" &&
+    echo "removing images dir at $project_imgs_dir" && rm -r "$project_imgs_dir"
+  # remove videos & images directories for project if they are empty
+  [ $keep = true ] && [ -z "$(ls -A "$project_vids_dir" 2>/dev/null)" ] &&
+    echo "removing videos dir because it's empty at $project_vids_dir" &&
+    rmdir "$project_vids_dir"
+  [ $keep = true ] && [ -z "$(ls -A "$project_imgs_dir" 2>/dev/null)" ] &&
+    echo "removing images dir because it's empty at $project_imgs_dir" &&
+    rmdir "$project_imgs_dir"
+
+  echo "removing project '$project_dir'"
+  rm -r "$project_dir"
+
+  echo "removed project '$project_name'"
+}
+
+pdf() {
+  [ ! -f "$1" ] && echo "not a file: '$1'" && return
+  "$pdf_reader_app" "$1"
+}

@@ -147,9 +147,9 @@ function print_msg_for_error_code() {
   [ "$1" -eq 2 ] && echo -e "found multiple possibilities for '$search_text', abort\n$result" && return
 }
 
-function find_one_file() {
+function find_one() {
   [ -z "$1" ] || [ -z "$2" ] && echo "usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
-  if [ -n "$3" ]; then search_dir="$3"; else search_dir="$wt_projects_dir"; fi
+  if [ -n "$3" ]; then search_dir="$3"; else search_dir="$projects_dir"; fi
   search_text="$2"
   type="$1"
 
@@ -168,7 +168,7 @@ function find_one_vmeta() {
   platform="$2"
 
   [ -f "$search_text" ] && echo "$search_text" && return
-  result=$(find_one_file f "*$platform*$search_text*metadata.json" "$vids_meta_dir")
+  result=$(find_one f "*$platform*$search_text*metadata.json" "$vids_meta_dir")
   error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
   echo "$result"
 }
@@ -179,7 +179,7 @@ function find_one_cmeta() {
   platform="$2"
 
   [ -f "$search_text" ] && echo "$search_text" && return
-  result=$(find_one_file f "*$search_text*$platform*metadata.json" "$channels_meta_dir")
+  result=$(find_one f "*$search_text*$platform*metadata.json" "$channels_meta_dir")
   error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
   echo "$result"
 }
@@ -266,17 +266,17 @@ function fvidcv() {
   [ "$(jq '.entries | length' <<<"$json")" -eq 0 ] && echo "found nothing" && return
   opinionated_print
 
-# Output:
-#   title: x
-#   url: y
-#   description: z
-#
-#  result="$(
-#    jq -r --arg search_text "$search_text" --arg GREEN "$GREEN" --arg WHITE "$WHITE" '
-#      [.entries[] | select(.title | ascii_downcase | contains($search_text))] | unique_by(.webpage_url)[]
-#      | "\ntitle: " + .title + "\nurl: " + .webpage_url + "\ndescription:\n" + .description' "$json_file"
-#  )"
-#  echo "${GREEN}${result}${NC}"
+  # Output:
+  #   title: x
+  #   url: y
+  #   description: z
+  #
+  #  result="$(
+  #    jq -r --arg search_text "$search_text" --arg GREEN "$GREEN" --arg WHITE "$WHITE" '
+  #      [.entries[] | select(.title | ascii_downcase | contains($search_text))] | unique_by(.webpage_url)[]
+  #      | "\ntitle: " + .title + "\nurl: " + .webpage_url + "\ndescription:\n" + .description' "$json_file"
+  #  )"
+  #  echo "${GREEN}${result}${NC}"
 }
 
 function fvidfc() {
@@ -285,8 +285,9 @@ function fvidfc() {
     echo "   info: find downloaded video files for channel in VidHop videos metadata dir," &&
     echo "         with video titles (filenames) that match <TITLE_SEARCH_TEXT>" &&
     echo "         and a channels whose name matches <CHANNEL_SEARCH_TEXT>" && return
-  [ $# = 1 ] && title_search_text="*" && channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
-  [ $# = 2 ] && title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')" &&
+  [ $# = 1 ] && title_search_text="*" && channel_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  [ $# = 2 ] &&
+    title_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')" &&
     channel_search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
 
   echo "searching through video files..."
@@ -297,11 +298,11 @@ function fvidfc() {
           if .vh_downloaded == "true"
             and .title != null
             and (if .uploader != null then .uploader | ascii_downcase | contains($channel_search_text) else empty end)
-          then .uploader + ": " + .title + "\n" + .webpage_url + "\n" + .vh_media_file + "\n"
+          then .uploader + ": " + .title + "\n" + .vh_media_file + "\n" + .webpage_url + "\n"
           elif .vh_downloaded == "true"
             and .title != null
             and (if .channel != null then .channel | ascii_downcase | contains($channel_search_text) else empty end)
-          then .channel + ": " + .title + "\n" + .webpage_url + "\n" + .vh_media_file + "\n"
+          then .channel + ": " + .title + "\n" + .vh_media_file + "\n" + .webpage_url + "\n"
           else empty end' "$json"
       done
   )"

@@ -20,6 +20,7 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 . "$bin_dir/batch"
 . "$bin_dir/sync"
 . "$bin_dir/ffmpeg"
+. "$bin_dir/project"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
 

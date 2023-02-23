@@ -18,6 +18,7 @@ function create_app_dirs() {
     "$social_media_dir" \
     "$websites_dir" \
     2>/dev/null
+  [ -n "$projects_dir" ] && mkdir -p "$projects_dir" 2>/dev/null
   touch "$meta_dir/.nomedia" 2>/dev/null
   touch "$websites_dir/.nomedia" 2>/dev/null
   touch "$social_media_dir/.nomedia" 2>/dev/null
@@ -165,6 +166,52 @@ function save_channel_entries_to_archive() {
 
 function is_url() {
   [[ "$1" == *http* ]] && echo true || echo false
+}
+
+function is_list() {
+  [ -z "$1" ] && [ -z "$json" ] && echo "is_list received no input, abort" && return 1
+  [ -f "$1" ] && json=$(jq . "$1")
+  [ ! -f "$1" ] && [ -n "$1" ] && json=$(jq . <<<"$1")
+  [ -z "$json" ] && echo "is_list could not determine valid json, abort" && return 1
+  is_list="$([ "$(jq .entries <<<"$json")" = null ] && echo false || echo true)"
+  echo "$is_list"
+}
+
+# NTFS forbidden chars.
+#  * (asterisk)
+#  / (forward slash)
+#  < (less than)
+#  > (greater than)
+#  ? (question mark)
+#  " (double quote)
+#  \ (backslash)
+#  | (vertical bar or pipe)
+#  : (colon - sometimes works, but is actually NTFS Alternate Data Streams)
+#
+# Go to bin/common.sanitize_filename to read about Termux forbidden chars.
+#
+#
+# shellcheck disable=SC2120
+function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
+  [ -n "$1" ] && echo "$1" | sanitize_filename && return
+  tr '"' "'" |
+    tr -d '\*' |
+    tr -d '/' |
+    tr -d '<' |
+    tr -d '>' |
+    tr -d '\?' |
+    tr -d '\\' |
+    tr '"' "'" |
+    tr '\|' '-' |
+    tr '$' 'S' |
+    tr '\`' "'" |
+    sed 's/:/ -/g' |
+    sed 's/#/[ht]/g' |
+    sed 's/\.\{2,\}/./g' |
+    sed 's/ - Topic//' |
+    sed 's/ - Videos//' |
+    sed -e "s/^'//" -e "s/'$//" |
+    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
 }
 
 # Create name for downloaded archive file.

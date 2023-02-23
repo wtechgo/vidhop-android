@@ -55,12 +55,16 @@ termux_screen_char_count=53
 filename_char_count=180
 # VidHop app dirs -- end
 
+# project module: uncomment defaults or set values in config/config.ini
+
 # default applications
 video_app="termux-open"
 audio_app="termux-open"
 picture_app="termux-open"
 picture_app_alt="termux-open"
 text_app="termux-open"
+pdf_reader_app="termux-open"
+
 
 # User media (outside VidHop dir)
 music_dir_ws=""                 # set value in config.ini

@@ -28,15 +28,30 @@ function metadata_help() {
 }
 
 function metadata() {
-  # open metadata file of last download
-  [ -z "$1" ] && [ -f "$meta_file" ] && jq . "$meta_file" && return
-  [ -z "$1" ] && [ -f "$json_file" ] && jq . "$json_file" && return
-  # arg is a path to json file
-  [ -f "$1" ] && [[ "$1" == *.json ]] && jq . "$1" && return
+  if [ -z "$1" ]; then
+    if [ -z "$json" ]; then
+      [ -f "$meta_file" ] && json="$(jq . "$meta_file")"
+      [ -f "$json_file" ] && json="$(jq . "$json_file")"
+    fi
+  fi
+  [ -f "$1" ] && [[ "$1" == *.json ]] && json="$(jq . "$1")"
   # arg is a search term
-  found_meta_file="$(find_one_vmeta "$1")"
-  error=$? && [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
-  jq . "$found_meta_file"
+  if [ -z "$json" ]; then
+    unset error
+    found_meta_file="$(find_one_vmeta "$1")" && error=$?
+    [ "$error" = 0 ] && json="$(jq . "$found_meta_file")"
+    [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
+  fi
+  [ -z "$json" ] && echo "could not resolve a json file or variable to process, abort" && return
+
+  jq . <<<"$json"
+  # print summary
+  [ "$(is_list)" = false ] && function=dlv || function=dlc
+  title="$(jq .title <<<"$json")"
+  url="$(jq .webpage_url <<<"$json")"
+  channel_name="$(channel_name_from_obj "$json")"
+  channel_url="$(channel_url_from_obj "$json")"
+  print_summary
 }
 
 function filesize-channel-meta-files() {

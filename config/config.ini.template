@@ -33,3 +33,11 @@
 #USER_HOME_WS=""
 #VIDHOP_DIR_WS=""
 #VIDHOP_APP_DIR_WS=""
+
+## Projects module.
+## Uncomment 5 lines bellow (delete hashtag) to activate the module with default configuration, or modify to preference.
+#name_projects_root_dir="Projects"  # Typically, only this value needs to be changed.
+#projects_dir="$HOME/$name_projects_root_dir"
+#projects_videos_dir="$HOME/Videos/$name_projects_root_dir"
+#projects_images_dir="$HOME/Pictures/$name_projects_root_dir"
+#projects_documents_dir="$HOME/Documents/$name_projects_root_dir"

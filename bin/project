@@ -32,22 +32,6 @@ project_markdown_scaffold() {
 EOF
 }
 
-# A find helper function that returns one file in happy path and an error otherwise.
-function find_one() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
-  if [ -n "$3" ]; then search_dir="$3"; else search_dir="$projects_dir"; fi
-  search_text="$2"
-  type="$1"
-
-  [ -f "$search_text" ] && echo "$search_text" && return
-  result=$(find "$search_dir" -type "$type" -iwholename "*$search_text*")
-  unset search_text
-
-  [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
-  [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
-  [ "$(wc -l <<<"$result")" -eq 1 ] && echo -e "$result"
-}
-
 # Command to create a new project e.g. Nanotechnology.
 project() {
   [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "invalid input '$1'" && return

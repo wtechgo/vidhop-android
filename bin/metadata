@@ -28,19 +28,19 @@ function metadata_help() {
 }
 
 function metadata() {
-  if [ -z "$1" ]; then
-    if [ -z "$json" ]; then
+  search_text="$1"
+  if [ -z "$search_text" ] &&  [ -z "$json" ]; then # no arg
       [ -f "$meta_file" ] && json="$(jq . "$meta_file")"
       [ -f "$json_file" ] && json="$(jq . "$json_file")"
-    fi
   fi
-  [ -f "$1" ] && [[ "$1" == *.json ]] && json="$(jq . "$1")"
+  [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")"  # file arg
   # arg is a search term
-  if [ -z "$json" ]; then
+  if [ -n "$search_text" ] && [ ! -f "$search_text" ]; then # search term arg
     unset error
-    found_meta_file="$(find_one_vmeta "$1")" && error=$?
-    [ "$error" = 0 ] && json="$(jq . "$found_meta_file")"
-    [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
+    result="$(find_one_vmeta "$search_text")"
+    error=$?
+    [ "$error" = 0 ] && json="$(jq . "$result")"
+    [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
   fi
   [ -z "$json" ] && echo "could not resolve a json file or variable to process, abort" && return
 

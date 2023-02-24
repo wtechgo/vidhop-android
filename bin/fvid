@@ -150,16 +150,14 @@ function print_msg_for_error_code() {
 function find_one() {
   [ -z "$1" ] || [ -z "$2" ] && echo "usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
   if [ -n "$3" ]; then search_dir="$3"; else search_dir="$projects_dir"; fi
-  search_text="$2"
+  unset search_text && search_text="$2"
   type="$1"
 
   [ -f "$search_text" ] && echo "$search_text" && return
   result=$(find "$search_dir" -type "$type" -iwholename "*$search_text*")
-  unset search_text
-
+  echo -e "$result"
   [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
   [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
-  [ "$(wc -l <<<"$result")" -eq 1 ] && echo -e "$result"
 }
 
 function find_one_vmeta() {
@@ -169,8 +167,9 @@ function find_one_vmeta() {
 
   [ -f "$search_text" ] && echo "$search_text" && return
   result=$(find_one f "*$platform*$search_text*metadata.json" "$vids_meta_dir")
-  error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
+  error=$?
   echo "$result"
+  if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
 }
 
 function find_one_cmeta() {
@@ -204,6 +203,7 @@ function fvidv() {
                 ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
             )' "$vidjson"
     )
+    [ ! $? = 0 ] && echo "jq could not parse '$vidjson'"
   done < <(find "$vids_meta_dir" -type f -iname "*.json")
 
   videos=$(jq -s '{ entries: . }' <<<"$videos")
@@ -227,6 +227,7 @@ function fvidc() {
                   ( if .description != null then select(.description | ascii_downcase | contains($text)) else empty end )
               )' "$chanjson"
     )
+    [ ! $? = 0 ] && echo "jq could not parse '$chanjson'"
   done < <(find "$channels_meta_dir" ! -name "avatar_data*json" -type f -iname "*json")
 
   channels=$(jq -s '{ entries: . }' <<<"$channels")

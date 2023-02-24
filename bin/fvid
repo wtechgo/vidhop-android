@@ -158,6 +158,7 @@ function find_one() {
   echo -e "$result"
   [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
   [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
+  return 0
 }
 
 function find_one_vmeta() {
@@ -169,7 +170,9 @@ function find_one_vmeta() {
   result=$(find_one f "*$platform*$search_text*metadata.json" "$vids_meta_dir")
   error=$?
   echo "$result"
-  if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
+  [ "$error" = 1 ] && return 1
+  [ "$error" = 2 ] && return 2
+  return 0
 }
 
 function find_one_cmeta() {

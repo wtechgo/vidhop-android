@@ -46,7 +46,7 @@ function metadata() {
 
   jq . <<<"$json"
   # print summary
-  [ "$(is_list)" = false ] && function=dlv || function=dlc
+  [ "$(has_entries)" = false ] && function=dlv || function=dlc
   title="$(jq .title <<<"$json")"
   url="$(jq .webpage_url <<<"$json")"
   channel_name="$(channel_name_from_obj "$json")"

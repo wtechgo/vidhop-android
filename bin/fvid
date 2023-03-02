@@ -321,7 +321,32 @@ function fvidf() { # find video files (on disk)
   unset result
   found_something="false"
 
-  result=$(find -L "$HOME/Videos" -not \( -path "$HOME/Videos/VidHop" -prune \) -not -path "*.srt" \
+  result=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Channel downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Single video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  [ "$found_something" = "false" ] && echo "found nothing"
+}
+
+# Output all video files whose name match your query.
+function fvidfall() { # find video files (on disk)
+  [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
+  text="$1"
+  unset result
+  found_something="false"
+
+  result=$(find -L "$shared/Movies" \
+    -not -path "* - search results*" \
+    -not -path "*.srt" \
+    -not -path "*.jpg" \
+    -not -path "*.webp" \
+    -not -path "*.png" \
     -type f -iname "*$text*" | sed "s/^/'/;s/$/'/" | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Videos in user home directory result:" && echo -e "${GREEN}$result${NC}" &&
@@ -338,6 +363,50 @@ function fvidf() { # find video files (on disk)
     unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"
+}
+
+# Creates symlinks from fvidf results in the project /vid directory.
+function fvidf-symlinks2dir() {
+  [ -z "$1" ] && echo "usage: fvidf-symlinks2dir <SEARCH_TEXT> <DEST_DIR>" &&
+    echo " info: creates symbolic links in <DEST_DIR> for all video files returned by searching for <SEARCH_TEXT>" && return
+  search_text="$1"
+  dest_dir="$2"
+  mkdir -p "$dest_dir"
+
+  unset result
+  found_something="false"
+
+  result_vids=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*") # sed adds quotes for filenames with spaces
+  result_channels=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$search_text*")
+  [ "$(wc -w <<<"$result_channels")" -gt 0 ] && result+="$result_channels\n" && found_something="true"
+  [ "$(wc -w <<<"$result_vids")" -gt 0 ] && result+="$result_vids\n" && found_something="true"
+  [ "$found_something" = "false" ] && echo "found nothing" && return
+
+  echo "Found $(wc -l <<<"$result") video files!" && sleep 2
+  echo "$result" && sleep 1
+  echo "Create links to video files in '$dest_dir' in 3 seconds."
+  echo "Hit CTRL-C to abort."
+  echo -n "3..." && sleep 1 && echo -n "2..." && sleep 1 &&   echo -n "1..." && sleep 1 && echo
+
+  echo "Creating links to video files in '$dest_dir'..."
+  list="$dest_dir/titles_and_links.md"
+  [ -f "$list" ] && rm "$list"
+  cd "$dest_dir"
+  while read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      ln -s "$file" "$(basename "$file")" 2>/dev/null
+      # write title & link to markdown file
+      metadata="$(strip_extension "$(echo "$file" | sed 's;/videos/;/metadata/videos/;g')")/metadata.json"
+      if [ -f "$metadata" ]; then
+        line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+        echo "$line" >>"$list"
+      fi
+    else
+      echo "file error for '$file'"
+    fi
+  done < <(echo -e "$result")
+  echo "Done creating links to video files in '$dest_dir'."
 }
 
 function format_usermeta() {
@@ -585,7 +654,7 @@ function wp_convert_fvid_merge() {
 
   pwd=$(pwd)
   mkdir -p "$wp_export_dir/merge/oneliners"
-  cd "$HOME/Code/vidhop" || return 1
+  cd "$vidhop_app_dir" || return 1
   python -m cli.vidhop --wp-convert --merge-exports
   cd "$pwd" || return 1
 
@@ -601,7 +670,7 @@ function wp_convert_fvid_oneliner_file() {
 
   pwd=$(pwd)
   mkdir -p "$wp_export_dir/merge/oneliners"
-  cd "$HOME/Code/vidhop" || return 1
+  cd "$vidhop_app_dir" || return 1
   python -m cli.vidhop --wp-convert --input-file "$input_file"
   cd "$pwd" || return 1
 }

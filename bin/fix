@@ -206,12 +206,11 @@ function redownload-all-music() {
     while read -r json; do
       url="$(jq .webpage_url "$json" | tr -d '"')"
       archive="$downloaded_dir/$(url_to_filename "$url")"
-      is_list="$([ "$(jq .entries "$json")" = null ] && echo false || echo true)"
-      type=$( ([ "$is_list" = true ] && echo "list/album") || echo "song")
+      type=$( ([ "$(has_entries)" = true ] && echo "list/album") || echo "song")
 
       echo "processing $type: $(basename "$json")..."
       rm "$archive" 2>/dev/null
-      if [ "$is_list" = true ]; then dlapl "$url"; else dla "$url"; fi
+      if [ "$has_entries" = true ]; then dlapl "$url"; else dla "$url"; fi
     done
 }
 

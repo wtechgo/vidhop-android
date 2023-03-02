@@ -24,17 +24,17 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
 
-function switch_env() {
+function switch-env-vidhop() {
   [ "$1" = -h ] || [ "$1" = --help ] &&
-    echo "   usage: switch_env <PATH>" &&
+    echo "   usage: switch-env-vidhop <PATH>" &&
     echo "            <PATH> is the path of the targeted VidHop directory e.g. /PATH/TO/FUN/VidHop" &&
-    echo "          switch_env" &&
+    echo "          switch-env-vidhop" &&
     echo "            fetches <PATH> from 'vidhop_dir_alt' var in config.ini if it exists" &&
     echo "            fetches <PATH> from \$PWD (present working directory)" &&
     echo "    info: Points the VidHop media directory to <PATH> to create a new environment." &&
     echo "          The default VidHop media directory will stay untouched." &&
     echo "scenario: You don't want to mix videos you download for work with those you download for fun." &&
-    echo "          You can accomplish that by doing 'switch_env /PATH/TO/FUN_DIR" && return
+    echo "          You can accomplish that by doing 'switch-env-vidhop /PATH/TO/FUN_DIR" && return
   unset vidhop_dir
 
   [ -n "$1" ] && vidhop_dir="$(realpath "$1")"
@@ -42,6 +42,7 @@ function switch_env() {
   [ -z "$1" ] && vidhop_dir="$PWD/VidHop"
 
   mkdir -p "$vidhop_dir" 2>/dev/null
+  cd "$vidhop_dir"
   . vidhop
 }
 

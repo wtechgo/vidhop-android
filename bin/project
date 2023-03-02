@@ -40,13 +40,13 @@ project() {
   [ -d "$project_dir" ] && echo "project with name '$project_name' already exists, abort" && return
   # create dirs and symbolic links
   mkdir "$project_dir"
-  mkviddir4project "$project_name"  # symlink to the newly created video dir for this project
-  mkimgdir4project "$project_name"  # symlink to the newly created images dir for this project
+  mkviddir4project "$project_name" # symlink to the newly created video dir for this project
+  mkimgdir4project "$project_name" # symlink to the newly created images dir for this project
   mkdir "$project_dir/site"
   mkdir "$project_dir/doc"
   # create a markdown document with some boilerplate
   document_file="$project_dir/doc/$project_name.md"
-  project_markdown_scaffold >> "$document_file"
+  project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$project_dir"
   "$text_app" "$document_file"
@@ -54,10 +54,10 @@ project() {
 
 # Creates a directory with the name of a singular project in the videos directory.
 # Example with default behavior:
-# You create a new project 'Nanotechnology' which will create directory $HOME/Projects/Nanotechnology.
-# mkviddir4project will create $HOME/Videos/Projects/Nanotechnology.
-# mkviddir4project will also create a symbolic link $HOME/Projects/Nanotechnology/vid
-# that points to $HOME/Videos/Projects/Nanotechnology.
+# You create a new project 'Nanotechnology' which will create directory $shared/Projects/Nanotechnology.
+# mkviddir4project will create $shared/Movies/Projects/Nanotechnology.
+# mkviddir4project will also create a symbolic link $shared/Projects/Nanotechnology/vid
+# that points to $shared/Movies/Projects/Nanotechnology.
 mkviddir4project() {
   mkdir -p "$(realpath "$projects_videos_dir")/$project_name" 2>/dev/null
   ln -s "$(realpath "$projects_videos_dir")/$project_name" "$projects_dir/$project_name/vid"
@@ -70,9 +70,9 @@ mkimgdir4project() {
 }
 
 # Create a symbolic link to video file (arg) in the videos directory of a project.
-# Example: linkvid4project "$HOME/Videos/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
-# Result: Symbolic link "$HOME/Videos/Projects/Nanotechnology/DNA self-assembly.mp4"
-#         points to "$HOME/Videos/VidHop/videos/youtube.com/DNA self-assembly.mp4".
+# Example: linkvid4project "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
+# Result: Symbolic link "$shared/Movies/Projects/Nanotechnology/DNA self-assembly.mp4"
+#         points to "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4".
 linkvid4project() {
   [ -z "$1" ] && echo -e "usage: linkvid4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
   [ $# = 1 ] && file="$media_file" && project_name="$1"
@@ -96,18 +96,18 @@ subproject() { # create a new project in dir /data/projects/wickedtruths.org
   subproject_name="$2"
   subproject_dir="$project_dir/$subproject_name"
   [ ! -d "$project_dir" ] && echo "project '$project_dir' does not exist" &&
-    echo "will create $subproject_dir and parent dir in 4 seconds" &&
-    echo "press CTRL-C if you want to abort" && sleep 4 && return
+    echo "will create '$subproject_dir' and parent dir in 4 seconds" &&
+    echo "press CTRL-C if you want to abort" && sleep 4
 
   # create dirs and symbolic links
   mkdir -p "$subproject_dir"
-  mkviddir4subproject "$project_name" "$subproject_name"  # symlink to the newly created video dir for this project
-  mkimgdir4subproject "$project_name" "$subproject_name"  # symlink to the newly created images dir for this project
+  mkviddir4subproject "$project_name" "$subproject_name" # symlink to the newly created video dir for this project
+  mkimgdir4subproject "$project_name" "$subproject_name" # symlink to the newly created images dir for this project
   mkdir "$subproject_dir/site"
   mkdir "$subproject_dir/doc"
   # create a markdown document with some boilerplate
   document_file="$subproject_dir/doc/$subproject_name.md"
-  project_markdown_scaffold >> "$document_file"
+  project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$subproject_dir"
   "$text_app" "$document_file"
@@ -125,6 +125,67 @@ mkimgdir4subproject() {
   mkdir -p "$(realpath "$projects_images_dir")/$project_name/$subproject_name" 2>/dev/null
   ln -s "$(realpath "$projects_images_dir")/$project_name/$subproject_name" \
     "$(realpath "$projects_dir")/$project_name/$subproject_name/img"
+}
+
+# Creates symlinks from fvidf results in the project /vid directory, more precisely in,
+# <PROJECT_NAME/vid/Video File Links/<SEARCH_TEXT>.
+function link-videos4project() {
+  [ -z "$1" ] && echo "usage: link-videos4project <SEARCH_TEXT> <PROJECT_NAME>" &&
+    echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
+  search_text="$1"
+  project_dir="$projects_dir/$2"
+  [ ! -d "$project_dir" ] && echo "project directory '$project_dir' does not exist, abort" && return
+  dest_dir="$project_dir/vid/Video File Links/$search_text"
+  mkdir -p "$dest_dir"
+
+  unset result
+  found_something="false"
+  result_vids=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*") # sed adds quotes for filenames with spaces
+  result_channels=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$search_text*")
+  [ "$(wc -w <<<"$result_channels")" -gt 0 ] && result+="$result_channels\n" && found_something="true"
+  [ "$(wc -w <<<"$result_vids")" -gt 0 ] && result+="$result_vids\n" && found_something="true"
+  [ "$found_something" = "false" ] && echo "found nothing" && return
+
+  echo "Found $(wc -l <<<"$result") video files!" && sleep 1
+  echo "$result"
+  #  echo "Create links to video files in '$dest_dir' in 3 seconds."
+  #  echo "Hit CTRL-C to abort."
+  #  echo -n "3..." && sleep 1 && echo -n "2..." && sleep 1 && echo -n "1..." && sleep 1 && echo
+
+  echo "Creating links to video files in '$dest_dir'..."
+  cd "$dest_dir"
+  list_md="$dest_dir/$search_text.md"
+  list_txt="$dest_dir/$search_text.txt"
+  [ -f "$list_md" ] && rm "$list_md"
+  [ -f "$list_txt" ] && rm "$list_txt"
+
+  while read -r file; do
+    [ -z "$file" ] && continue
+    if [ -f "$file" ]; then
+      # create link
+      ln -s "$file" "$(basename "$file")" 2>/dev/null
+      # write title & link to file
+      metadata="$(strip_extension "$(echo "$file" | sed 's;/videos/;/metadata/videos/;g')")/metadata.json"
+      if [ -f "$metadata" ]; then
+        write_title_url_to_markdown_file
+        write_title_url_to_txt_file
+      fi
+    else
+      echo "file error for '$file'"
+    fi
+  done < <(echo -e "$result")
+  echo "Done creating links to video files in '$dest_dir'."
+}
+
+function write_title_url_to_markdown_file() {
+  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+  echo "$line" >>"$list_md"
+}
+
+function write_title_url_to_txt_file() {
+  title="$(jq '.title' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+  webpage_url="$(jq '.webpage_url' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+  echo -e "$title\n$webpage_url\n" >>"$list_txt"
 }
 
 # Find files in projects root directory (all projects).

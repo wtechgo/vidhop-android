@@ -43,10 +43,8 @@ function create_import_files() {
 }
 create_import_files
 
-function is_dir_empty() {
-  [ -z "$1" ] && echo "usage: is_dir_empty <PATH>" && return 0
-  [ ! -d "$1" ] && echo "'$1' is not a directory, abort" && return 1
-  [ ! "$(ls -A1q "$1")" ] && echo true || echo false
+function is_url() {
+  [[ "$1" == *http* ]] && echo true || echo false
 }
 
 # Determine the video platform for a  given url e.g. https://youtube.com yields youtube.com.
@@ -55,10 +53,16 @@ function extract_platform_name() {
   python -c 'print("'"$input"'".split("/")[2].replace("www.", ""))'
 }
 
-# Termux FS forbidden chars (Error: Operation not permitted).
-#
-# Identical to NTFS forbidden chars, see bin/common.sanitize_filename comments, however.
-# Hashtags (#) in filenames cause command 'termux-open' to do nothing. It just returns without an error.
+# NTFS forbidden chars.
+#  * (asterisk)
+#  / (forward slash)
+#  < (less than)
+#  > (greater than)
+#  ? (question mark)
+#  " (double quote)
+#  \ (backslash)
+#  | (vertical bar or pipe)
+#  : (colon - sometimes works, but is actually NTFS Alternate Data Streams)
 #
 # shellcheck disable=SC2120
 function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
@@ -70,9 +74,10 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     tr -d '>' |
     tr -d '\?' |
     tr -d '\\' |
+    tr '"' "'" |
     tr '\|' '-' |
-    tr '\`' "'" |
     tr '$' 'S' |
+    tr '\`' "'" |
     sed 's/:/ -/g' |
     sed 's/#/[ht]/g' |
     sed 's/\.\{2,\}/./g' |
@@ -82,9 +87,10 @@ function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
 }
 
-function is_single_download() {
-  [[ "$function" == dlv* ]] || [[ "$function" == dla* ]] || [[ "$function" == dlpod* ]] &&
-    echo "true" || echo "false"
+function is_dir_empty() {
+  [ -z "$1" ] && echo "usage: is_dir_empty <PATH>" && return 0
+  [ ! -d "$1" ] && echo "'$1' is not a directory, abort" && return 1
+  [ ! "$(ls -A1q "$1")" ] && echo true || echo false
 }
 
 function is_media_download() {
@@ -164,54 +170,13 @@ function save_channel_entries_to_archive() {
   jq '[.entries[].id] | unique' <<<"$json" | jq --arg platform "$platform" '$platform + " " + .[]' | tr -d '"' >"$archive_file"
 }
 
-function is_url() {
-  [[ "$1" == *http* ]] && echo true || echo false
-}
-
-function is_list() {
-  [ -z "$1" ] && [ -z "$json" ] && echo "is_list received no input, abort" && return 1
+function has_entries() {
+  [ -z "$1" ] && [ -z "$json" ] && echo "has_entries received no input, abort" && return 1
   [ -f "$1" ] && json=$(jq . "$1")
   [ ! -f "$1" ] && [ -n "$1" ] && json=$(jq . <<<"$1")
-  [ -z "$json" ] && echo "is_list could not determine valid json, abort" && return 1
-  is_list="$([ "$(jq .entries <<<"$json")" = null ] && echo false || echo true)"
-  echo "$is_list"
-}
-
-# NTFS forbidden chars.
-#  * (asterisk)
-#  / (forward slash)
-#  < (less than)
-#  > (greater than)
-#  ? (question mark)
-#  " (double quote)
-#  \ (backslash)
-#  | (vertical bar or pipe)
-#  : (colon - sometimes works, but is actually NTFS Alternate Data Streams)
-#
-# Go to bin/common.sanitize_filename to read about Termux forbidden chars.
-#
-#
-# shellcheck disable=SC2120
-function sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
-  [ -n "$1" ] && echo "$1" | sanitize_filename && return
-  tr '"' "'" |
-    tr -d '\*' |
-    tr -d '/' |
-    tr -d '<' |
-    tr -d '>' |
-    tr -d '\?' |
-    tr -d '\\' |
-    tr '"' "'" |
-    tr '\|' '-' |
-    tr '$' 'S' |
-    tr '\`' "'" |
-    sed 's/:/ -/g' |
-    sed 's/#/[ht]/g' |
-    sed 's/\.\{2,\}/./g' |
-    sed 's/ - Topic//' |
-    sed 's/ - Videos//' |
-    sed -e "s/^'//" -e "s/'$//" |
-    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+  [ -z "$json" ] && echo "has_entries could not determine valid json, abort" && return 1
+  has_entries="$([ "$(jq .entries <<<"$json")" = null ] && echo false || echo true)"
+  echo "$has_entries"
 }
 
 # Create name for downloaded archive file.

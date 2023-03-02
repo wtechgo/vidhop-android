@@ -35,7 +35,7 @@ SSH_PORT_WS=22
 SHARED_DIR_PHONE="/data/data/com.termux/files/home/storage/shared"
 VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
 TERMUX_RC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
-SSH_PRIVATE_KEY_PHONE="$HOME/.ssh/id_vidhop"
+SSH_PRIVATE_KEY_PHONE="$shared/.ssh/id_vidhop"
 
 function sshworkstation() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"

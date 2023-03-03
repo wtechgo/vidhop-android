@@ -45,11 +45,27 @@ thistory_file="$log_dir/thistory.log"
 titles_file="$log_dir/titles.log"
 downloaded_dir="$log_dir/downloaded"
 # batch
-import_dir="$vidhop_dir/import"
-import_list_dir="$import_dir/list"
 export_dir="$vidhop_dir/export"
 fvid_export_dir="$export_dir/fvid"
 wp_export_dir="$export_dir/wp"
+# import
+import_dir="$vidhop_dir/import"
+import_list_dir="$import_dir/list"
+dlalist="$import_list_dir/dla.list"
+dlaclist="$import_list_dir/dlac.list"
+dlacilist="$import_list_dir/dlaci.list"
+dlalbumlist="$import_list_dir/dlalbum.list"
+dlapllist="$import_list_dir/dlapl.list"
+dlaplilist="$import_list_dir/dlapli.list"
+dlclist="$import_list_dir/dlc.list"
+dlcilist="$import_list_dir/dlci.list"
+dlpodlist="$import_list_dir/dlpod.list"
+dltlist="$import_list_dir/dlt.list"
+dlvlist="$import_list_dir/dlv.list"
+dlvilist="$import_list_dir/dlvi.list"
+dlvpllist="$import_list_dir/dlvpl.list"
+dlvplilist="$import_list_dir/dlvpli.list"
+
 
 termux_screen_char_count=53
 filename_char_count=180

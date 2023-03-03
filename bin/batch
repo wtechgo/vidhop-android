@@ -20,8 +20,8 @@ function batch_help() {
 }
 
 function dlalist () {
-  list="$import_list_dir/dla.list"
-  log="$import_list_dir/log/dla.list.log"
+  list="$dlalist"
+  log="$import_list_dir/log/dlalist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -33,8 +33,8 @@ function dlalist () {
 }
 
 function dlaclist () {
-  list="$import_list_dir/dlac.list"
-  log="$import_list_dir/log/dlac.list.log"
+  list="$dlaclist"
+  log="$import_list_dir/log/dlaclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -46,8 +46,8 @@ function dlaclist () {
 }
 
 function dlacilist () {
-  list="$import_list_dir/dlaci.list"
-  log="$import_list_dir/log/dlaci.list.log"
+  list="$dlacilist"
+  log="$import_list_dir/log/dlacilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -59,8 +59,8 @@ function dlacilist () {
 }
 
 function dlalbumlist () {
-  list="$import_list_dir/dlalbum.list"
-  log="$import_list_dir/log/dlalbum.list.log"
+  list="$dlalbumlist"
+  log="$import_list_dir/log/dlalbumlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -72,8 +72,8 @@ function dlalbumlist () {
 }
 
 function dlapllist () {
-  list="$import_list_dir/dlapl.list"
-  log="$import_list_dir/log/dlapl.list.log"
+  list="$dlapllist"
+  log="$import_list_dir/log/dlapllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -85,8 +85,8 @@ function dlapllist () {
 }
 
 function dlaplilist () {
-  list="$import_list_dir/dlapli.list"
-  log="$import_list_dir/log/dlapli.list.log"
+  list="$dlaplilist"
+  log="$import_list_dir/log/dlaplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -98,8 +98,8 @@ function dlaplilist () {
 }
 
 function dlclist () {
-  list="$import_list_dir/dlc.list"
-  log="$import_list_dir/log/dlc.list.log"
+  list="$dlclist"
+  log="$import_list_dir/log/dlclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -111,8 +111,8 @@ function dlclist () {
 }
 
 function dlcilist () {
-  list="$import_list_dir/dlci.list"
-  log="$import_list_dir/log/dlci.list.log"
+  list="$dlcilist"
+  log="$import_list_dir/log/dlcilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -124,8 +124,8 @@ function dlcilist () {
 }
 
 function dlpodlist () {
-  list="$import_list_dir/dlpod.list"
-  log="$import_list_dir/log/dlpod.list.log"
+  list="$dlpodlist"
+  log="$import_list_dir/log/dlpodlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -137,8 +137,8 @@ function dlpodlist () {
 }
 
 function dltlist () {
-  list="$import_list_dir/dlt.list"
-  log="$import_list_dir/log/dlt.list.log"
+  list="$dltlist"
+  log="$import_list_dir/log/dltlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -150,8 +150,8 @@ function dltlist () {
 }
 
 function dlvlist () {
-  list="$import_list_dir/dlv.list"
-  log="$import_list_dir/log/dlv.list.log"
+  list="$dlvlist"
+  log="$import_list_dir/log/dlvlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -163,8 +163,8 @@ function dlvlist () {
 }
 
 function dlvilist () {
-  list="$import_list_dir/dlvi.list"
-  log="$import_list_dir/log/dlvi.list.log"
+  list="$dlvilist"
+  log="$import_list_dir/log/dlvilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -176,8 +176,8 @@ function dlvilist () {
 }
 
 function dlvpllist () {
-  list="$import_list_dir/dlvpl.list"
-  log="$import_list_dir/log/dlvpl.list.log"
+  list="$dlvpllist"
+  log="$import_list_dir/log/dlvpllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
@@ -189,8 +189,8 @@ function dlvpllist () {
 }
 
 function dlvplilist () {
-  list="$import_list_dir/dlvpli.list"
-  log="$import_list_dir/log/dlvpli.list.log"
+  list="$dlvplilist"
+  log="$import_list_dir/log/dlvplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 

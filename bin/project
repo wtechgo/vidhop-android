@@ -2,6 +2,19 @@
 # While reading the code, differentiate between "projects" in plural, which is the directory
 # that holds all individual projects which are referred to in singular as "project".
 
+function project_help() {
+  echo " Title: project"
+  echo " Description: Create projects scaffolding and link VidHop video files."
+  echo " Commands:"
+  echo "    project <PROJECT_NAME> => Create new project with <PROJECT_NAME> in \$projects_dir."
+  echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
+  echo "    linkvid4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
+  echo "    link-videos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
+  echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
+  echo "    absfproj <SEARCH_TEXT>   => Identical to fproj but results are displayed as absolute paths."
+  echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
+}
+
 project_markdown_scaffold() {
   cat <<EOF
 # $project_name
@@ -34,7 +47,7 @@ EOF
 
 # Command to create a new project e.g. Nanotechnology.
 project() {
-  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "invalid input '$1'" && return
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage: project <PROJECT_NAME>" && return
   project_name="$1"
   project_dir="$projects_dir/$project_name"
   [ -d "$project_dir" ] && echo "project with name '$project_name' already exists, abort" && return

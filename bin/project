@@ -178,7 +178,7 @@ function link-videos4project() {
       # create link
       ln -s "$file" "$(basename "$file")" 2>/dev/null
       # write title & link to file
-      metadata="$(strip_extension "$(echo "$file" | sed 's;/videos/;/metadata/videos/;g')")/metadata.json"
+      metadata="$(media_file_to_metadata_path "$file")"
       if [ -f "$metadata" ]; then
         write_title_url_to_markdown_file
         write_title_url_to_txt_file

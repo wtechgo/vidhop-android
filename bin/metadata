@@ -29,18 +29,20 @@ function metadata_help() {
 
 function metadata() {
   search_text="$1"
-  if [ -z "$search_text" ] &&  [ -z "$json" ]; then # no arg
+  if [ -z "$search_text" ]; then  # use json from latest download
+    if [ -z "$json" ]; then
       [ -f "$meta_file" ] && json="$(jq . "$meta_file")"
       [ -f "$json_file" ] && json="$(jq . "$json_file")"
-  fi
-  [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")"  # file arg
-  # arg is a search term
-  if [ -n "$search_text" ] && [ ! -f "$search_text" ]; then # search term arg
-    unset error
-    result="$(find_one_vmeta "$search_text")"
-    error=$?
-    [ "$error" = 0 ] && json="$(jq . "$result")"
-    [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
+    fi
+  else  # arg can be a file or a search term
+    [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")" # json file arg
+    [ -f "$(media_file_to_metadata_path "$search_text")" ] && json="$(jq . "$(media_file_to_metadata_path "$search_text")")" # media file arg
+    if [ -z "$json" ]; then
+      result="$(find_one_vmeta "$search_text")"
+      error=$?
+      [ "$error" = 0 ] && json="$(jq . "$result")"
+      [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
+    fi
   fi
   [ -z "$json" ] && echo "could not resolve a json file or variable to process, abort" && return
 

@@ -81,12 +81,10 @@ picture_app_alt="termux-open"
 text_app="termux-open"
 pdf_reader_app="termux-open"
 
-
 # User media (outside VidHop dir)
 music_dir_ws=""                 # set value in config.ini
 music_dir_phone="$shared/Music" # set value in config.ini
 vidhop_backup_dir=""            # set value in config.ini
-video_editor_projects_dir=""    # set value in config.ini e.g. kdenlive, davinci resolve, premiere...
 
 # .bashrc shortkeys
 alias loadconfig='. "$bin_dir/config'

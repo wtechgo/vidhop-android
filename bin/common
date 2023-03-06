@@ -100,6 +100,12 @@ function is_media_download() {
     echo "true" || echo "false"
 }
 
+function media_file_to_metadata_path() {
+  [ ! -f "$1" ] && echo "not a file" && return 1
+  [[ "$1" == */metadata/videos/* ]] && [[ "$1" == *.json* ]] && return "$1"
+  echo "$(strip_extension "$(echo "$1" | sed 's;/videos/;/metadata/videos/;g')")/metadata.json"
+}
+
 # shellcheck disable=SC2120
 function channel_url_from_obj() {
   [ -n "$json" ] &&

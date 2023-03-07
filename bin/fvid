@@ -2,7 +2,7 @@
 
 function fvid_help() {
   echo " Title: fvid"
-  echo " Description: Searches for <SEARCH_WORD> in all videos and channels metadata."
+  echo " Description: Find videos for <SEARCH_WORD> in all videos and channels metadata."
   echo " Commands:"
   echo "    fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata"
   echo "    fvidv <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all videos metadata (shorter search time)"

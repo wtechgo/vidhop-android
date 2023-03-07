@@ -25,10 +25,11 @@ Windows users can run [VidHop in Docker](https://github.com/wtechgo/vidhop-docke
 ## Installation
 
 1. Install [F-Droid](https://f-droid.org/), an open-source version of Google Play Store.  
+   **We need to install Termux with F-Droid because Termux on Google Play is outdated and will not work correctly**.  
    Your browser will ask permission to install the .apk from unknown sources, in this case that is F-Droid which is fine. 
    Grant your browser the permission.
-2. Install [Termux](https://f-droid.org/en/packages/com.termux/) from F-Droid on Android.  
-   You'll get the same notification as before, only this time the unknown source is F-Droid. Grant the permission.
+2. Install [Termux](https://f-droid.org/en/packages/com.termux/) **with F-Droid** on your Android device.  
+   You'll get the same notification as before, only this time, the unknown source is F-Droid. Grant the permission.
 3. Open Termux and paste this command.
 
     ```   
@@ -119,7 +120,7 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
     dlw <URL>       => alias for dlwebsite
 
  Title: fvid
- Description: Searches for <SEARCH_WORD> in all videos and channels metadata.
+ Description: Find videos for <SEARCH_WORD> in all videos and channels metadata.
  Commands:
     fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata
     fvidv <SEARCH_TEXT> => find videos where title or description matches <SEARCH_TEXT> in all videos metadata (shorter search time)

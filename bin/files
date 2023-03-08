@@ -42,19 +42,21 @@ function play() {
   ! [ -f "$media_file" ] && echo "cannot play file '$media_file'" && return
 
   # video
-  [[ "$media_file" == *.mp4 ]] && "$video_app" "$media_file" && return
-  [[ "$media_file" == *.webm ]] && "$video_app" "$media_file" && return
-  [[ "$media_file" == *.wmv ]] && "$video_app" "$media_file" && return
-  [[ "$media_file" == *.avi ]] && "$video_app" "$media_file" && return
-  [[ "$media_file" == *.m4v ]] && "$video_app" "$media_file" && return
+  media_file_lowercase="$(echo "$media_file" | tr '[:upper:]' '[:lower:]')"
+  [[ "$media_file_lowercase" == *.mp4 ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.webm ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.wmv ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.mov ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.avi ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.m4v ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
   # audio
-  [[ "$media_file" == *.mp3 ]] && "$audio_app" "$media_file" && return
-  [[ "$media_file" == *.m4a ]] && "$audio_app" "$media_file" && return
+  [[ "$media_file_lowercase" == *.mp3 ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.m4a ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   # images
-  [[ "$media_file" == *.webp ]] && "$picture_app_alt" "$media_file" && return
-  [[ "$media_file" == *.png ]] && "$picture_app_alt" "$media_file" && return
-  [[ "$media_file" == *.bmp ]] && "$picture_app_alt" "$media_file" && return
-  [[ "$media_file" == *.jpg ]] || [[ "$media_file" == *.jpeg ]] && "$picture_app" "$media_file" && return
+  [[ "$media_file_lowercase" == *.webp ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.png ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.bmp ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
 }
 
 function path_newfile() {

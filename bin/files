@@ -22,12 +22,13 @@ function play() {
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
+    search_text_asterisks="$(echo "$search_text" | tr ' ' '*')"
     files=$(
-      find "$vidhop_dir" -iname "*$search_text*mp4" \
-        -o -iname "*$search_text*webm" \
-        -o -iname "*$search_text*wmv" \
-        -o -iname "*$search_text*avi" \
-        -o -iname "*$search_text*m4v"
+      find "$vidhop_dir" -iname "*$search_text_asterisks*mp4" \
+        -o -iname "*$search_text_asterisks*webm" \
+        -o -iname "*$search_text_asterisks*wmv" \
+        -o -iname "*$search_text_asterisks*avi" \
+        -o -iname "*$search_text_asterisks*m4v"
     )
     echo "$files"
     count=$(wc -l <<<"$files")

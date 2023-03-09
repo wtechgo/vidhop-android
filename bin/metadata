@@ -38,7 +38,7 @@ function metadata() {
     [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")" # json file arg
     [ -f "$(media_file_to_metadata_path "$search_text")" ] && json="$(jq . "$(media_file_to_metadata_path "$search_text")")" # media file arg
     if [ -z "$json" ]; then
-      result="$(find_one_vmeta "$search_text")"
+      result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
       error=$?
       [ "$error" = 0 ] && json="$(jq . "$result")"
       [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
@@ -72,7 +72,7 @@ function set_metadata_field() {
   [ "$#" = 0 ] || [ "$#" = 1 ] && echo "usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" && # three arguments implies we need to find a metadata FILE.
-    meta_file="$(find_one_vmeta "$partial_filename")" &&
+    meta_file="$(find_one_vmeta "$(echo "$partial_filename" | tr ' ' '*')")" &&
     result_find_one_vmeta="$?" &&
     metadata=$(jq . "$meta_file")
   [ "$result_find_one_vmeta" = 1 ] && echo "found no metadata for '$partial_filename'" && return

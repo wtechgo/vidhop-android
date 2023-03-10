@@ -246,6 +246,32 @@ renproject() {
   echo "renamed project from '$project_name' to '$new_project_name'"
 }
 
+rensubproject() {
+  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] &&
+    echo "usage: rensubproject <PROJECT_NAME> <SUB_PROJECT_NAME> <NEW_SUB_PROJECT_NAME>" && return
+  project_name="$1"
+  sub_project_name="$2"
+  new_sub_project_name="$3"
+  sub_project_dir="$projects_dir/$project_name/$sub_project_name"
+  sub_project_vids_dir="$projects_videos_dir/$project_name/$sub_project_name"
+  sub_project_imgs_dir="$projects_images_dir/$project_name/$sub_project_name"
+  new_sub_project_dir="$projects_dir/$project_name/$new_sub_project_name"
+  new_sub_project_vids_dir="$projects_videos_dir/$project_name/$new_sub_project_name"
+  new_sub_project_imgs_dir="$projects_images_dir/$project_name/$new_sub_project_name"
+  [ ! -d "$sub_project_dir" ] && echo "found no subproject '$sub_project_name' in project '$project_name', abort" && return
+  # rename main directories
+  rm "$sub_project_dir/vid"
+  rm "$sub_project_dir/img"
+  mv "$sub_project_dir/doc/$sub_project_name.md" "$sub_project_dir/doc/$new_sub_project_name.md"
+  mv "$sub_project_dir" "$new_sub_project_dir"
+  mv "$sub_project_vids_dir" "$new_sub_project_vids_dir"
+  mv "$sub_project_imgs_dir" "$new_sub_project_imgs_dir"
+  # recreate symbolic links for vid & img
+  ln -s "$(realpath "$sub_project_vids_dir")" "$new_sub_project_dir/vid"
+  ln -s "$(realpath "$sub_project_imgs_dir")" "$new_sub_project_dir/img"
+  echo "renamed subproject from '$sub_project_name' to '$new_sub_project_name'"
+}
+
 # Remove a project.
 rmproject() {
   [ -z "$1" ] && echo "usage: rmproject <PARTIAL_PROJECT_NAME>" && return
@@ -286,6 +312,54 @@ rmproject() {
   rm -r "$project_dir"
 
   echo "removed project '$project_name'"
+}
+
+# Remove a subproject.
+rmsubproject() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: rmsubproject <PROJECT_NAME> <SUB_PROJECT_NAME>" && return
+  project_name="$1"
+  sub_project_name="$2"
+  #  project_dir="$projects_dir/$project_name"
+  #  project_vids_dir="$projects_videos_dir/$project_name"
+  #  project_imgs_dir="$projects_images_dir/$project_name"
+  sub_project_dir="$projects_dir/$project_name/$sub_project_name"
+  sub_project_vids_dir="$projects_videos_dir/$project_name/$sub_project_name"
+  sub_project_imgs_dir="$projects_images_dir/$project_name/$sub_project_name"
+  [ ! -d "$sub_project_dir" ] && echo "found no project with name '$project_name', abort" && return
+
+  echo "The following directories will be removed for project '$project_name':"
+  echo "$sub_project_dir"
+  echo "$sub_project_vids_dir"
+  echo "$sub_project_imgs_dir"
+
+  unset answer keep
+  echo -e "Y(es) = Remove All\nK(eep) = Remove project dir but Keep Videos & images\nN(o) = No, abort"
+  echo -n "Remove project? Y/k/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "y" ] && keep=false
+  [ "$answer" = "k" ] && keep=true
+  [ "$answer" = "n" ] && return
+
+  [ $keep = false ] && # remove videos & images directories
+    {
+      echo "removing videos dir at $sub_project_vids_dir" && rm -r "$sub_project_vids_dir"
+      echo "removing images dir at $sub_project_imgs_dir" && rm -r "$sub_project_imgs_dir"
+    }
+  # remove videos & images directories for project if they are empty
+  [ $keep = true ] && [ -z "$(ls -A "$sub_project_vids_dir" 2>/dev/null)" ] &&
+    {
+      echo "removing videos dir because it's empty at $sub_project_vids_dir"
+      rmdir "$sub_project_vids_dir"
+    }
+  [ $keep = true ] && [ -z "$(ls -A "$sub_project_imgs_dir" 2>/dev/null)" ] &&
+    {
+      echo "removing images dir because it's empty at $sub_project_imgs_dir" &&
+        rmdir "$sub_project_imgs_dir"
+    }
+
+  echo "removing project '$sub_project_dir'"
+  rm -r "$sub_project_dir"
+  echo "removed project '$sub_project_name'"
 }
 
 pdf() {

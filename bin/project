@@ -222,6 +222,30 @@ absfproj() {
   find -L "$project_dir" -type f -iname "*$search_text*" -printf '"%p"\n'
 }
 
+renproject() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "usage: renproject <PROJECT_NAME> <NEW_PROJECT_NAME>" && return
+  project_name="$1"
+  project_dir="$projects_dir/$project_name"
+  project_vids_dir="$projects_videos_dir/$project_name"
+  project_imgs_dir="$projects_images_dir/$project_name"
+  new_project_name="$2"
+  new_project_dir="$projects_dir/$new_project_name"
+  new_project_vids_dir="$projects_videos_dir/$new_project_name"
+  new_project_imgs_dir="$projects_images_dir/$new_project_name"
+  [ ! -d "$project_dir" ] && echo "found no project with name '$project_name', abort" && return
+  # rename main directories
+  rm "$project_dir/vid"
+  rm "$project_dir/img"
+  mv "$project_dir/doc/$project_name.md" "$project_dir/doc/$new_project_name.md"
+  mv "$project_dir" "$new_project_dir"
+  mv "$project_vids_dir" "$new_project_vids_dir"
+  mv "$project_imgs_dir" "$new_project_imgs_dir"
+  # recreate symbolic links for vid & img
+  ln -s "$(realpath "$new_project_vids_dir")" "$new_project_dir/vid"
+  ln -s "$(realpath "$new_project_imgs_dir")" "$new_project_dir/img"
+  echo "renamed project from '$project_name' to '$new_project_name'"
+}
+
 # Remove a project.
 rmproject() {
   [ -z "$1" ] && echo "usage: rmproject <PARTIAL_PROJECT_NAME>" && return

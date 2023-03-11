@@ -22,13 +22,13 @@ function play() {
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
 
   if [ -n "$search_text" ]; then
-    search_text_asterisks="$(echo "$search_text" | tr ' ' '*')"
+    searchable_text="$(enhance_searchability "$search_text")"
     files=$(
-      find "$vidhop_dir" -iname "*$search_text_asterisks*mp4" \
-        -o -iname "*$search_text_asterisks*webm" \
-        -o -iname "*$search_text_asterisks*wmv" \
-        -o -iname "*$search_text_asterisks*avi" \
-        -o -iname "*$search_text_asterisks*m4v"
+      find "$vidhop_dir" -iname "*$searchable_text*mp4" \
+        -o -iname "*$searchable_text*webm" \
+        -o -iname "*$searchable_text*wmv" \
+        -o -iname "*$searchable_text*avi" \
+        -o -iname "*$searchable_text*m4v"
     )
     echo "$files"
     count=$(wc -l <<<"$files")
@@ -80,10 +80,10 @@ function rename_file() {
 function renvid() {
   [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>" && return
   [ "$(echo -n "$1" | wc -c)" -lt 3 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
-  old_name_search_term="$1"
+  old_name_search_text="$(enhance_searchability "$1")"
   new_name="$2"
 
-  old_meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_term*/metadata.json")
+  old_meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_text*/metadata.json")
   [ "$(echo "$old_meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
   [ "$old_meta_file" = "." ] && echo "metadata file not found" && return
 
@@ -105,12 +105,12 @@ function renvid() {
   [ "$answer" = "n" ] && return
 
   # rename subs
-  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" 2>/dev/null |
+  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r file; do
       ext=$(get_sub_extension "$file")
       mv "$file" "$old_meta_dir/subs/$new_name.$ext"
     done
-  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_term*.srt" 2>/dev/null |
+  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r file; do
       ext=$(get_sub_extension "$file")
       mv "$file" "$old_meta_dir/subs/auto-generated/$new_name.$ext"
@@ -151,12 +151,13 @@ function renlast() {
 
 function rmvid() {
   [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
-  unset name answer results
-  name="$1"
+  unset search_text answer results
+  search_text="$1"
+  searchable_text="$(enhance_searchability "$search_text")"
   [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
 
-  media_results=$(find "$vids_dir" -iname "*$name*")
-  meta_results=$(find "$vids_meta_dir" -iname "*$name*")
+  media_results=$(find "$vids_dir" -iname "*$searchable_text*")
+  meta_results=$(find "$vids_meta_dir" -iname "*$searchable_text*")
   [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
   echo "$media_results" && echo "$meta_results"
 
@@ -174,7 +175,7 @@ function rmvid() {
     rm -rf "$file"
   done < <(echo "$meta_results")
 
-  echo "deleted files for '$name'"
+  echo "deleted files for '$search_text'"
 
   head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
   mv "$log_dir/titles.tmp.log" "$titles_file"

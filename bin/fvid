@@ -154,7 +154,8 @@ function find_one() {
   type="$1"
 
   [ -f "$search_text" ] && echo "$search_text" && return
-  result=$(find "$search_dir" -type "$type" -iwholename "*$search_text*")
+  searchable_text="$(enhance_searchability "$search_text")"
+  result=$(find "$search_dir" -type "$type" -iwholename "*$searchable_text*")
   echo -e "$result"
   [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
   [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
@@ -317,7 +318,7 @@ function fvidfc() {
 # Output all video files whose name match your query.
 function fvidf() { # find video files (on disk)
   [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
-  search_text="$(echo "$1" | tr ' ' '*')"
+  search_text="$(enhance_searchability "$1")"
   unset result
   found_something="false"
 
@@ -337,7 +338,7 @@ function fvidf() { # find video files (on disk)
 # Output all video files whose name match your query.
 function fvidfall() { # find video files (on disk)
   [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
-  search_text="$(echo "$1" | tr ' ' '*')"
+  search_text="$(enhance_searchability "$1")"
   unset result
   found_something="false"
 
@@ -369,7 +370,7 @@ function fvidfall() { # find video files (on disk)
 function fvidf-symlinks2dir() {
   [ -z "$1" ] && echo "usage: fvidf-symlinks2dir <SEARCH_TEXT> <DEST_DIR>" &&
     echo " info: creates symbolic links in <DEST_DIR> for all video files returned by searching for <SEARCH_TEXT>" && return
-  search_text="$(echo "$1" | tr ' ' '*')"
+  search_text="$(enhance_searchability "$1")"
   dest_dir="$2"
   mkdir -p "$dest_dir"
 
@@ -485,10 +486,10 @@ function chani() { # channel info
   [ -z "$1" ] &&
     echo "usage: chani <CHANNEL_SEARCH_TEXT>" &&
     echo "       chani <ABS_FILE_PATH> [<PLATFORM>]" && return
-  search_text=$(echo "$1" | tr "'" '*' | tr ' ' '*')
+  search_text="$1"
   platform="$2"
 
-  if [ -f "$search_text" ]; then
+  if [ -f "$search_text" ] && [[ "$search_text" == *.json ]]; then
     json_file="$search_text"
     json=$(jq '.' "$search_text")
   else
@@ -525,19 +526,6 @@ function channel_url_from_name() {
   json_file="$json_files" && unset json_files # only one entry in json_files
 
   channel_url_from_json_file "$json_file"
-}
-
-function chanmeta() {
-  [ -z "$1" ] && echo "usage: chanmeta <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
-  name="$1" platform="$2"
-
-  json_files=$(json_files_for_channel_name "$name" "$platform")
-  [ -z "$json_files" ] && echo no match found && return 0
-  [[ "$json_files" == *$'\n'* ]] && msg_multiple_channels_found "chanmeta" && return 0
-
-  json_file="$json_files"
-
-  code "$json_file"
 }
 
 function json_files_for_video_name() {

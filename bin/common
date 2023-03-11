@@ -312,5 +312,22 @@ function repeat_char_full_screen() {
 }
 
 function full_screen_line() {
-  repeat_char_full_screen '_' "$termux_screen_char_count"
+  repeat_char_full_screen '_' "$workstation_screen_char_count"
+}
+
+# shellcheck disable=SC2120
+function replace_spaces_and_quotes_with_asterisks() {
+  [ -n "$1" ] && echo "$1" | tr ' ' '*' | tr "'" '*' | tr '"' '*' && return
+  tr ' ' '*' | tr "'" '*' | tr '"' '*'
+}
+
+# shellcheck disable=SC2120
+function escape_square_brackets() {
+  [ -n "$1" ] && echo "$1" | sed 's/\[/\\\[/g' |  sed 's/\]/\\\]/g' && return
+  sed 's/\[/\\\[/g' |  sed 's/\]/\\\]/g'
+}
+
+function enhance_searchability() {
+  [ -n "$1" ] && echo "$1" | replace_spaces_and_quotes_with_asterisks | escape_square_brackets && return
+  replace_spaces_and_quotes_with_asterisks | escape_square_brackets
 }

@@ -1131,16 +1131,19 @@ function dlt() {
 
 function dlfbpost() {
   url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
+  [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
+  platform="$(extract_platform_name "$url")"
+
   json="$(python "$facebook_scraper" --url "$url")"
   text="$(jq '.text' <<<"$json")"
-  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -"$filename_char_count")"
+  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25)"
   username=$(jq .username <<<"$json" | tr -d '"')
-  timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
-  json_file="${social_media_dir}/facebook/${username}/${shortened_text}_${timestamp}.json"
-  [ -z "$shortened_text" ] && json_file="${social_media_dir}/facebook/${username}/${timestamp}.json"
-  mkdir -p "${social_media_dir}/facebook/${username}" 2>/dev/null
+  timestamp=$(date +'%Y%m%d_%Hh%Mm')
+  fbpost_dir="${social_media_dir}/$platform/${username}_${timestamp}$([ -n "$shortened_text" ] && echo " - $shortened_text")"
+  json_file="$fbpost_dir/metadata.json"
+  mkdir -p "$fbpost_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"
-  cd "${social_media_dir}/facebook/${username}"
+  cd "$fbpost_dir"
   jq . <<<"$json"
 }
 

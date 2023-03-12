@@ -317,8 +317,9 @@ function full_screen_line() {
 
 # shellcheck disable=SC2120
 function replace_spaces_and_quotes_with_asterisks() {
-  [ -n "$1" ] && echo "$1" | tr ' ' '*' | tr "'" '*' | tr '"' '*' && return
-  tr ' ' '*' | tr "'" '*' | tr '"' '*'
+  [ -n "$1" ] && echo "$1" |
+    tr ' ' '*' | tr '|' '*' | tr '&' '*' | tr "'" '*' | tr '"' '*' && return
+  tr ' ' '*' | tr '|' '*' | tr '&' '*' | tr "'" '*' | tr '"' '*'
 }
 
 # shellcheck disable=SC2120

@@ -1053,8 +1053,15 @@ function dlpod() {
   mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
 
   name="$(fetch_sanitized_title)"
-  json_file="$podcasts_meta_dir/$platform/$name/metadata.json"
+
+  video_meta_dir="$podcasts_meta_dir/$platform/$name"
+  mkdir -p "$video_meta_dir"
+  json_file="$video_meta_dir/metadata.json"
+
   fetch_video_metadata "$url"
+  fetch_video_thumbnail
+  fetch_video_subs
+
   ext=m4a
   add_to_phistory
   augment_json
@@ -1066,8 +1073,8 @@ function dlpod() {
   yt-dlp -f ba --recode m4a --no-mtime \
     -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
-  print_metadata
   cd "$podcasts_dir/$platform" || return
+  print_metadata
 }
 
 # Download thumbnail. Store the thumbnail of a single video plus its metadata.

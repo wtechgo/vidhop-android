@@ -153,17 +153,17 @@ function link-videos4project() {
 
   unset result
   found_something="false"
-  result_vids=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*") # sed adds quotes for filenames with spaces
-  result_channels=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$search_text*")
+  searchable_text="$(enhance_searchability "$search_text")"
+  result_vids=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$searchable_text*") # sed adds quotes for filenames with spaces
+  result_channels=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$searchable_text*")
+  result_podcasts=$(find "$podcasts_dir" -not -path "*.srt" -type f -iname "*$searchable_text*")
+  [ "$(wc -w <<<"$result_podcasts")" -gt 0 ] && result+="$result_podcasts\n" && found_something="true"
   [ "$(wc -w <<<"$result_channels")" -gt 0 ] && result+="$result_channels\n" && found_something="true"
   [ "$(wc -w <<<"$result_vids")" -gt 0 ] && result+="$result_vids\n" && found_something="true"
   [ "$found_something" = "false" ] && echo "found nothing" && return
 
   echo "Found $(wc -l <<<"$result") video files!" && sleep 1
   echo "$result"
-  #  echo "Create links to video files in '$dest_dir' in 3 seconds."
-  #  echo "Hit CTRL-C to abort."
-  #  echo -n "3..." && sleep 1 && echo -n "2..." && sleep 1 && echo -n "1..." && sleep 1 && echo
 
   echo "Creating links to video files in '$dest_dir'..."
   cd "$dest_dir"

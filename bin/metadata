@@ -26,7 +26,7 @@ function metadata_help() {
   echo "                                                note  => the two previous examples including [<PARTIAL_FILENAME>]"
   echo "                                                         expose the mechanism applicable to all other 'set' and 'rm' metadata methods"
 }
-
+Download subs for podcasts. Add podcasts to search fuctions.
 function metadata() {
   search_text="$1"
   if [ -z "$search_text" ]; then  # use json from latest download

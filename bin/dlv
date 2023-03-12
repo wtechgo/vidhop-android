@@ -102,7 +102,7 @@ function fetch_video_metadata() {
                   asr: .asr
             }'
   )
-  [ "$function" = "dlpod" ] && ext=m4a || ext="$(yt-dlp --print ext "$url")"
+  ext="$(yt-dlp --print ext "$url")"
 }
 
 # SINGLE VIDEO
@@ -141,9 +141,15 @@ function fetch_song_filename() {
     --verbose "$url"
 }
 
-function fetch_video_subs() {
+function fetch_subs() {
   unset subs_dir auto_subs_dir english english_auto
-  subs_dir="$video_meta_dir/subs"
+  [ "$function" = dlv ] || [ "$function" = dlvi ] &&
+    meta_dir_dest="$vids_meta_dir/$platform/$name" &&
+    media_dir_dest="$vids_dir"
+  [ "$function" = dlpod ] || [ "$function" = dlpodi ] &&
+    meta_dir_dest="$podcasts_meta_dir/$platform/$name" &&
+    media_dir_dest="$podcasts_dir"
+  subs_dir="$meta_dir_dest/subs"
   auto_subs_dir="$subs_dir/auto-generated"
 
   # subs provided by the uploader. https://www.science.co.il/language/Codes.php
@@ -158,21 +164,16 @@ function fetch_video_subs() {
   # The mechanism that forces VLC player to pick the best English subtitles available by default.
   # Extra info: Media Players prioritize a subs file that is next to a media file,
   # even if there is a subs directory too.
-  if [ "$(is_media_download)" = true ]; then
+  if [ "$(is_media_download)" = true ] && ! [ "$function" = dlpod ] ; then
     english="$subs_dir/${name}.en.srt"
     english_auto="$auto_subs_dir/${name}.en.srt"
-    [ -f "$english" ] && /bin/cp "$english" "$vids_dir/$platform/$name.en.srt"
-    ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$vids_dir/$platform/$name.en.srt"
+    default_subs_en="$media_dir_dest/$platform/$name.en.srt"
+    [ -f "$english" ] && /bin/cp "$english" "$default_subs_en"
+    ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$default_subs_en"
   fi
 
   [ "$(is_dir_empty "$auto_subs_dir")" = true ] && rm -rf "$auto_subs_dir"
   [ "$(is_dir_empty "$subs_dir")" = true ] && rm -rf "$subs_dir"
-}
-
-function fetch_video_thumbnail() {
-  yt-dlp --write-thumbnail --convert-thumbnails jpg \
-    -P "$video_meta_dir" -o "thumbnail.%(ext)s" \
-    --no-download --verbose "$url"
 }
 
 function print_metadata() {
@@ -192,6 +193,13 @@ function augment_json() {
   [ -n "$thumb_file" ] && set_metadata_field_json_obj "vh_thumb_file" "$thumb_file"
 }
 
+function fetch_thumbnail() {
+  meta_dir_dest="$1" # Example input for podcasts: "$podcasts_meta_dir/$platform/$name"
+  yt-dlp --write-thumbnail --convert-thumbnails jpg \
+    -P "$meta_dir_dest" -o "thumbnail.%(ext)s" \
+    --no-download --verbose "$url"
+}
+
 # Download video information. Video metadata and thumbnail.
 function dlvi() {
   [ -z "$function" ] && function=dlvi && standalone=true
@@ -208,8 +216,8 @@ function dlvi() {
   mkdir -p "$video_meta_dir"
   json_file="$video_meta_dir/metadata.json"
 
-  fetch_video_subs
-  fetch_video_thumbnail
+  fetch_thumbnail "$video_meta_dir"
+  fetch_subs
 
   add_to_vhistory
   augment_json
@@ -1039,38 +1047,57 @@ function dlapl() {
   cd "$music_dir/$pl_dir" || return
 }
 
+function dlalbumi() {
+  dlapli "$@"
+}
+
 function dlalbum() {
   dlapl "$@"
 }
 
-# Download podcast. We differentiate podcasts from music.
-function dlpod() {
-  function=dlpod
+# Download podcast metadata.
+function dlpodi() {
+  ! [ "$function" = dlpod ] && function=dlpodi && standalone=true
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
-  [ $# = 2 ] && dl_comments=true && url="$2"
-  platform=$(extract_platform_name "$url")
-  mkdir -p "$podcasts_meta_dir/$platform" 2>/dev/null
+  [ $# = 2 ] && url="$2"
+  [ "$1" = -c ] || [ "$1" = --comments ] && dl_comments=true
+  [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
 
   name="$(fetch_sanitized_title)"
-
-  video_meta_dir="$podcasts_meta_dir/$platform/$name"
-  mkdir -p "$video_meta_dir"
-  json_file="$video_meta_dir/metadata.json"
+  platform=$(extract_platform_name "$url")
+  podcast_meta_dir="$podcasts_meta_dir/$platform/$name"
+  mkdir -p "$podcast_meta_dir" 2>/dev/null
+  json_file="$podcast_meta_dir/metadata.json"
 
   fetch_video_metadata "$url"
-  fetch_video_thumbnail
-  fetch_video_subs
-
+  fetch_thumbnail "$podcast_meta_dir"
+  fetch_subs
   ext=m4a
+
   add_to_phistory
   augment_json
   jq <<<"$json" >"$json_file"
 
-  yt-dlp --write-thumbnail --convert-thumbnails jpg --no-download --add-metadata \
-    -P "$podcasts_meta_dir/$platform/$name" -o "thumbnail.%(ext)s" --verbose "$url"
+  if [ "$(is_media_download)" = false ]; then
+    print_metadata
+    cd "$podcast_meta_dir"
+    unset dl_comments function
+  fi
+}
 
-  yt-dlp -f ba --recode m4a --no-mtime \
+# Download podcast. We differentiate podcasts from music.
+function dlpod() {
+  clear_vars_dlv
+  function=dlpod
+  dl_comments=false
+  [ $# = 1 ] && url="$1"
+  [ $# = 2 ] && url="$2"
+  [ "$1" = -c ] || [ "$1" = --comments ] && dl_comments=true
+
+  dlpodi "$url"
+
+  yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
     -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
 
   cd "$podcasts_dir/$platform" || return

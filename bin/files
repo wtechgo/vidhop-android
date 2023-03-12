@@ -181,7 +181,40 @@ function rmvid() {
   mv "$log_dir/titles.tmp.log" "$titles_file"
 }
 
+function rmpod() {
+  [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
+  unset search_text answer results
+  search_text="$1"
+  searchable_text="$(enhance_searchability "$search_text")"
+  [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
+
+  media_results=$(find "$podcasts_dir" -iname "*$searchable_text*")
+  meta_results=$(find "$podcasts_meta_dir" -iname "*$searchable_text*")
+  [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
+  echo "$media_results" && echo "$meta_results"
+
+  if [ -z "$answer" ]; then
+    echo -n "delete these files permanently? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
+  fi
+
+  while read -r file; do
+    rm -rf "$file"
+  done < <(echo "$media_results") && unset file
+
+  while read -r file; do
+    rm -rf "$file"
+  done < <(echo "$meta_results")
+
+  echo "deleted files for '$search_text'"
+
+  head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
+  mv "$log_dir/titles.tmp.log" "$titles_file"
+}
+
 function rmlast() {
+  [ "$function" = dlpod ] || [ "$function" = dlpodi ] && rmpod "$(lasttitle)" && return
   rmvid "$(lasttitle)"
 }
 

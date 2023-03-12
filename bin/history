@@ -187,6 +187,8 @@ function add_to_phistory() {
 
   title="$name"
   url="$url"
+  channel_name="$(channel_name_from_obj "$json")"
+  channel_url="$(channel_url_from_obj "$json")"
   podcast_dir="$podcasts_dir/$platform/$name"
   meta_file="$podcasts_meta_dir/$platform/$name/metadata.json"
   avatar_file="$podcasts_meta_dir/$platform/$name/avatar_data.json"
@@ -277,7 +279,7 @@ function print_files() {
 
 function print_summary() {
   [ -n "$title" ] || [ -n "$channel_name" ] && echo -e "\nSummary:"
-  if [[ "$function" == dlc* ]] || [[ "$function" == dlvpl* ]] || [[ "$function" == dlapl* ]]; then  # channels & playlists
+  if [[ "$function" == dlc* ]] || [[ "$function" == dlvpl* ]] || [[ "$function" == dlapl* ]] || [[ "$function" == dlalbum* ]]; then  # channels & playlists
     [ -n "$channel_name" ] && echo -e "${BOLD}${BLUE}---channel_name${NORMAL}${NC}: ${GREEN}$channel_name${NC}"
     [ -n "$channel_url" ] && echo -e "${BOLD}${BLUE}----channel_url${NORMAL}${NC}: ${GREEN}$channel_url${NC}"
     first_upload="$(first_channel_upload)"

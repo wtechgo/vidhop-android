@@ -464,18 +464,16 @@ function json_files_for_channel_name() {
 }
 
 function print_channel_label() {
-  url="$(channel_url_from_json_file "$json_file")"
-  channel_name="$(basename "$json_file" ".json")"
-  label="  $channel_name | $url"
+  label="  $(channel_name) | $(channel_url)"
   echo -e "\n${GREEN}$(underline "$label")${NC}" && echo
 }
 
 function print_channel_data() {
-  url="$(channel_url_from_json_file "$json_file")"
-  url_msg=" channel_url : $url"
+  channel_url="$(channel_url)"
+  url_msg=" channel_url : $channel_url"
   print_line_for_msg "$url_msg"
   echo " channel_name: $(channel_name)"
-  echo " channel_url : $url"
+  echo "  channel_url: $channel_url"
   echo " first_upload: $(first_channel_upload)"
   echo " count_videos: $(jq '.entries | length' <<<"$json")"
   echo

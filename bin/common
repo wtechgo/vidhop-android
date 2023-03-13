@@ -316,7 +316,7 @@ function full_screen_line() {
 }
 
 # shellcheck disable=SC2120
-function replace_spaces_and_quotes_with_asterisks() {
+function replace_special_chars_with_asterisks() {
   [ -n "$1" ] && echo "$1" |
     tr ' ' '*' | tr '|' '*' | tr '&' '*' | tr "'" '*' | tr '"' '*' && return
   tr ' ' '*' | tr '|' '*' | tr '&' '*' | tr "'" '*' | tr '"' '*'
@@ -329,6 +329,6 @@ function escape_square_brackets() {
 }
 
 function enhance_searchability() {
-  [ -n "$1" ] && echo "$1" | replace_spaces_and_quotes_with_asterisks | escape_square_brackets && return
-  replace_spaces_and_quotes_with_asterisks | escape_square_brackets
+  [ -n "$1" ] && echo "$1" | replace_special_chars_with_asterisks | escape_square_brackets && return
+  replace_special_chars_with_asterisks | escape_square_brackets
 }

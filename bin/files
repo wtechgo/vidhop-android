@@ -45,6 +45,7 @@ function play() {
   # video
   media_file_lowercase="$(echo "$media_file" | tr '[:upper:]' '[:lower:]')"
   [[ "$media_file_lowercase" == *.mp4 ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.mkv ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.webm ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.wmv ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.mov ]] && ("$video_app" "$media_file" 2>/dev/null &) && return
@@ -53,11 +54,19 @@ function play() {
   # audio
   [[ "$media_file_lowercase" == *.mp3 ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.m4a ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.aac ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.flac ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.ogg ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.wma ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.wav ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.aiff ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.alac ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   # images
   [[ "$media_file_lowercase" == *.webp ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.png ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.bmp ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
+  echo "unknown file extension for media file '$media_file'"
 }
 
 function path_newfile() {

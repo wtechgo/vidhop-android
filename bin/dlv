@@ -202,7 +202,7 @@ function fetch_thumbnail() {
 
 # Download video information. Video metadata and thumbnail.
 function dlvi() {
-  [ -z "$function" ] && function=dlvi && standalone=true
+  ! [ "$function" = dlv ] && function=dlvi && standalone=true
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
   [ $# = 2 ] && dl_comments=true && url="$2"
@@ -212,6 +212,7 @@ function dlvi() {
 
   fetch_video_metadata "$url" # populates $json
   name="$(fetch_sanitized_title)"
+  [ "$(is_platform_facebook)" = true ] && name="$(shorten_text "$name")_$(timestamp)"
   video_meta_dir="$vids_meta_dir/$platform/$name"
   mkdir -p "$video_meta_dir"
   json_file="$video_meta_dir/metadata.json"
@@ -1136,10 +1137,9 @@ function dlfbpost() {
 
   json="$(python "$facebook_scraper" --url "$url")"
   text="$(jq '.text' <<<"$json")"
-  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25)"
+  shortened_text="$(shorten_text "$text")"
   username=$(jq .username <<<"$json" | tr -d '"')
-  timestamp=$(date +'%Y%m%d_%Hh%Mm')
-  fbpost_dir="${social_media_dir}/$platform/${username}_${timestamp}$([ -n "$shortened_text" ] && echo " - $shortened_text")"
+  fbpost_dir="${social_media_dir}/$platform/${username}_$(timestamp)$([ -n "$shortened_text" ] && echo " - $shortened_text")"
   json_file="$fbpost_dir/metadata.json"
   mkdir -p "$fbpost_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"

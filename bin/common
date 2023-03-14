@@ -47,6 +47,11 @@ function is_url() {
   [[ "$1" == *http* ]] && echo true || echo false
 }
 
+function is_platform_facebook() {
+  [ "$platform" = facebook.com ] || [ "$platform" = m.facebook.com ] || [ "$platform" = fb.watch ] && echo true && return
+  echo false
+}
+
 # Determine the video platform for a  given url e.g. https://youtube.com yields youtube.com.
 function extract_platform_name() {
   [ -n "$1" ] && input="$1" || input="$url"
@@ -331,4 +336,13 @@ function escape_square_brackets() {
 function enhance_searchability() {
   [ -n "$1" ] && echo "$1" | replace_special_chars_with_asterisks | escape_square_brackets && return
   replace_special_chars_with_asterisks | escape_square_brackets
+}
+
+function shorten_text() {
+  [ -n "$1" ] && echo "$1" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25 && return
+  tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25
+}
+
+function timestamp() {
+  date +'%Y%m%d_%Hh%Mm'
 }

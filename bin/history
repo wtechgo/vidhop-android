@@ -13,7 +13,7 @@ function history_help() {
 
 function clear_history_vars() {
   unset title channel_name channel_url media_file meta_file thumb_file vh_downloaded vh_downloaded_date upload_date \
-    channel_dir avatar_file podcast_dir first_upload count_videos
+    channel_dir avatar_file first_upload count_videos
 }
 
 function create_if_not_exists() {
@@ -189,7 +189,7 @@ function add_to_phistory() {
   url="$url"
   channel_name="$(channel_name_from_obj "$json")"
   channel_url="$(channel_url_from_obj "$json")"
-  podcast_dir="$podcasts_dir/$platform/$name"
+  media_file="$podcasts_dir/$platform/$name.$ext"
   meta_file="$podcasts_meta_dir/$platform/$name/metadata.json"
   avatar_file="$podcasts_meta_dir/$platform/$name/avatar_data.json"
   vh_downloaded="$([ "$function" = "dlpod" ] && echo true || echo false)"
@@ -204,7 +204,7 @@ function add_to_phistory() {
 {
     "title": "$name",
     "url": "$url",
-    "podcast_dir": "$podcast_dir",
+    "media_file": "$media_file",
     "meta_file": "$meta_file",
     "avatar_file": "$avatar_file",
     "vh_downloaded": "$vh_downloaded",
@@ -273,7 +273,6 @@ function print_files() {
   [ -n "$media_file" ] && echo -e "${BOLD}${BLUE}-----media_file${NORMAL}${NC}: ${GREEN}$media_file${NC}"
   [ -n "$meta_file" ] && echo -e "${BOLD}${BLUE}------meta_file${NORMAL}${NC}: ${GREEN}$meta_file${NC}"
   [ -n "$thumb_file" ] && echo -e "${BOLD}${BLUE}-----thumb_file${NORMAL}${NC}: ${GREEN}$thumb_file${NC}"
-  [ -n "$podcast_dir" ] && echo -e "${BOLD}${BLUE}----podcast_dir${NORMAL}${NC}: ${GREEN}$podcast_dir${NC}"
   [ -n "$avatar_file" ] && echo -e "${BOLD}${BLUE}----avatar_file${NORMAL}${NC}: ${GREEN}$avatar_file${NC}"
 }
 

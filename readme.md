@@ -184,7 +184,7 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Description: Do work in bulk aka batch processing.
  Commands:
     dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list
-    dlaclist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlac.list
+    dlaclist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlac.list
     dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list
     dlalbumlist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlalbum.list
     dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list
@@ -207,8 +207,11 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
  Prerequisites:
    1. the IP-address and user have to be known in the 'sync' file, optionally via config.ini
    2. passwordless public SSH keys should be configured on phone and workstation (or you'll have to type passwords)
-   3. start sshd on workstation and phone (Termux)
- Notes:
+  3. start sshd on the phone, in Termux, with command 'sshd'
+ Scenario:
+   Execute 'syncvidhop' on laptop.
+   The command will pull in files from the phone onto the laptop, and send metadata files to the phone
+  Notes:
    sendvidhop sends all VidHop files, keeps the metadata files and deletes media files to not clog up the phone
    fetchvidhop fetches only metadata files to enable video searches in Termux via the fvid command
  Troubleshoot:

@@ -5,7 +5,7 @@ function batch_help() {
   echo " Description: Do work in bulk aka batch processing."
   echo " Commands:"
   echo "    dlalist [<LIST_FILE_PATH>]     => download all URLs in list file at /VidHop/import/list/dla.list"
-  echo "    dlaclist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlac.list"
+  echo "    dlaclist [<LIST_FILE_PATH>]    => download all URLs in list file at /VidHop/import/list/dlac.list"
   echo "    dlacilist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlaci.list"
   echo "    dlalbumlist [<LIST_FILE_PATH>] => download all URLs in list file at /VidHop/import/list/dlalbum.list"
   echo "    dlapllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlapl.list"

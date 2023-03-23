@@ -18,8 +18,8 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 
 . "$bin_dir/dlv"
 . "$bin_dir/batch"
-. "$bin_dir/sync"
 . "$bin_dir/ffmpeg"
+. "$bin_dir/sync"
 . "$bin_dir/project"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
@@ -126,11 +126,11 @@ function uninstallvidhop() {
   echo "It does not delete your downloads in the VidHop directory."
   echo -n 'Are you sure you want to uninstall VidHop? y/N: ' && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "uninstall stopped" && return
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "aborted uninstall" && return
   [ "$answer" = "y" ] &&
     sudo rm "/usr/local/bin/vidhop" &&
     rm -rf "/opt/vidhop" &&
-    echo "VidHop software removed" && sleep 2
+    echo "VidHop software removed" && sleep 1
   unset answer
 
   echo 'WARNING: The following action will permanently delete your VidHop directory that contains all your downloaded media and metadata files.' && sleep 1

@@ -1107,7 +1107,7 @@ function dlpod() {
     echo "  1. download video"
     echo "  2. extract audio"
     echo "  3. delete video"
-    echo "  3. delete video"
+    echo "this can take a few minutes..."
     ext="$(yt-dlp --print ext "$url")"
     yt-dlp --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
     video_file="$podcasts_dir/$platform/$name.$ext"

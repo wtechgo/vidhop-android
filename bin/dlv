@@ -164,7 +164,7 @@ function fetch_subs() {
   # The mechanism that forces VLC player to pick the best English subtitles available by default.
   # Extra info: Media Players prioritize a subs file that is next to a media file,
   # even if there is a subs directory too.
-  if [ "$(is_media_download)" = true ] && ! [ "$function" = dlpod ] ; then
+  if [ "$(is_media_download)" = true ] && ! [ "$function" = dlpod ]; then
     english="$subs_dir/${name}.en.srt"
     english_auto="$auto_subs_dir/${name}.en.srt"
     default_subs_en="$media_dir_dest/$platform/$name.en.srt"
@@ -1100,6 +1100,22 @@ function dlpod() {
 
   yt-dlp -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
     -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+
+  if [ $? = 1 ]; then # error no audio formats available
+    echo "default podcast download failed"
+    echo "starting fallback strategy:"
+    echo "  1. download video"
+    echo "  2. extract audio"
+    echo "  3. delete video"
+    echo "  3. delete video"
+    ext="$(yt-dlp --print ext "$url")"
+    yt-dlp --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+    video_file="$podcasts_dir/$platform/$name.$ext"
+    audio_file="$podcasts_dir/$platform/$name.mp3"
+    thumb_file="$podcast_meta_dir/thumbnail.jpg"
+    convert-to-mp3 "$video_file"
+    embed-thumbnail-into-mp3 "$thumb_file" "$audio_file"
+  fi
 
   cd "$podcasts_dir/$platform" || return
   print_metadata

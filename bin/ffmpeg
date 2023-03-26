@@ -32,7 +32,7 @@ function 265encode() {
   echo "file conversion to x265 completed"
 }
 
-function to720p_x264(){
+function to720p_x264() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"
   ffmpeg -i "$input_file" -vf scale=-1280:720 -c:v libx264 -crf 18 -preset veryslow -c:a copy "$output_file"
@@ -91,16 +91,57 @@ function replaceaudio() {
   backup_file="$(prefix_extension "$video_file" backup)"
   cp "$video_file" "$backup_file"
   ffmpeg -i "$backup_file" -i "$audio_file" -c copy -map 0:v:0 -map 1:a:0 "$video_file"
+  #  mv "$backup_file" "$video_file"
 }
 
 # Audio.
+function extract-mp3() {
+  input_file="$1"
+  [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
+  mp3_file="$(strip_extension "$input_file").mp3"
+  ffmpeg -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
+  #  ffmpeg -nostdin -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
+}
 function convert-to-mp3() {
   input_file="$1"
-  [ ! -f "$input_file" ] && echo "not a file: $input_file" && return
-		mp3_file="$(strip_extension "$input_file").mp3"
-		ffmpeg -nostdin -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 192k "$mp3_file"
+  [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
+  mp3_file="$(strip_extension "$input_file").mp3"
+  ffmpeg -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
+  rm "$input_file"
 }
 
-function strip-id3tags() {  # not ffmpeg
+function id3tags() { # uses ffprobe
+  [ $# = 0 ] && echo "usage: id3tags <AUDIO_FILE>" && return
+  input_file="$1"
+  tags_json="$(ffprobe -show_format -print_format json "$input_file")"
+  tags_json="$(jq '.format.tags' <<<"$tags_json")"
+  jq <<<"$tags_json"
+}
+
+function embed-thumbnail-into-mp3() {
+  [ $# = 0 ] && echo "usage: embed-thumbnail-into-mp3 <THUMBNAIL_FILE> <AUDIO_FILE>" && return
+  thumb_file="$1"
+  input_file="$2"
+  output_file="$(strip_extension "$input_file")_art.mp3"
+
+  tags_json="$(id3tags "$input_file")"
+  title="$(jq .title <<<"$tags_json" | tr -d '"')"
+  artist="$(jq .artist <<<"$tags_json" | tr -d '"')"
+  album="$(jq .album <<<"$tags_json" | tr -d '"')"
+  year="$(jq .date <<<"$tags_json" | tr -d '"')"
+
+  ffmpeg -i "$input_file" -i "$thumb_file" -map 0:0 -map 1:0 -c copy -id3v2_version 3 \
+    -metadata title="$title" \
+    -metadata artist="$artist" \
+    -metadata album="$album" \
+    -metadata year="$year" \
+    -metadata:s:v title="Album cover" \
+    -metadata:s:v comment="Cover (front)" \
+    "$output_file"
+
+  mv "$output_file" "$input_file"
+}
+
+function strip-id3tags() { # not ffmpeg
   id3convert --strip "$1" 2>/dev/null # strip all id-tags as some choke the car radio
 }

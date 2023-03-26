@@ -35,7 +35,7 @@ yes | pkg install nano               # for editing code with nanodlv, nanofvid,.
 yes | pkg install ncurses-utils      # for installing tput, used in fvid
 yes | pkg install iproute2           # for fetching the current IP address
 yes | pkg install moreutils          # better for fetching the current IP address
-yes | pkg install python ffmpeg      # required for yt-dlp
+yes | pkg install python ffmpeg      # required for yt-dlp, ffprobe is included in ffmpeg
 yes | pkg install jq                 # json processor
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
 yes | pkg install termux-services    # enables management of services, used in the Tor workflow

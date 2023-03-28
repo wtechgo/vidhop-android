@@ -1110,11 +1110,11 @@ function dlpod() {
     echo "this can take a few minutes..."
     ext="$(yt-dlp --print ext "$url")"
     yt-dlp --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
-    video_file="$podcasts_dir/$platform/$name.$ext"
-    audio_file="$podcasts_dir/$platform/$name.mp3"
+    video_file_tmp="$podcasts_dir/$platform/$name.$ext"
+    media_file="$podcasts_dir/$platform/$name.mp3"
     thumb_file="$podcast_meta_dir/thumbnail.jpg"
-    convert-to-mp3 "$video_file"
-    embed-thumbnail-into-mp3 "$thumb_file" "$audio_file"
+    convert-to-mp3 "$video_file_tmp"
+    embed-thumbnail-into-mp3 "$thumb_file" "$media_file"
   fi
 
   cd "$podcasts_dir/$platform" || return

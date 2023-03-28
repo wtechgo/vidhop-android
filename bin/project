@@ -191,13 +191,13 @@ function link-videos4project() {
 }
 
 function write_title_url_to_markdown_file() {
-  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | prefix_suffix_with_double_quotes)"
   echo "$line" >>"$list_md"
 }
 
 function write_title_url_to_txt_file() {
-  title="$(jq '.title' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
-  webpage_url="$(jq '.webpage_url' "$metadata" | sed -e 's/^"//' -e 's/"$//')"
+  title="$(jq '.title' "$metadata" | prefix_suffix_with_double_quotes)"
+  webpage_url="$(jq '.webpage_url' "$metadata" | prefix_suffix_with_double_quotes)"
   echo -e "$title\n$webpage_url\n" >>"$list_txt"
 }
 

@@ -320,6 +320,11 @@ function full_screen_line() {
   repeat_char_full_screen '_' "$workstation_screen_char_count"
 }
 
+function prefix_suffix_with_double_quotes() {
+  [ -n "$1" ] && echo "$1" && echo "$1" | sed 's/^/"/;s/$/"/' && return
+  sed 's/^/"/;s/$/"/'
+}
+
 # shellcheck disable=SC2120
 function replace_special_chars_with_asterisks() {
   [ -n "$1" ] && echo "$1" |

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function history_help() {
+history_help() {
   echo " Title: history"
   echo " Description: Show history of actions in VidHop."
   echo " Commands:"
@@ -11,12 +11,12 @@ function history_help() {
   echo "    thistory => shows the history of the thumbnails you downloaded"
 }
 
-function clear_history_vars() {
+clear_history_vars() {
   unset title channel_name channel_url media_file meta_file thumb_file vh_downloaded vh_downloaded_date upload_date \
     channel_dir avatar_file first_upload count_videos
 }
 
-function create_if_not_exists() {
+create_if_not_exists() {
   history_file="$1"
   ! [ -f "$history_file" ] && echo "[]" >"$history_file"
   ! [ -s "$history_file" ] && echo "[]" >"$history_file"
@@ -26,7 +26,7 @@ function create_if_not_exists() {
     echo "[]" >"$history_file"
 }
 
-function add_to_vhistory() {
+add_to_vhistory() {
   clear_history_vars
   create_if_not_exists "$vhistory_file"
 
@@ -63,7 +63,7 @@ JSON
   echo "$title" >>"$titles_file"
 }
 
-function add_to_chistory() {
+add_to_chistory() {
   clear_history_vars
   create_if_not_exists "$chistory_file"
 
@@ -101,7 +101,7 @@ JSON
   echo "$title" >>"$titles_file"
 }
 
-function add_to_ahistory() {
+add_to_ahistory() {
   clear_history_vars
   create_if_not_exists "$ahistory_file"
 
@@ -142,7 +142,7 @@ JSON
   echo "$title" >>"$titles_file"
 }
 
-function add_to_thistory() {
+add_to_thistory() {
   clear_history_vars
   create_if_not_exists "$thistory_file"
 
@@ -181,7 +181,7 @@ JSON
   echo "$title" >>"$titles_file"
 }
 
-function add_to_phistory() {
+add_to_phistory() {
   clear_history_vars
   create_if_not_exists "$phistory_file"
 
@@ -218,7 +218,7 @@ JSON
   echo "$title" >>"$titles_file"
 }
 
-function format_oneliner_history() {
+format_oneliner_history() {
   mode="$1" file="$2"
   if [ "$mode" = -c ]; then
     echo -e "${GREEN}$(jq 'unique_by(.url) | sort_by(.vh_downloaded_date) | .[] | "> " + .channel_name + " | " + .url' "$file" | tr -d '"')"
@@ -233,40 +233,40 @@ function format_oneliner_history() {
   fi
 }
 
-function vhistory() {
+vhistory() {
   [ "$1" = "-h" ] || [ "$1" = "--help" ] && history_help && return
   [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$vhistory_file" && return
   format_oneliner_history -v "$vhistory_file"
 }
 
-function chistory() {
+chistory() {
   [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$chistory_file" && return
   format_oneliner_history -c "$chistory_file"
 }
 
-function ahistory() {
+ahistory() {
   [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$ahistory_file" && return
   format_oneliner_history -a "$ahistory_file"
 }
 
-function phistory() {
+phistory() {
   [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$phistory_file" && return
   format_oneliner_history -p "$phistory_file"
 }
 
-function thistory() {
+thistory() {
   [ "$1" = "-a" ] || [ "$1" = "--all" ] && jq . "$thistory_file" && return
   format_oneliner_history -t "$thistory_file"
 }
 
-function lasttitle() {
+lasttitle() {
   [ -n "$name" ] && echo "$name" && return
   [ -n "$meta_file" ] && [ -f "$meta_file" ] && basename "$meta_file" .json && return
   [ -n "$media_file" ] && [ -f "$media_file" ] && basename "$media_file" ".$ext" && return
   [ -f "$titles_file" ] && tail -n 1 "$titles_file"
 }
 
-function print_files() {
+print_files() {
   [ -z "$title" ] && [ -n "$name" ] && title="$name"
   [ -n "$title" ] && echo -e "Files:"
   [ -n "$channel_dir" ] && echo -e "${BOLD}${BLUE}----channel_dir${NORMAL}${NC}: ${GREEN}$channel_dir${NC}"
@@ -276,7 +276,7 @@ function print_files() {
   [ -n "$avatar_file" ] && echo -e "${BOLD}${BLUE}----avatar_file${NORMAL}${NC}: ${GREEN}$avatar_file${NC}"
 }
 
-function print_summary() {
+print_summary() {
   [ -n "$title" ] || [ -n "$channel_name" ] && echo -e "\nSummary:"
   if [[ "$function" == dlc* ]] || [[ "$function" == dlvpl* ]] || [[ "$function" == dlapl* ]] || [[ "$function" == dlalbum* ]]; then  # channels & playlists
     [ -n "$channel_name" ] && echo -e "${BOLD}${BLUE}---channel_name${NORMAL}${NC}: ${GREEN}$channel_name${NC}"
@@ -293,12 +293,12 @@ function print_summary() {
   fi
 }
 
-function last() {
+last() {
   print_files
   print_summary
 }
 
-function echovars() {
+echovars() {
   [ -n "$name" ] && echo "name: $name"
   [ -n "$url" ] && echo "url: $url"
   [ -n "$standalone" ] && echo "standalone: $standalone"
@@ -311,16 +311,16 @@ function echovars() {
   [ -n "$pl_dir" ] && echo "pl_dir: $pl_dir"
 }
 
-function has_vhistory_vars() {
+has_vhistory_vars() {
   if [ -f "$media_file" ] || [ -f "$meta_file" ] || [ -f "$thumb_file" ]; then echo true; else echo false; fi
 }
 
-function lastmeta() {
+lastmeta() {
   found="$(find "$vidhop_dir" -iname "$(lasttitle).json")"
   [ -n "$found" ] && echo "$found" && "$text_app" "$found" || echo "$(lasttitle).json not found"
 }
 
-function rm_duplicate_titles() {
+rm_duplicate_titles() {
   if [ -f "$titles_file" ]; then
     echo "removing dupliacates from titles.log at $titles.log"
     filtered=$(uniq "$titles_file")

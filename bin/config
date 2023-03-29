@@ -1,26 +1,26 @@
 #!/bin/bash
 
-function set_user_phone() {
+set_user_phone() {
   [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
   sed -i "s/^#USER_PHONE=.*/USER_PHONE=\"$1\"/" "$config_ini"
 }
 
-function set_ip_phone() {
+set_ip_phone() {
   [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
   sed -i "s/^#IP_PHONE=.*/IP_PHONE=\"$1\"/" "$config_ini"
 }
 
-function set_user_workstation() {
+set_user_workstation() {
   [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
   sed -i "s/^#USER_WS=.*/USER_WS=\"$1\"/" "$config_ini"
 }
 
-function set_ip_workstation() {
+set_ip_workstation() {
   [ ! -f "$config_ini" ] && echo "no config.ini found at $config" && return
   sed -i "s/^#IP_WS=.*/IP_WS=\"$1\"/" "$config_ini"
 }
 
-function configure_ssh() {
+configure_ssh() {
   [ ! -f "$config_ini_template" ] && echo "no config.ini.template found at $config_ini_template, abort" && return
   [ -f "$config_ini" ] && cp "$config_ini" "$config.backup"
   cp "$config_ini_template" "$config_ini"

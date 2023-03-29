@@ -27,7 +27,7 @@ alias llmusic='ls -lAhtr $shared/Music'
 alias nanobashrc='nano $bashrc; source $bashrc'
 alias reloadbashrc='source $bashrc'
 
-function which() {
+which() {
   command -v "$1"
 }
 

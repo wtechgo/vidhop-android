@@ -1,7 +1,7 @@
 #!/bin/bash
 # YT-DLP video and channel downloader functions.
 
-function dlv_help() {
+dlv_help() {
   echo " Title: dlv"
   echo " Description: Download video(s) and channels."
   echo " Commands:"
@@ -29,7 +29,7 @@ function dlv_help() {
   echo "    dlw <URL>       => alias for dlwebsite"
 }
 
-function clear_vars_dlv() {
+clear_vars_dlv() {
   [ "$(is_media_download)" = true ] && unset url standalone platform name
   unset json json_file meta_file archive_file has_archive archive_content avatar_json \
     avatar_json_file valid album artist pl_name pl_dir media_file thumb_file channel_dir
@@ -39,7 +39,7 @@ function clear_vars_dlv() {
 
 # Fetch video metadata (yt-dlp), select relevant fields and pretty print (jq).
 # Populates global variable $json.
-function fetch_video_metadata() {
+fetch_video_metadata() {
   url="$1"
   json=$(
     yt-dlp $([ "$dl_comments" = true ] && echo -n --write-comments) \
@@ -109,7 +109,7 @@ function fetch_video_metadata() {
 # ------------
 
 # Download video information of one video: metadata and video thumbnail..
-function fetch_sanitized_title() {
+fetch_sanitized_title() {
   yt-dlp --print "%(title).${filename_char_count}s" \
     --replace-in-metadata "title" '"' "'" \
     --replace-in-metadata "title" '\*' '' \
@@ -125,7 +125,7 @@ function fetch_sanitized_title() {
     --verbose "$url"
 }
 
-function fetch_song_filename() {
+fetch_song_filename() {
   yt-dlp --print "%(artist)s - %(title).${filename_char_count}s" \
     --replace-in-metadata "artist,title" '"' "'" \
     --replace-in-metadata "artist,title" '\*' '' \
@@ -141,7 +141,7 @@ function fetch_song_filename() {
     --verbose "$url"
 }
 
-function fetch_subs() {
+fetch_subs() {
   unset subs_dir auto_subs_dir english english_auto
   [ "$function" = dlv ] || [ "$function" = dlvi ] &&
     meta_dir_dest="$vids_meta_dir/$platform/$name" &&
@@ -176,13 +176,13 @@ function fetch_subs() {
   [ "$(is_dir_empty "$subs_dir")" = true ] && rm -rf "$subs_dir"
 }
 
-function print_metadata() {
+print_metadata() {
   echo -e "Metadata JSON:"
   jq 'del(.comments)' <<<"$json"
   print_summary
 }
 
-function augment_json() {
+augment_json() {
   [ -z "$meta_file" ] && meta_file="$json_file"
   set_downloaded "$(is_media_download)"
   set_downloaded_date
@@ -193,7 +193,7 @@ function augment_json() {
   [ -n "$thumb_file" ] && set_metadata_field_json_obj "vh_thumb_file" "$thumb_file"
 }
 
-function fetch_thumbnail() {
+fetch_thumbnail() {
   meta_dir_dest="$1" # Example input for podcasts: "$podcasts_meta_dir/$platform/$name"
   yt-dlp --write-thumbnail --convert-thumbnails jpg \
     -P "$meta_dir_dest" -o "thumbnail.%(ext)s" \
@@ -201,7 +201,7 @@ function fetch_thumbnail() {
 }
 
 # Download video information. Video metadata and thumbnail.
-function dlvi() {
+dlvi() {
   ! [ "$function" = dlv ] && function=dlvi && standalone=true
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
@@ -232,7 +232,7 @@ function dlvi() {
 }
 
 # Download video. Plus thumbnail and metadata.
-function dlv() {
+dlv() {
   clear_vars_dlv
   [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
   [ "$1" = "--comments" ] || [ "$1" = "-c" ] && dl_comments=true && url="$2"
@@ -253,25 +253,25 @@ function dlv() {
   unset dl_comments function
 }
 
-function dlv720p() {
+dlv720p() {
   res=720
   dlv "$@"
   unset res
 }
 
-function dlv1080p() {
+dlv1080p() {
   res=1080
   dlv "$@"
   unset res
 }
 
-function dlv1440p() {
+dlv1440p() {
   res=1440
   dlv "$@"
   unset res
 }
 
-function dlv2160p() {
+dlv2160p() {
   res=2160
   dlv "$@"
   unset res
@@ -281,7 +281,7 @@ function dlv2160p() {
 # --------
 # Fetch channel metadata (yt-dlp), select relevant fields and pretty print (jq).
 # Populates global variable $json.
-function fetch_channel_metadata() {
+fetch_channel_metadata() {
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 
@@ -333,7 +333,7 @@ function fetch_channel_metadata() {
 
 # With --downloaded-archive, only new videos are downloaded.
 # This method merges previous metadata json with the newly scraped json.
-function merge_json_with_archive() { # called by dlci
+merge_json_with_archive() { # called by dlci
   old_json=$(jq '.' "$json_file")
   entries=$(jq -s '.[0].entries += .[1].entries | .[0].entries | sort_by(.date) | reverse' <<<"$old_json" <<<"$json")
   json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$old_json" <<<"$entries")
@@ -342,12 +342,12 @@ function merge_json_with_archive() { # called by dlci
 # Each yt-dlp command that uses downloaded archive file, updates it, adds the new entries.
 # As we call yt-dlp multiple times, we only want to have that happen in the last yt-dlp call.
 # To solve that, we reset the file to its original values when the program started.
-function reset_archive_file() {
+reset_archive_file() {
   echo "$archive_content" >"$archive_file"
 }
 
 # Download channel information (metadata and thumbnails of all videos and the avatar image.
-function dlci() {
+dlci() {
   url="$1"
   # Force dlci to only process /videos instead of /videos, /shorts and /live.
   [[ "$url" == *youtu.be* ]] || [[ "$url" == *youtube.com* ]] && [[ ! "$url" == */videos* ]] && old_url="$url" &&
@@ -454,7 +454,7 @@ function dlci() {
 }
 
 # Download all videos of a channel, metadata of the channel and the avatar image.
-function dlc() {
+dlc() {
   clear_vars_dlv
   url="$1"
   [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
@@ -487,7 +487,7 @@ function dlc() {
   cd "$channel_dir" || return
 }
 
-function fetch_playlist_metadata() {
+fetch_playlist_metadata() {
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 
@@ -539,7 +539,7 @@ function fetch_playlist_metadata() {
 }
 
 # Download video playlist information (similar to dlci).
-function dlvpli() {
+dlvpli() {
   url="$1"
   standalone="$2"
   [ -n "$3" ] && debug="$3"
@@ -626,7 +626,7 @@ function dlvpli() {
 }
 
 # Download video playlist.
-function dlvpl() {
+dlvpl() {
   clear_vars_dlv
   url="$1"
   [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
@@ -659,7 +659,7 @@ function dlvpl() {
   cd "$channels_dir/$name/$platform" || return
 }
 
-function fetch_music_metadata() {
+fetch_music_metadata() {
   url="$1"
   json=$(
     yt-dlp $([ "$dl_comments" = true ] && echo -n --write-comments) \
@@ -721,7 +721,7 @@ function fetch_music_metadata() {
 }
 
 # Download audio. Save only the m4a audio of a video plus metadata and thumbnail.
-function dla() {
+dla() {
   function=dla
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
@@ -747,7 +747,7 @@ function dla() {
   cd "$music_dir" || return
 }
 
-function fetch_music_playlist_metadata() {
+fetch_music_playlist_metadata() {
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 
@@ -805,7 +805,7 @@ function fetch_music_playlist_metadata() {
   )
 }
 
-function dlaci() {
+dlaci() {
   url="$1"
   standalone="$2"
   [ -n "$3" ] && debug="$3"
@@ -839,7 +839,7 @@ function dlaci() {
   if [ -f "$json_file" ]; then
     logInfo "found a previous channel json, starting merge"
     if [ "$(head -n 1 "$json_file")" = "{" ]; then
-      merge_json_with_archive # TODO: possibly fails for playlists as this function was written for channels
+      merge_json_with_archive # TODO: possibly fails for playlists as this was written for channels
       logJq "2: merge result"
       [ "$has_archive" ] && reset_archive_file
     else
@@ -890,7 +890,7 @@ function dlaci() {
   return 0
 }
 
-function dlac() {
+dlac() {
   clear_vars_dlv
   url="$1"
   [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
@@ -923,7 +923,7 @@ function dlac() {
 }
 
 # Download video playlist information (similar to dlci).
-function dlapli() {
+dlapli() {
   url="$1"
   standalone="$2"
   [ -n "$3" ] && debug="$3"
@@ -964,7 +964,7 @@ function dlapli() {
   if [ -f "$json_file" ]; then
     logInfo "found a previous channel json, starting merge"
     if [ "$(head -n 1 "$json_file")" = "{" ]; then
-      merge_json_with_archive # TODO: possibly fails for playlists as this function was written for channels
+      merge_json_with_archive # TODO: possibly fails for playlists as this was written for channels
       logJq "2: merge result"
       [ "$has_archive" ] && reset_archive_file
     else
@@ -1016,7 +1016,7 @@ function dlapli() {
 }
 
 # Download video playlist.
-function dlapl() {
+dlapl() {
   clear_vars_dlv
   url="$1"
   [ "$1" = "--ignore-archive" ] && url="$2" && has_archive=false
@@ -1048,16 +1048,16 @@ function dlapl() {
   cd "$music_dir/$pl_dir" || return
 }
 
-function dlalbumi() {
+dlalbumi() {
   dlapli "$@"
 }
 
-function dlalbum() {
+dlalbum() {
   dlapl "$@"
 }
 
 # Download podcast metadata.
-function dlpodi() {
+dlpodi() {
   ! [ "$function" = dlpod ] && function=dlpodi && standalone=true
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
@@ -1088,7 +1088,7 @@ function dlpodi() {
 }
 
 # Download podcast. We differentiate podcasts from music.
-function dlpod() {
+dlpod() {
   clear_vars_dlv
   function=dlpod
   dl_comments=false
@@ -1122,7 +1122,7 @@ function dlpod() {
 }
 
 # Download thumbnail. Store the thumbnail of a single video plus its metadata.
-function dlt() {
+dlt() {
   function=dlt
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
@@ -1146,7 +1146,7 @@ function dlt() {
   cd "$thumbnails_dir/$platform" || return
 }
 
-function dlfbpost() {
+dlfbpost() {
   url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
   platform="$(extract_platform_name "$url")"
@@ -1163,7 +1163,7 @@ function dlfbpost() {
   jq . <<<"$json"
 }
 
-function dltweet() {
+dltweet() {
   url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
   json=$(python "$twitter_scraper" --url "$url")
   text="$(jq '.content' <<<"$json")"
@@ -1178,18 +1178,18 @@ function dltweet() {
   jq . <<<"$json"
 }
 
-function dlwebsite() {
+dlwebsite() {
   [ -z "$1" ] || [ "$(is_url "$1")" = false ] && echo "not a valid url" && return
   url="$1"
   python "$website_scraper" "$url" "$websites_dir"
   cd "$websites_dir"
 }
 
-function dlw() {
+dlw() {
   dlwebsite "$1"
 }
 
-function dlcensored() {
+dlcensored() {
   [ ! "$(command -v tor)" ] && echo "tor not installed, run 'pkg install tor'" and try again && return
   [ ! "$(command -v proxychains4)" ] && echo "proxychains-ng not installed, run 'pkg install proxychains-ng'" and try again && return
   [ ! "$(command -v sv)" ] && echo "sv not installed, run 'pkg install sv'" and try again && return

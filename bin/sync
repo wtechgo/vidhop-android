@@ -5,7 +5,7 @@
 # Don't forget to start sshd on the workstation.
 # Allow SSH through your firewall in case of permission errors.
 
-function sync_help() {
+sync_help() {
   echo " Title: sync"
   echo " Description: Sync files between phone and workstation."
   echo " Commands:"
@@ -40,12 +40,12 @@ VIDHOP_DIR_PHONE="$SHARED_DIR_PHONE/VidHop"
 TERMUX_RC_PHONE="/data/data/com.termux/files/usr/etc/bash.bashrc"
 SSH_PRIVATE_KEY_PHONE="$shared/.ssh/id_vidhop"
 
-function sshworkstation() {
+sshworkstation() {
   ssh -i "$SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS"
 }
 
 # sendvidhop
-function real_sendvidhop() {
+real_sendvidhop() {
   echo -e "sending metadata JSON files..."
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
@@ -83,7 +83,7 @@ function real_sendvidhop() {
     "$VIDHOP_DIR_PHONE/" "$USER_WS@$IP_WS:$VIDHOP_DIR_WS"
 }
 
-function dry_sendvidhop() {
+dry_sendvidhop() {
   echo -e "sending metadata JSON files..."
   rsync -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
@@ -123,7 +123,7 @@ function dry_sendvidhop() {
 
 # sync media files
 # ----------------
-function sendvidhop() {
+sendvidhop() {
   unset answer
   if [ "$1" = "-exec" ]; then
     real_sendvidhop
@@ -143,7 +143,7 @@ function sendvidhop() {
 }
 
 # fetchvidhop
-function real_fetchvidhop() {
+real_fetchvidhop() {
   echo -e ">> FETCHING METADATA (JSON files)..."
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
@@ -159,7 +159,7 @@ function real_fetchvidhop() {
     "$USER_WS@$IP_WS:$VIDHOP_DIR_WS/" "$VIDHOP_DIR_PHONE"
 }
 
-function dry_fetchvidhop() {
+dry_fetchvidhop() {
   echo -e ">> FETCHING METADATA (JSON files)..."
   rsync -Pauvn -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
@@ -177,7 +177,7 @@ function dry_fetchvidhop() {
 
 # Termux doesn't support creating files with names containing colons, backslash and who knows what else.
 # For files with such names, rsync will not work either, hence fetchvidhop will not work either.
-function fetchvidhop() {
+fetchvidhop() {
   unset answer
   if [ "$1" = "-exec" ]; then
     real_fetchvidhop
@@ -196,7 +196,7 @@ function fetchvidhop() {
   fi
 }
 
-function syncvidhop() {
+syncvidhop() {
   unset answer
   echo -n "Do real run (y) or dry run (n) or abort (a)? Y/n: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
@@ -209,7 +209,7 @@ function syncvidhop() {
     echo -e "\n> FETCHING vidhop files..." && fetchvidhop -exec
 }
 
-function sendvidhopbin() {
+sendvidhopbin() {
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \
@@ -217,7 +217,7 @@ function sendvidhopbin() {
     "$vidhop_app_dir/"* "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS"
 }
 
-function fetchvidhopbin() {
+fetchvidhopbin() {
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
     --exclude=".git/" \
     --exclude=".gitignore" \
@@ -225,39 +225,39 @@ function fetchvidhopbin() {
     "$USER_WS@$IP_WS:$VIDHOP_DEV_DIR_WS/"* "$vidhop_app_dir"
 }
 
-function sendbashrc() {
+sendbashrc() {
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$TERMUX_RC_PHONE" "$USER_WS@$IP_WS:$TERMUX_RC_WS"
 }
 
-function fetchbashrc() {
+fetchbashrc() {
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$TERMUX_RC_WS" "$TERMUX_RC_PHONE"
 }
 
-function sendfile() {
+sendfile() {
   file_phone="$1"
   file_ws="$2"
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$file_phone" "$USER_WS@$IP_WS:$file_ws"
 }
 
-function fetchfile() {
+fetchfile() {
   file_ws="$1"
   file_phone="$2"
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$file_ws" "$file_phone"
 }
 
-function senddir() {
+senddir() {
   dir_phone="$1"
   dir_ws="$2"
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$dir_phone" "$USER_WS@$IP_WS:$dir_ws"
 }
 
-function fetchdir() {
+fetchdir() {
   dir_ws="$1"
   dir_phone="$2"
   rsync -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" "$USER_WS@$IP_WS:$dir_ws" "$dir_phone"
 }
 
-function sshconfig() {
+sshconfig() {
   echo "User on this phone      : $(whoami)"
   echo "IP-address of this phone: $(ifdata -pa wlan0)"
 }
@@ -282,7 +282,7 @@ img_exts="jpg png webp jpeg"
 audio_exts="mp3 m4a wav flacc aac"
 mov_exts="mp4 webm mkv mov avi"
 
-function senddownloads() {
+senddownloads() {
   if [ "$1" == "-exec" ]; then
     for ext in $audio_exts; do
       rsync --remove-source-files -Pauv -e "ssh -p $SSH_PORT_WS -i $SSH_PRIVATE_KEY_PHONE" \
@@ -363,7 +363,7 @@ function senddownloads() {
   fi
 }
 
-function cleandownloads() {
+cleandownloads() {
   exts="jpg png webp jpeg mp4 webm mkv mov avi doc docx xls xlsx pdf txt md mp3 m4a wav flacc aac"
 
   for ext in $exts; do
@@ -378,7 +378,7 @@ function cleandownloads() {
   done
 }
 
-function create-backup-vidhop() {
+create-backup-vidhop() {
   [ "$1" = -h ] || [ "$1" = --help ] &&
     echo "usage: create-backup-vidhop" &&
     echo " info: copy files from \$vidhop_dir to \$vidhop_backup_dir (ideally set in config.ini)" &&
@@ -390,7 +390,7 @@ function create-backup-vidhop() {
   rsync -av "$vidhop_dir"/* "$vidhop_backup_dir" --exclude=".git/" --exclude=".idea"
 }
 
-function restore-backup-vidhop() {
+restore-backup-vidhop() {
   [ "$1" = -h ] || [ "$1" = --help ] &&
     echo "usage: restore-backup-vidhop" &&
     echo " info: copy files from \$vidhop_backup_dir to \$vidhop_dir (ideally set in config.ini)" &&

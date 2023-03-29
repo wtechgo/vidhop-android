@@ -12,8 +12,8 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 . "$bin_dir/common"
 . "$bin_dir/logger"
 . "$bin_dir/history"
-. "$bin_dir/files"
 . "$bin_dir/fvid"
+. "$bin_dir/files"
 . "$bin_dir/metadata"
 
 . "$bin_dir/dlv"
@@ -24,7 +24,7 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
 
-function switch-env-vidhop() {
+switch-env-vidhop() {
   [ "$1" = -h ] || [ "$1" = --help ] &&
     echo "   usage: switch-env-vidhop <PATH>" &&
     echo "            <PATH> is the path of the targeted VidHop directory e.g. /PATH/TO/FUN/VidHop" &&
@@ -46,7 +46,7 @@ function switch-env-vidhop() {
   . vidhop
 }
 
-function install_loader() {
+install_loader() {
   loader="$bin_dir/loader"
   loader_bin="$PREFIX/bin/vidhop"
   echo "> Installing VidHop loader to $loader_bin..." && sleep 1
@@ -57,11 +57,11 @@ function install_loader() {
   . vidhop
 }
 
-function installloader() { # alias for phone hand typing
+installloader() { # alias for phone hand typing
   install_loader
 }
 
-function fetch_github() {
+fetch_github() {
   echo "> Updating VidHop code at $vidhop_app_dir..."
   echo "> Fetching from GitHub..." && sleep 1
   cd "$vidhop_app_dir"
@@ -71,7 +71,7 @@ function fetch_github() {
   . "$PREFIX/opt/vidhop/bin/loader"
 }
 
-function update_python_packages() {
+update_python_packages() {
   echo "> Updating Python packages..." && sleep 1
   pkg install python
   pip install -U pip
@@ -87,19 +87,19 @@ function update_python_packages() {
   pip install -U pywebcopy
 }
 
-function updateytdlp() {
+updateytdlp() {
   echo "> Updating YT-DLP..." && sleep 1
   pip install -U yt-dlp
 }
 
-function update_system() {
+update_system() {
   echo "> Updating & upgrading Termux system..." && sleep 1
   yes | pkg update
   yes | pkg upgrade
   yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }
 
-function updatevidhop() {
+updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   update_system
   update_python_packages
@@ -110,7 +110,7 @@ function updatevidhop() {
   cd "$pwd"
 }
 
-function updatevidhopbin() {
+updatevidhopbin() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   fetch_github
   update_python_packages
@@ -120,7 +120,7 @@ function updatevidhopbin() {
   cd "$pwd"
 }
 
-function uninstallvidhop() {
+uninstallvidhop() {
   echo "This is the uninstallation program for VidHop."
   echo "Uninstall removes all program files."
   echo "It does not delete your downloads in the VidHop directory."
@@ -141,7 +141,7 @@ function uninstallvidhop() {
   echo "VidHop uninstall completed"
 }
 
-function loader_help() {
+loader_help() {
   echo " Title: loader"
   echo " Description: VidHop management functions."
   echo " Commands:"
@@ -154,7 +154,7 @@ function loader_help() {
   echo "    update_python_packages => updates Python packages with pip (package manager)"
 }
 
-function vidhophelp() {
+vidhophelp() {
   dlv_help && echo
   fvid_help && echo
   files_help && echo

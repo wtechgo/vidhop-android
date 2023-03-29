@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function files_help() {
+files_help() {
   echo " Title: files"
   echo " Description: Manage VidHop files."
   echo " Commands:"
@@ -16,7 +16,7 @@ function files_help() {
   echo "    specs <PARTIAL_FILENAME>        => shows technical video information like codecs, resolution...of a video who's filename matches <PARTIAL_FILENAME>"
 }
 
-function play() {
+play() {
   [ -z "$1" ] && [ -z "$media_file" ] && echo "no media file available and no user input received" && return
   unset search_text
   if [ -f "$1" ]; then media_file="$1"; else search_text="$1"; fi
@@ -24,8 +24,11 @@ function play() {
   if [ -n "$search_text" ]; then
     searchable_text="$(enhance_searchability "$search_text")"
     files=$(
-      find "$vidhop_dir" -iname "*$searchable_text*mp4" \
+      find "$vidhop_dir" \
+        -iname "*$searchable_text*mp4" \
+        -o -iname "*$searchable_text*mkv" \
         -o -iname "*$searchable_text*webm" \
+        -o -iname "*$searchable_text*mov" \
         -o -iname "*$searchable_text*wmv" \
         -o -iname "*$searchable_text*avi" \
         -o -iname "*$searchable_text*m4v"
@@ -69,7 +72,7 @@ function play() {
   echo "unknown file extension for media file '$media_file'"
 }
 
-function path_newfile() {
+path_newfile() {
   old_file="$1"
   new_name="$2"
   dir_name=$(dirname "$old_file")
@@ -77,7 +80,7 @@ function path_newfile() {
   echo "$dir_name/$new_name.$ext"
 }
 
-function rename_file() {
+rename_file() {
   old_file="$1"
   new_name="$2"
   new_file=$(path_newfile "$old_file" "$new_name")
@@ -86,7 +89,7 @@ function rename_file() {
 }
 
 # Rename a video and its metadata.
-function renvid() {
+renvid() {
   [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>" && return
   [ "$(echo -n "$1" | wc -c)" -lt 3 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
   old_name_search_text="$(enhance_searchability "$1")"
@@ -151,14 +154,14 @@ function renvid() {
   fi
 }
 
-function renlast() {
+renlast() {
   [ -z "$1" ] && echo "usage: renlast <NEW_NAME>" && return
   old_name=$(lasttitle)
   new_name="$1"
   renvid "$old_name" "$new_name"
 }
 
-function rmvid() {
+rmvid() {
   [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
   unset search_text answer results
   search_text="$1"
@@ -190,7 +193,7 @@ function rmvid() {
   mv "$log_dir/titles.tmp.log" "$titles_file"
 }
 
-function rmpod() {
+rmpod() {
   [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
   unset search_text answer results
   search_text="$1"
@@ -222,12 +225,12 @@ function rmpod() {
   mv "$log_dir/titles.tmp.log" "$titles_file"
 }
 
-function rmlast() {
+rmlast() {
   [ "$function" = dlpod ] || [ "$function" = dlpodi ] && rmpod "$(lasttitle)" && return
   rmvid "$(lasttitle)"
 }
 
-function find_archive_file_from_audio_channel_name() {
+find_archive_file_from_audio_channel_name() {
   name="$1"
   found_json=$(find "$music_meta_dir" -type f -iwholename "*$name**metadata.json")
   [ -z "$found_json" ] && return
@@ -238,7 +241,7 @@ function find_archive_file_from_audio_channel_name() {
   echo "$archive_filename"
 }
 
-function find_archive_file_from_channel_name() {
+find_archive_file_from_channel_name() {
   name="$1"
   found_json=$(find "$channels_meta_dir" -type f -iwholename "*$name**metadata.json")
   [ -z "$found_json" ] && return
@@ -249,14 +252,14 @@ function find_archive_file_from_channel_name() {
   find "$downloaded_dir" -type f -iname "$archive_filename"
 }
 
-function find_archive_file_from_url() {
+find_archive_file_from_url() {
   url="$1"
   archive_file="$downloaded_dir/$(url_to_filename "$url")"
   [ -f "$archive_file" ] && echo "$archive_file" && return
   logInfo "find_archive_file_from_url created an invalid archive file path: $archive_file"
 }
 
-function rmarchiveforurl() {
+rmarchiveforurl() {
   url="$1"
   [ "$(is_url "$url")" = "false" ] && echo "not a valid url" && return 1
 
@@ -265,7 +268,7 @@ function rmarchiveforurl() {
   echo "could not remove as file '$archive_file' does not exist"
 }
 
-function rmchan() {
+rmchan() {
   [ -z "$1" ] && echo "usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
   unset answer found_channel_dir found_downloaded_file found_music_channel_dir found_music_channel_meta_dir
   name="$1"
@@ -306,7 +309,7 @@ function rmchan() {
   [ -f "$found_music_downloaded_file" ] && rm "$found_music_downloaded_file" && echo "deleted downloaded archive file: $found_music_downloaded_file"
 }
 
-function rmartist() {
+rmartist() {
   [ -z "$1" ] && echo "usage: rmartist <PARTIAL_ARTIST_NAME>" && return 1
   unset answer found_artist_dir found_downloaded_file
 
@@ -336,7 +339,7 @@ function rmartist() {
   [ -f "$found_downloaded_file" ] && rm "$found_downloaded_file" && echo "deleted downloaded archive file: $found_downloaded_file"
 }
 
-function rmarchive() {
+rmarchive() {
   [ -z "$1" ] && echo 'rmarchive $URL' && return
   url="$1"
   [[ "$url" != http* ]] && echo "invalid url '$url'" && return
@@ -348,7 +351,7 @@ function rmarchive() {
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
-function specs() {
+specs() {
   [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo -e "usage: specs <URL>\n       specs <FILE>" && return
   if [ "$(is_url "$1")" = true ]; then
     yt-dlp -F --force-ipv4 "$1"
@@ -369,20 +372,26 @@ function specs() {
     mediainfo "$1" && return
   elif [ -f "$media_file" ]; then
     mediainfo "$media_file" && return
+  else
+    file="$(find_one_video "$1")"
+    error=$?
+    [ "$error" = 1 ] && echo "found nothing" && return
+    [ "$error" = 2 ] && echo -e "found multiple:\n$result" && return
+    mediainfo "$file"
   fi
   echo "input '$1' was not a valid URL or file"
 }
 
-function mediafile() {
+mediafile() {
   echo "$media_file"
 }
 
-function treevidhopbefore() {
+treevidhopbefore() {
   ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
   tree "$vidhop_dir" >"$log_dir/tree_vidhop_before"
 }
 
-function treevidhopafter() {
+treevidhopafter() {
   ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
   tree "$vidhop_dir" >"$log_dir/tree_vidhop_after"
 }

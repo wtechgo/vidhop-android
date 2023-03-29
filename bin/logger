@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function logInfo() {
+logInfo() {
   if [ "$debug" = true ]; then
     local msg="$1"
     echo -e "[vidhop|info] $msg" >>"$log_file"
@@ -8,7 +8,7 @@ function logInfo() {
   fi
 }
 
-function logJq() {
+logJq() {
   if [ "$debug" = true ]; then
     msg="[logjq] $1"
     [ -n "$msg" ] && echo "$msg" >>"$log_json_file"
@@ -18,7 +18,7 @@ function logJq() {
   fi
 }
 
-function logError() {
+logError() {
   if [ "$debug" = true ]; then
     msg="$1"
     echo -e "[vidhop|warning] $msg" >>"$log_file"

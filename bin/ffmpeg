@@ -2,7 +2,7 @@
 # TODO: https://github.com/CrypticSignal/better-ffmpeg-progress
 
 # Video.
-function 264encode() {
+264encode() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
@@ -18,7 +18,7 @@ function 264encode() {
   #ffmpeg -i input.avi -c:v libx264 -crf 21 -preset faster -pix_fmt yuv420p -maxrate 5000K -bufsize 5000K -vf 'scale=if(gte(iw\,ih)\,min(1920\,iw)\,-2):if(lt(iw\,ih)\,min(1920\,ih)\,-2)' -movflags +faststart -c:a aac -b:a 160k output.mp4
 }
 
-function 265encode() {
+265encode() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
@@ -32,7 +32,7 @@ function 265encode() {
   echo "file conversion to x265 completed"
 }
 
-function to720p_x264() {
+to720p_x264() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"
   ffmpeg -i "$input_file" -vf scale=-1280:720 -c:v libx264 -crf 18 -preset veryslow -c:a copy "$output_file"
@@ -40,7 +40,7 @@ function to720p_x264() {
   echo "result file is at '$output_file'"
 }
 
-function 265encode1080p() {
+265encode1080p() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
@@ -54,7 +54,7 @@ function 265encode1080p() {
   echo "file conversion to x265 completed"
 }
 
-function cutvideo() {
+cutvideo() {
   [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] && cat <<EOF && return
 usage: cutvideo <START_TIME> <END_TIME> <INPUT_FILE> <OUTPUT_FILE>
 
@@ -84,7 +84,7 @@ mp3+thumbnail2video() {
   ffmpeg -loop 1 -r 1 -i "$image_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
 }
 
-function replaceaudio() {
+replaceaudio() {
   [ -z "$1" ] || [ -z "$2" ] && echo "usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
   video_file="$1"
   audio_file="$2"
@@ -95,14 +95,14 @@ function replaceaudio() {
 }
 
 # Audio.
-function extract-mp3() {
+extract-mp3() {
   input_file="$1"
   [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
   mp3_file="$(strip_extension "$input_file").mp3"
   ffmpeg -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
   #  ffmpeg -nostdin -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
 }
-function convert-to-mp3() {
+convert-to-mp3() {
   input_file="$1"
   [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
   mp3_file="$(strip_extension "$input_file").mp3"
@@ -110,7 +110,7 @@ function convert-to-mp3() {
   rm "$input_file"
 }
 
-function id3tags() { # uses ffprobe
+id3tags() { # uses ffprobe
   [ $# = 0 ] && echo "usage: id3tags <AUDIO_FILE>" && return
   input_file="$1"
   tags_json="$(ffprobe -show_format -print_format json "$input_file")"
@@ -118,7 +118,7 @@ function id3tags() { # uses ffprobe
   jq <<<"$tags_json"
 }
 
-function embed-thumbnail-into-mp3() {
+embed-thumbnail-into-mp3() {
   [ $# = 0 ] && echo "usage: embed-thumbnail-into-mp3 <THUMBNAIL_FILE> <AUDIO_FILE>" && return
   thumb_file="$1"
   input_file="$2"
@@ -142,6 +142,6 @@ function embed-thumbnail-into-mp3() {
   mv "$output_file" "$input_file"
 }
 
-function strip-id3tags() { # not ffmpeg
+strip-id3tags() { # not ffmpeg
   id3convert --strip "$1" 2>/dev/null # strip all id-tags as some choke the car radio
 }

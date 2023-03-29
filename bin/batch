@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function batch_help() {
+batch_help() {
   echo " Title: batch"
   echo " Description: Do work in bulk aka batch processing."
   echo " Commands:"
@@ -19,7 +19,7 @@ function batch_help() {
   echo "    dlvpllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlvpl.list"
 }
 
-function dlalist () {
+dlalist () {
   list="$dlalist"
   log="$import_list_dir/log/dlalist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -32,7 +32,7 @@ function dlalist () {
   done <"$list"
 }
 
-function dlaclist () {
+dlaclist () {
   list="$dlaclist"
   log="$import_list_dir/log/dlaclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -45,7 +45,7 @@ function dlaclist () {
   done <"$list"
 }
 
-function dlacilist () {
+dlacilist () {
   list="$dlacilist"
   log="$import_list_dir/log/dlacilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -58,7 +58,7 @@ function dlacilist () {
   done <"$list"
 }
 
-function dlalbumlist () {
+dlalbumlist () {
   list="$dlalbumlist"
   log="$import_list_dir/log/dlalbumlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -71,7 +71,7 @@ function dlalbumlist () {
   done <"$list"
 }
 
-function dlapllist () {
+dlapllist () {
   list="$dlapllist"
   log="$import_list_dir/log/dlapllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -84,7 +84,7 @@ function dlapllist () {
   done <"$list"
 }
 
-function dlaplilist () {
+dlaplilist () {
   list="$dlaplilist"
   log="$import_list_dir/log/dlaplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -97,7 +97,7 @@ function dlaplilist () {
   done <"$list"
 }
 
-function dlclist () {
+dlclist () {
   list="$dlclist"
   log="$import_list_dir/log/dlclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -110,7 +110,7 @@ function dlclist () {
   done <"$list"
 }
 
-function dlcilist () {
+dlcilist () {
   list="$dlcilist"
   log="$import_list_dir/log/dlcilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -123,7 +123,7 @@ function dlcilist () {
   done <"$list"
 }
 
-function dlpodlist () {
+dlpodlist () {
   list="$dlpodlist"
   log="$import_list_dir/log/dlpodlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -136,7 +136,7 @@ function dlpodlist () {
   done <"$list"
 }
 
-function dltlist () {
+dltlist () {
   list="$dltlist"
   log="$import_list_dir/log/dltlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -149,7 +149,7 @@ function dltlist () {
   done <"$list"
 }
 
-function dlvlist () {
+dlvlist () {
   list="$dlvlist"
   log="$import_list_dir/log/dlvlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -162,7 +162,7 @@ function dlvlist () {
   done <"$list"
 }
 
-function dlvilist () {
+dlvilist () {
   list="$dlvilist"
   log="$import_list_dir/log/dlvilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -175,7 +175,7 @@ function dlvilist () {
   done <"$list"
 }
 
-function dlvpllist () {
+dlvpllist () {
   list="$dlvpllist"
   log="$import_list_dir/log/dlvpllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -188,7 +188,7 @@ function dlvpllist () {
   done <"$list"
 }
 
-function dlvplilist () {
+dlvplilist () {
   list="$dlvplilist"
   log="$import_list_dir/log/dlvplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
@@ -202,7 +202,7 @@ function dlvplilist () {
 }
 
 # Write urls from channels to file.
-function export_channel_urls() {
+export_channel_urls() {
   youtube_channels_1="$import_dir/urls_export.txt"
   url_stream_txt="$import_dir/url_stream.txt"
   channel_stream_json="$import_dir/channel_stream.json"
@@ -230,7 +230,7 @@ function export_channel_urls() {
 }
 
 # Merge subset metadata json of all channels and write one big file to channels metadata root directory.
-function squashjson() {
+squashjson() {
   unset json
 
   while read -r chanjson; do

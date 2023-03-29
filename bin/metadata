@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function metadata_help() {
+metadata_help() {
   echo " Title: metadata"
   echo " Description: Edit the metadata of downloads."
   echo " Commands:"
@@ -27,7 +27,7 @@ function metadata_help() {
   echo "                                                         expose the mechanism applicable to all other 'set' and 'rm' metadata methods"
 }
 
-function metadata() {
+metadata() {
   search_text="$1"
   if [ -z "$search_text" ]; then  # use json from latest download
     if [ -z "$json" ]; then
@@ -56,11 +56,11 @@ function metadata() {
   print_summary
 }
 
-function filesize-channel-meta-files() {
+filesize-channel-meta-files() {
   find "$channels_meta_dir" -type f -iname "*metadata.json" -exec du -hs {} \;
 }
 
-function set_metadata_field_json_obj() {
+set_metadata_field_json_obj() {
   key="$1" && value="$2"
   json=$(jq --arg 'value' "$value" '."'"$key"'" = $value' <<<"$json")
 }
@@ -68,7 +68,7 @@ function set_metadata_field_json_obj() {
 # Sets JSON field with 'key' to 'value' and writes to $meta_file if available.
 # Usage: command "key" "value" ---------------------> uses "$json"
 #        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
-function set_metadata_field() {
+set_metadata_field() {
   [ "$#" = 0 ] || [ "$#" = 1 ] && echo "usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" && # three arguments implies we need to find a metadata FILE.
@@ -85,61 +85,61 @@ function set_metadata_field() {
   echo "no metadata file to write to" && return 1
 }
 
-function setdescription() {
+setdescription() {
   [ "$#" = 0 ] && echo -e "usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_description' "$@" || return
   echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setsummary() {
+setsummary() {
   [ "$#" = 0 ] && echo -e "usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_summary' "$@" || return
   echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setremarks() {
+setremarks() {
   [ "$#" = 0 ] && echo -e "usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_remarks' "$@" || return
   echo "'vh_remarks' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setcategories() {
+setcategories() {
   [ "$#" = 0 ] && echo -e "usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_categories' "$@" || return
   echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function settopics() {
+settopics() {
   [ "$#" = 0 ] && echo -e "usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setspeakers() {
+setspeakers() {
   [ "$#" = 0 ] && echo -e "usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_speakers' "$@" || return
   echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setcreators() {
+setcreators() {
   [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function setcreators() {
+setcreators() {
   [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function settimestamps() {
+settimestamps() {
   [ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field "vh_timestamps" "$@" || return
   echo "'vh_timestamps' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function addtimestamps() {
+addtimestamps() {
   [ -z "$1" ] && echo -e "usage: addtimestamps <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
     echo "example: addtimestamps \"01:11:01 = talking about interesting topic X, 01:23:45 = well that escalated quickly\"" && return
   [ -n "$json" ] && metadata="$json"
@@ -158,28 +158,28 @@ function addtimestamps() {
   echo "'vh_timestamps' was set to '$timestamps' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function set_downloaded() {
+set_downloaded() {
   [ "$#" -eq 2 ] && value="$2" || value="$1"
   set_metadata_field_json_obj "vh_downloaded" "$value"
   [ "$1" = "-f" ] || [ "$1" = "--file" ] && jq <<<"$json" >"$meta_file"
 }
 
-function set_downloaded_date() {
+set_downloaded_date() {
   set_metadata_field_json_obj "vh_downloaded_date" "$(date +%s)"
 }
 
-function set_thumb_file() {
+set_thumb_file() {
   set_metadata_field "vh_thumb_file" "$1" || return
   echo "'vh_thumb_file' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
-function rm_metadata_field_json_obj() {
+rm_metadata_field_json_obj() {
   key="$1"
   [ -z "$key" ] || [ -z "$json" ] && echo "could not remove metadata for key '$key'" && return
   json=$(jq 'del(."'"$key"'")' <<<"$json")
 }
 
-function rm_metadata_field() {
+rm_metadata_field() {
   [ "$#" = 0 ] && echo "no metadata field given to remove" && return
   [ "$#" = 1 ] && key="$1" && metadata="$json" # meta_file should be set if $json is set
   [ "$#" = 2 ] && key="$1" && partial_filename="$2" &&
@@ -196,67 +196,67 @@ function rm_metadata_field() {
   echo "no metadata file to write to"
 }
 
-function rmdescription() {
+rmdescription() {
   rm_metadata_field 'vh_description' "$@" || return
   echo "'vh_description' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmsummary() {
+rmsummary() {
   rm_metadata_field 'vh_summary' "$@" || return
   echo "'vh_summary' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmcategories() {
+rmcategories() {
   rm_metadata_field 'vh_categories' "$@" || return
   echo "'vh_categories' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmremarks() {
+rmremarks() {
   rm_metadata_field 'vh_remarks' "$@" || return
   echo "'vh_remarks' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmtopics() {
+rmtopics() {
   rm_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmspeakers() {
+rmspeakers() {
   rm_metadata_field 'vh_speakers' "$@" || return
   echo "'vh_speakers' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmcreators() {
+rmcreators() {
   rm_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmtimestamps() {
+rmtimestamps() {
   rm_metadata_field 'vh_timestamps' "$@" || return
   echo "'vh_timestamps' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmdownloaded() {
+rmdownloaded() {
   rm_metadata_field 'vh_downloaded' || return
   echo "'vh_downloaded' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rmdownloaded_date() {
+rmdownloaded_date() {
   rm_metadata_field 'vh_downloaded_date' || return
   echo "'vh_downloaded_date' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rm_media_file() {
+rm_media_file() {
   rm_metadata_field 'vh_media_file' || return
   echo "'vh_downloaded' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rm_meta_file() {
+rm_meta_file() {
   rm_metadata_field 'vh_meta_file' || return
   echo "'vh_meta_file' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }
 
-function rm_thumb_file() {
+rm_thumb_file() {
   rm_metadata_field 'vh_thumb_file' || return
   echo "'vh_thumb_file' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
 }

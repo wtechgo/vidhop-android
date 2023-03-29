@@ -223,7 +223,7 @@ To see some of these commands in action, watch [An Introduction to VidHop](https
     project <PROJECT_NAME> => Create new project with <PROJECT_NAME> in $projects_dir.
     subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>.
     linkvid4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>.
-    link-videos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background).
+    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background).
     fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects.
     absfproj <SEARCH_TEXT>   => Identical to fproj but results are displayed as absolute paths.
     rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>.

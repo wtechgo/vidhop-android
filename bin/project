@@ -8,7 +8,7 @@ project_help() {
   echo " Commands:"
   echo "    project <PROJECT_NAME> => Create new project with <PROJECT_NAME> in \$projects_dir."
   echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
-  echo "    linkvid4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
+  echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
   echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
   echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
   echo "    absfproj <SEARCH_TEXT>   => Identical to fproj but results are displayed as absolute paths."
@@ -123,11 +123,11 @@ mkimgdir4subproject() {
 }
 
 # Create a symbolic link to video file (arg) in the videos directory of a project.
-# Example: linkvid4project "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
+# Example: linkvideo4project "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
 # Result: Symbolic link "$shared/Movies/Projects/Nanotechnology/DNA self-assembly.mp4"
 #         points to "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4".
-linkvid4project() {
-  [ -z "$1" ] && echo -e "usage: linkvid4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
+linkvideo4project() {
+  [ -z "$1" ] && echo -e "usage: linkvideo4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
   [ $# = 1 ] && file="$media_file" && project_name="$1"
   [ $# = 2 ] && [ -f "$1" ] && file="$(realpath "$1")" && project_name="$2"
   [ $# = 2 ] && [ ! -f "$1" ] && search_text="$1" && project_name="$2"
@@ -141,7 +141,7 @@ linkvid4project() {
   [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
 
   link_path="$project_dir/vid/$(basename "$file")"
-  ln -s "$file" "$link_path" || echo "failed to create link from '$file' to '$link_path'" && echo return
+  ln -s "$file" "$link_path" || echo "failed to create link from '$file' to '$link_path'" && return
   echo "created link from '$file' to '$link_path'"
   unset file search_text
 }

@@ -144,16 +144,15 @@ say() {
 
 print_msg_for_error_code() {
   [ "$1" -eq 1 ] && echo -e "found no match for '$search_text', abort" && return
-  [ "$1" -eq 2 ] && echo -e "found multiple possibilities for '$search_text', abort\n$result" && return
+  [ "$1" -eq 2 ] && echo -e "found multiple possibilities for '$search_text':\n$result\nabort" && return
 }
 
 find_one_video() {
   [ -z "$1" ] && echo "usage: find_one_video <PARTIAL_NAME>" && return
   unset search_text && search_text="$1"
-
   [ -f "$search_text" ] && echo "$search_text" && return
-  result=$(find "$vids_dir" -iregex '.*'"$search_text"'.*\.\(mp4\|mkv\|webm\|mov\|wmv\|avi\|m4v\)')
 
+  result=$(find "$vids_dir" -iregex '.*'"$search_text"'.*\.\(mp4\|mkv\|webm\|mov\|wmv\|avi\|m4v\)')
   echo -e "$result"
   [ "$(wc -w <<<"$result")" -eq 0 ] && return 1
   [ "$(wc -l <<<"$result")" -gt 1 ] && return 2
@@ -196,8 +195,9 @@ find_one_cmeta() {
 
   [ -f "$search_text" ] && echo "$search_text" && return
   result=$(find_one f "*$search_text*$platform*metadata.json" "$channels_meta_dir")
-  error=$? && if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; fi
-  echo "$result"
+  error=$?
+  echo -e "$result"
+  if [ "$error" = 1 ]; then return 1; elif [ "$error" = 2 ]; then return 2; else return 0; fi
 }
 
 fvidv() {
@@ -495,7 +495,7 @@ print_channel_data() {
 # Show all videos of a channel, one line per video.
 chani() { # channel info
   [ -z "$1" ] &&
-    echo "usage: chani <CHANNEL_SEARCH_TEXT>" &&
+    echo "usage: chani <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" &&
     echo "       chani <ABS_FILE_PATH> [<PLATFORM>]" && return
   search_text="$1"
   platform="$2"
@@ -505,7 +505,8 @@ chani() { # channel info
     json=$(jq '.' "$search_text")
   else
     result=$(find_one_cmeta "$search_text" "$platform")
-    error=$? && [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
+    error=$?
+    [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
     json=$(jq '.' "$result")
   fi
 

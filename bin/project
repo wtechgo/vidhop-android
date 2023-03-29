@@ -134,15 +134,16 @@ linkvideo4project() {
 
   [ -n "$search_text" ] && file="$(find_one_video "$search_text")"
   error=$?
-  [ "$error" = 1 ] && echo "found nothing" && return
-  [ "$error" = 2 ] && echo -e "found multiple:\n$result" && return
+  [ "$error" = 1 ] && echo -e "found nothing for '$search_text'" && return
+  [ "$error" = 2 ] && echo -e "found multiple videos instead of only one:\n$result" && return
 
   project_dir="$projects_dir/$project_name"
   [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
 
   link_path="$project_dir/vid/$(basename "$file")"
-  ln -s "$file" "$link_path" || echo "failed to create link from '$file' to '$link_path'" && return
-  echo "created link from '$file' to '$link_path'"
+  ln -s "$file" "$link_path"
+  [ $? = 1 ] && echo "failed to create link from '$file' to '$link_path'" && return
+  echo -e "created link at:\n\"$link_path\"\n which points to file:\n \"$file\""
   unset file search_text
 }
 

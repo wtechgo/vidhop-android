@@ -1,11 +1,12 @@
 #!/bin/bash
 
+logs() {
+  cat "$log_file"
+}
+
 logInfo() {
-  if [ "$debug" = true ]; then
-    local msg="$1"
-    echo -e "[vidhop|info] $msg" >>"$log_file"
-    echo -e "[vidhop|info] $msg"
-  fi
+  local msg="$1"
+  echo -e "$(timestamp) - $msg" >>"$log_file"
 }
 
 logJq() {
@@ -21,7 +22,11 @@ logJq() {
 logError() {
   if [ "$debug" = true ]; then
     msg="$1"
-    echo -e "[vidhop|warning] $msg" >>"$log_file"
-    echo -e "[vidhop|warning] $msg"
+    echo -e "$(timestamp) - $msg" >>"$log_file"
+    echo -e "$(timestamp) - $msg"
   fi
+}
+
+clearlog() {
+  echo "" >"$log_log_file"
 }

@@ -19,185 +19,185 @@ batch_help() {
   echo "    dlvpllist [<LIST_FILE_PATH>]   => download all URLs in list file at /VidHop/import/list/dlvpl.list"
 }
 
-dlalist () {
+dlalist() {
   list="$dlalist"
   log="$import_list_dir/log/dlalist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dla "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlaclist () {
+dlaclist() {
   list="$dlaclist"
   log="$import_list_dir/log/dlaclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlac "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlacilist () {
+dlacilist() {
   list="$dlacilist"
   log="$import_list_dir/log/dlacilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlaci "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlalbumlist () {
+dlalbumlist() {
   list="$dlalbumlist"
   log="$import_list_dir/log/dlalbumlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlalbum "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlapllist () {
+dlapllist() {
   list="$dlapllist"
   log="$import_list_dir/log/dlapllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlapl "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlaplilist () {
+dlaplilist() {
   list="$dlaplilist"
   log="$import_list_dir/log/dlaplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlapli "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlclist () {
+dlclist() {
   list="$dlclist"
   log="$import_list_dir/log/dlclist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlc "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlcilist () {
+dlcilist() {
   list="$dlcilist"
   log="$import_list_dir/log/dlcilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlci "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlpodlist () {
+dlpodlist() {
   list="$dlpodlist"
   log="$import_list_dir/log/dlpodlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlpod "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dltlist () {
+dltlist() {
   list="$dltlist"
   log="$import_list_dir/log/dltlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlt "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlvlist () {
+dlvlist() {
   list="$dlvlist"
   log="$import_list_dir/log/dlvlist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlv "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlvilist () {
+dlvilist() {
   list="$dlvilist"
   log="$import_list_dir/log/dlvilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlvi "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlvpllist () {
+dlvpllist() {
   list="$dlvpllist"
   log="$import_list_dir/log/dlvpllist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlvpl "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 
-dlvplilist () {
+dlvplilist() {
   list="$dlvplilist"
   log="$import_list_dir/log/dlvplilist.log"
   [ -n "$1" ] && list="$import_list_dir/custom/$1" && log="$import_list_dir/log/custom/$1.log"
   [ ! -f "$list" ] && echo "no file found at path '$list' which should point to a file containing only URLs, abort" && return
 
-  date +'%d-%m-%Y_%H:%M:%S' >> "$log"
+  date +'%d-%m-%Y_%H:%M:%S' >>"$log"
   while read -r url; do
     dlvpli "$url"
-    echo "$url" >> "$log"
+    echo "$url" >>"$log"
   done <"$list"
 }
 

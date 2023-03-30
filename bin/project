@@ -169,7 +169,7 @@ linkvideos4project() {
   [ "$found_something" = "false" ] && echo "found nothing" && return
 
   echo "Found $(wc -l <<<"$result") video files!" && sleep 1
-  echo "$result"
+  echo -e "${GREEN}$result${NC}" && clearLastLine
 
   echo "Creating links to video files in '$dest_dir'..."
   mkdir -p "$dest_dir"
@@ -196,21 +196,49 @@ linkvideos4project() {
   done < <(echo -e "$result")
   echo "Done creating links to video files in '$dest_dir'."
 }
+# When you have a directory with symbolic links to VidHop video files,
+# this function will search for the metadata for each video,
+# and write a text file containing the title, URL, channel and channel URL, for each video,
+# in the same directory provided as argument to the function.
+videolinks2text() {
+  [ -d "$1" ] && links_dir="$1"
+  [ ! -d "$1" ] && [ -d "$projects_dir/$1/vid/Video File Links" ] && links_dir="$projects_dir/$1/vid/Video File Links"
+  [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
+
+  unset summary
+  while read -r media_file; do
+    json_file="$(media_file_to_metadata_path "$media_file")" || continue
+    if [ -f "$json_file" ]; then
+      json="$(jq . "$json_file")"
+      title="$(jq .title <<<"$json")"
+      url="$(jq .webpage_url <<<"$json")"
+      channel_name="$(channel_name_from_obj)"
+      channel_url="$(channel_url)"
+      [ -n "$title" ] && echo -e "${GREEN}$title${NC}" | tr -d '"' && summary+="$(echo "$title" | tr -d '"')\n"
+      [ -n "$url" ] && echo -e "${GREEN}$url${NC}" | tr -d '"' && summary+="$(echo "$url" | tr -d '"')\n"
+      [ -n "$channel_name" ] && echo -e "${GREEN}$channel_name${NC}" && summary+="$channel_name\n"
+      [ -n "$channel_url" ] && echo -e "${GREEN}$channel_url${NC}" && summary+="$channel_url\n"
+      echo && summary+="\n"
+    else
+      logInfo "not a valid metadata file '$json_file'"
+    fi
+  done < <(find -L "$links_dir" -xtype l -exec realpath {} \;)
+  echo "$summary" >"$links_dir/links.txt"
+}
 
 fvidf4project() {
   [ -z "$1" ] && echo "usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
     echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
   linkvideos4project "$@"
 }
-
 write_title_url_to_markdown_file() {
-  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | prefix_suffix_with_double_quotes)"
+  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | remove_leading_trailing_double_quotes)"
   echo "$line" >>"$list_md"
 }
 
 write_title_url_to_txt_file() {
-  title="$(jq '.title' "$metadata" | prefix_suffix_with_double_quotes)"
-  webpage_url="$(jq '.webpage_url' "$metadata" | prefix_suffix_with_double_quotes)"
+  title="$(jq '.title' "$metadata" | remove_leading_trailing_double_quotes)"
+  webpage_url="$(jq '.webpage_url' "$metadata" | remove_leading_trailing_double_quotes)"
   echo -e "$title\n$webpage_url\n" >>"$list_txt"
 }
 

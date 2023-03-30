@@ -36,7 +36,7 @@ website_scraper="$bin_dir/websitescraper.py"
 # log
 log_dir="$vidhop_dir/log"
 log_file="$log_dir/vidhop.log"
-log_json_file="$log_dir/json.log"
+log_json_file="$log_dir/vidhop.log.json"
 vhistory_file="$log_dir/vhistory.log"
 chistory_file="$log_dir/chistory.log"
 ahistory_file="$log_dir/ahistory.log"

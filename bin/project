@@ -226,6 +226,25 @@ videolinks2text() {
   echo "$summary" >"$links_dir/links.txt"
 }
 
+renlink+source() {
+  [ ! $# = 2 ] && echo "usage: renlink+source <LINK_PATH> <NEW_NAME>" && return
+  video_link="$1"
+  new_name="$2"
+  video_file="$(realpath "$video_link")"
+  [ ! -L "$video_link" ] && echo "not a link: '$video_link'" && return
+  [ ! -f "$video_file" ] && echo "not a file: '$video_file'" && return
+
+  old_name="$(strip_extension "$(basename "$video_file")")"
+  renvid "$old_name" "$new_name"
+
+  ext="$(get_extension "$video_file")"
+  new_video_file="$(dirname "$video_file")/$new_name.$ext"
+  new_video_link="$(dirname "$video_link")/$new_name.$ext"
+  ln -s "$new_video_file" "$new_video_link"
+  [ $? = 0 ] && rm "$video_link"
+  echo "renamed the video file and created a new link"
+}
+
 fvidf4project() {
   [ -z "$1" ] && echo "usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
     echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return

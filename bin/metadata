@@ -36,7 +36,7 @@ metadata() {
     fi
   else  # arg can be a file or a search term
     [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")" # json file arg
-    [ -f "$(media_file_to_metadata_path "$search_text")" ] && json="$(jq . "$(media_file_to_metadata_path "$search_text")")" # media file arg
+    [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" # media file arg
     if [ -z "$json" ]; then
       result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
       error=$?

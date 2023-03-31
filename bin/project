@@ -128,12 +128,12 @@ mkimgdir4subproject() {
 #         points to "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4".
 linkvideo4project() {
   [ -z "$1" ] && echo -e "usage: linkvideo4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
+  unset file search_text error
   [ $# = 1 ] && file="$media_file" && project_name="$1"
   [ $# = 2 ] && [ -f "$1" ] && file="$(realpath "$1")" && project_name="$2"
   [ $# = 2 ] && [ ! -f "$1" ] && search_text="$1" && project_name="$2"
 
-  [ -n "$search_text" ] && file="$(find_one_video "$search_text")"
-  error=$?
+  [ -n "$search_text" ] && file="$(find_one_video "$search_text")" && error=$?
   [ "$error" = 1 ] && echo -e "found nothing for '$search_text'" && return
   [ "$error" = 2 ] && echo -e "found multiple videos instead of only one:\n$result" && return
 
@@ -185,7 +185,7 @@ linkvideos4project() {
       # create link
       ln -s "$file" "$(basename "$file")" 2>/dev/null
       # write title & link to file
-      metadata="$(media_file_to_metadata_path "$file")"
+      metadata="$(media_file2metadata_path "$file")"
       if [ -f "$metadata" ]; then
         write_title_url_to_markdown_file
         write_title_url_to_txt_file
@@ -196,6 +196,7 @@ linkvideos4project() {
   done < <(echo -e "$result")
   echo "Done creating links to video files in '$dest_dir'."
 }
+
 # When you have a directory with symbolic links to VidHop video files,
 # this function will search for the metadata for each video,
 # and write a text file containing the title, URL, channel and channel URL, for each video,
@@ -207,7 +208,7 @@ videolinks2text() {
 
   unset summary
   while read -r media_file; do
-    json_file="$(media_file_to_metadata_path "$media_file")" || continue
+    json_file="$(media_file2metadata_path "$media_file")" || continue
     if [ -f "$json_file" ]; then
       json="$(jq . "$json_file")"
       title="$(jq .title <<<"$json")"
@@ -241,8 +242,7 @@ renlink+source() {
   new_video_file="$(dirname "$video_file")/$new_name.$ext"
   new_video_link="$(dirname "$video_link")/$new_name.$ext"
   ln -s "$new_video_file" "$new_video_link"
-  [ $? = 0 ] && rm "$video_link"
-  echo "renamed the video file and created a new link"
+  [ $? = 0 ] && rm "$video_link" && echo "renamed the video file and created a new link"
 }
 
 fvidf4project() {
@@ -250,6 +250,7 @@ fvidf4project() {
     echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
   linkvideos4project "$@"
 }
+
 write_title_url_to_markdown_file() {
   line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | remove_leading_trailing_double_quotes)"
   echo "$line" >>"$list_md"

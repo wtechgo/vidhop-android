@@ -8,6 +8,7 @@ dl=$shared/Download
 # VidHop
 . vidhop
 
+alias cls='clear' # clear screen
 # cd.
 alias cdetc='cd $etc'
 alias cdbin='cd $bin'

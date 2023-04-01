@@ -27,33 +27,40 @@ metadata_help() {
   echo "                                                         expose the mechanism applicable to all other 'set' and 'rm' metadata methods"
 }
 
-metadata() {
-  search_text="$1"
-  if [ -z "$search_text" ]; then  # use json from latest download
-    if [ -z "$json" ]; then
-      [ -f "$meta_file" ] && json="$(jq . "$meta_file")"
-      [ -f "$json_file" ] && json="$(jq . "$json_file")"
-    fi
-  else  # arg can be a file or a search term
-    [ -f "$search_text" ] && [[ "$search_text" == *.json ]] && json="$(jq . "$search_text")" # json file arg
-    [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" # media file arg
-    if [ -z "$json" ]; then
-      result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
-      error=$?
-      [ "$error" = 0 ] && json="$(jq . "$result")"
-      [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
-    fi
-  fi
-  [ -z "$json" ] && echo "could not resolve a json file or variable to process, abort" && return
-
-  jq . <<<"$json"
-  # print summary
+extract_summary_vars() {
   [ "$(has_entries)" = false ] && function=dlv || function=dlc
   title="$(jq .title <<<"$json")"
   url="$(jq .webpage_url <<<"$json")"
   channel_name="$(channel_name_from_obj "$json")"
   channel_url="$(channel_url_from_obj "$json")"
-  print_summary
+  true # if channel_url fails, exit code is still 0, so && won't fail
+}
+
+metadata() {
+  search_text="$1"
+  if [ -z "$search_text" ]; then # use json from latest download
+    [ -n "$json" ] && jq . <<<"$json" && extract_summary_vars && print_summary && return
+    [ -f "$json_file" ] && json="$(jq . "$json_file")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
+    [ -f "$meta_file" ] && json="$(jq . "$meta_file")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
+    echo "usage: metadata <SEARCH_TEXT>"
+    echo "       metadata <METADATA_JSON_FILE>"
+    echo "       metadata <MEDIA_FILE>"
+    echo "       metadata"
+    echo "       => shows metadata from the last download"
+    return
+  fi
+  # json file arg
+  [ -f "$search_text" ] && [[ "$search_text" == *.json ]] &&
+    json="$(jq . "$search_text")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
+  # media file arg
+  [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" &&
+    jq . <<<"$json" && extract_summary_vars && print_summary && return
+  # find json file based search text arg
+  result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
+  error=$?
+  [ "$error" = 0 ] && json="$(jq . "$result")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
+  [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
+  echo "could not resolve a json file or variable to process, abort" && return
 }
 
 filesize-channel-meta-files() {

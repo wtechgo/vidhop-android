@@ -136,7 +136,6 @@ to-mp3() {
   [[ "$input_file" == *.mp3 ]] && return
 
   mp3_file="$(strip_extension "$input_file").mp3"
-  echo "$mp3_file"
   ffmpeg -i "$input_file" -vn -c:a libmp3lame -q:a 2 "$mp3_file"
 }
 

@@ -316,6 +316,13 @@ fvidfc() {
   echo "search completed"
 }
 
+set_vars_single_result() {
+  if [ "$(echo "$result" | wc -l)" = 1 ]; then
+    media_file="$(remove_leading_trailing_double_quotes "$result")"
+    filename="$(basename "$media_file")"
+  fi
+}
+
 # Output all video files whose name match your query.
 fvidf() { # find video files (on disk)
   [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
@@ -326,17 +333,17 @@ fvidf() { # find video files (on disk)
   result=$(find "$podcasts_dir" -not -path "*.srt" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Podcast downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
+    set_vars_single_result && unset result && found_something="true"
 
   result=$(find "$channels_dir" -not -path "*.srt" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
+    set_vars_single_result && unset result && found_something="true"
 
   result=$(find "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
+    set_vars_single_result && unset result && found_something="true"
 
   [ "$found_something" = "false" ] && echo "found nothing"
 }

@@ -74,6 +74,33 @@ EOF
   ffmpeg -ss "$1" -to "$2" -i "$3" -c copy "$4"
 }
 
+embed-thumbnail-into-video() { # not tested
+  [ $# != 3 ] && echo "usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <VIDEO_FILE>" && return
+  thumb_file="$1" && [ ! -f "$thumb_file" ] && echo "not a file: '$thumb_file'" && return
+  input_file="$2" && [ ! -f "$input_file" ] && echo "not a file: '$input_file'" && return
+  output_file="$(prefix_extension "$input_file" " (thumb)")"
+
+  if [[ "$input_file" == *.mkv ]] || [[ "$input_file" == *.MKV ]]; then
+    if [ "$(command -v magick)" ]; then # convert image to jpg
+      thumb_temp_file="$(strip_extension "$thumb_file").temp.jpg"
+      magick "$thumb_file" "$thumb_temp_file" # keeps original image
+      thumb_file="$thumb_temp_file"
+    fi
+    ffmpeg -i "$input_file" \
+      -attach "$thumb_file" \
+      -metadata:s:t:0 mimetype=image/jpeg \
+      -c copy "$output_file"
+    [ -f "$thumb_temp_file" ] && rm "$thumb_temp_file"
+  else
+    ffmpeg -i "$input_file" \
+      -i "$thumb_file" \
+      -map 1 \
+      -map 0 \
+      -c copy \
+      -disposition:0 attached_pic "$output_file"
+  fi
+}
+
 mp3+thumbnail2video() {
   audio_file="$(realpath "$1")"
   image_file="$(realpath "$2")"
@@ -102,12 +129,20 @@ extract-mp3() {
   ffmpeg -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
   #  ffmpeg -nostdin -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
 }
-convert-to-mp3() {
+
+to-mp3() {
   input_file="$1"
   [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
+  [[ "$input_file" == *.mp3 ]] && return
+
   mp3_file="$(strip_extension "$input_file").mp3"
-  ffmpeg -v 5 -y -i "$input_file" -acodec libmp3lame -ac 2 -ab 220k "$mp3_file"
-  rm "$input_file"
+  echo "$mp3_file"
+  ffmpeg -i "$input_file" -vn -c:a libmp3lame -q:a 2 "$mp3_file"
+}
+
+to-mp3-remove-input() {
+  to-mp3 "$1"
+  [ -f "$mp3_file" ] && rm "$input_file"
 }
 
 id3tags() { # uses ffprobe

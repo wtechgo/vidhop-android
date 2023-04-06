@@ -31,6 +31,7 @@ yes | pkg install git                # pull in code and updates
 yes | pkg install openssh            # install ssh client and server (sshd command)
 yes | pkg install rsync              # enables `termux-open` command, used by `play` command
 yes | pkg install mediainfo          # required for `specs`
+yes | pkg install imagemagick        # convert images
 yes | pkg install nano               # for editing code with nanodlv, nanofvid,...
 yes | pkg install ncurses-utils      # for installing tput, used in fvid
 yes | pkg install iproute2           # for fetching the current IP address

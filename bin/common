@@ -354,5 +354,5 @@ shorten_text() {
 }
 
 timestamp() {
-  date +'%Y-%m-%d_%H:%M:%S'
+  date +'%Y-%m-%d_%Hh%Mm%Ss'
 }

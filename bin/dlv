@@ -1149,15 +1149,18 @@ dlt() {
 dlfbpost() {
   url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
-  platform="$(extract_platform_name "$url")"
 
+  echo "fetching FB post..."
   json="$(python "$facebook_scraper" --url "$url")"
+
+  platform="$(extract_platform_name "$url")"
   text="$(jq '.text' <<<"$json")"
   shortened_text="$(shorten_text "$text")"
   username=$(jq .username <<<"$json" | tr -d '"')
-  fbpost_dir="${social_media_dir}/$platform/${username}_$(timestamp)$([ -n "$shortened_text" ] && echo " - $shortened_text")"
+  fbpost_dir="${social_media_dir}/$platform/${username} - $shortened_text_$(timestamp)"
   json_file="$fbpost_dir/metadata.json"
-  mkdir -p "$fbpost_dir" 2>/dev/null
+  mkdir -p "$fbpost_dir"
+
   jq . <<<"$json" >"$json_file"
   cd "$fbpost_dir"
   jq . <<<"$json"

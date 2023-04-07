@@ -173,7 +173,8 @@ embed-thumbnail-into-mp3() {
     -metadata:s:v comment="Cover (front)" \
     "$output_file"
 
-  mv "$output_file" "$input_file"
+  [ -f "$output_file" ] && mv "$output_file" "$input_file" && echo "thumbnail embedded into mp3" && return
+  echo "embedding thumbnail failed"
 }
 
 strip-id3tags() { # not ffmpeg

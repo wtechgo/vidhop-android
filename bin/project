@@ -143,7 +143,7 @@ linkvideo4project() {
   link_path="$project_dir/vid/$(basename "$file")"
   ln -s "$file" "$link_path"
   [ $? = 1 ] && echo "failed to create link from '$file' to '$link_path'" && return
-  echo -e "created link at:\n\"$link_path\"\n which points to file:\n \"$file\""
+  echo -e "created link at:\n\"$link_path\"\nwhich points to file:\n\"$file\""
   unset file search_text
 }
 

@@ -294,6 +294,10 @@ sort_playlist_index_asc() {
   json=$(jq -s '.[0].entries = .[1] | .[0]' <<<"$json" <<<"$entries")
 }
 
+clear_last_line() {
+  tput cuu 1 && tput el
+}
+
 print_line_for_msg() {
   [ -z "$1" ] && return
   line=""
@@ -349,10 +353,10 @@ enhance_searchability() {
 }
 
 shorten_text() {
-  [ -n "$1" ] && echo "$1" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25 && return
-  tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -25
+  [ -n "$1" ] && echo "$1" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -27 && return
+  tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -27
 }
 
 timestamp() {
-  date +'%Y-%m-%d_%Hh%Mm%Ss'
+  date +'%Y-%m-%d_%Hh%Mm%Ss'  # removed H:M:S format for Termux compatibility
 }

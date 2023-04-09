@@ -125,15 +125,11 @@ msg_multiple_channels_found() {
   echo "usage: $command <PARTIAL_CHANNEL_NAME> <PLATFORM>"
 }
 
-clearLastLine() {
-  tput cuu 1 && tput el
-}
-
 # `say --overwrite` will leave behind lines that are too big for the terminal size e.g. when terminal size is 80 while string is 120.
 say() {
   [ "$quiet" = "true" ] && return
   if [ "$1" = "--overwrite" ] || [ "$1" = "-o" ]; then
-    clearLastLine
+    clear_last_line
     file="$(echo "$2" | tr -d "'" | sed "s/.json//g")" # remove quotes and '.json' from filename
     # 1. remove VidHop root from path; 2. trim down to 'screensize - ".json" (5 chars)'; 3. append '.json'
     echo "${NC}$(echo -en "${NC}${file#$subtract}" | cut -c -"$(("$workstation_screen_char_count" - 5))").json"
@@ -470,7 +466,7 @@ fvidusermeta() {
               ( if .vh_categories != null then select(.vh_categories | ascii_downcase | contains($text)) else empty end )
             )' "$vidjson"
     )
-  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clearLastLine
+  done < <(find "$vids_meta_dir" -type f -iname "*.json") && clear_last_line
   echo "search done"
 
   json=$(jq -s '{ entries: . }' <<<"$json")

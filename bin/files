@@ -351,6 +351,16 @@ rmarchive() {
   rm "$archive_to_be_removed" && echo "deleted $archive_to_be_removed"
 }
 
+summary_specs() {
+  clear_last_line
+  specs="$(mediainfo --Output=JSON "$file" | jq)"
+  echo Summary
+  echo -------
+  echo "Frame rate           : $(jq '.media.track[1].FrameRate'<<<"$specs" | tr -d '"')"
+  echo "Width                : $(jq '.media.track[1].Width'<<<"$specs" | tr -d '"')"
+  echo "Height               : $(jq '.media.track[1].Height'<<<"$specs" | tr -d '"')"
+}
+
 specs() {
   [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo -e "usage: specs <URL>\n       specs <FILE>" && return
   if [ "$(is_url "$1")" = true ]; then
@@ -369,15 +379,17 @@ specs() {
     }'
     return
   elif [ -f "$1" ]; then
-    mediainfo "$1" && return
+    file="$1"
+    mediainfo "$file" && summary_specs && return
   elif [ -f "$media_file" ]; then
-    mediainfo "$media_file" && return
+    file="$media_file"
+    mediainfo "$file" && summary_specs && return
   else
     file="$(find_one_video "$1")"
     error=$?
     [ "$error" = 1 ] && echo "found nothing" && return
     [ "$error" = 2 ] && echo -e "found multiple:\n$result" && return
-    mediainfo "$file"
+    mediainfo "$file" && summary_specs && return
   fi
   echo "input '$1' was not a valid URL or file"
 }

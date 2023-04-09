@@ -122,7 +122,7 @@ mkimgdir4subproject() {
     "$(realpath "$projects_dir")/$project_name/$subproject_name/img"
 }
 
-# Create a symbolic link to video file (arg) in the videos directory of a project.
+# Create a symbolic link to a video file (arg) in the videos directory of a project.
 # Example: linkvideo4project "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
 # Result: Symbolic link "$shared/Movies/Projects/Nanotechnology/DNA self-assembly.mp4"
 #         points to "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4".
@@ -148,14 +148,14 @@ linkvideo4project() {
 }
 
 # Creates symlinks from fvidf results in the project /vid directory, more precisely in,
-# <PROJECT_NAME/vid/Video File Links/<SEARCH_TEXT>.
+# <PROJECT_NAME/vid/<SEARCH_TEXT>.
 linkvideos4project() {
   [ -z "$1" ] && echo "usage: linkvideos4project <SEARCH_TEXT> <PROJECT_NAME>" &&
     echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
   search_text="$1"
   project_dir="$projects_dir/$2"
   [ ! -d "$project_dir" ] && echo "project directory '$project_dir' does not exist, abort" && return
-  dest_dir="$project_dir/vid/Video File Links/$search_text"
+  dest_dir="$project_dir/vid/$search_text"
 
   unset result
   found_something="false"
@@ -169,7 +169,7 @@ linkvideos4project() {
   [ "$found_something" = "false" ] && echo "found nothing" && return
 
   echo "Found $(wc -l <<<"$result") video files!" && sleep 1
-  echo -e "${GREEN}$result${NC}" && clearLastLine
+  echo -e "${GREEN}$result${NC}" && clear_last_line
 
   echo "Creating links to video files in '$dest_dir'..."
   mkdir -p "$dest_dir"
@@ -203,7 +203,7 @@ linkvideos4project() {
 # in the same directory provided as argument to the function.
 videolinks2text() {
   [ -d "$1" ] && links_dir="$1"
-  [ ! -d "$1" ] && [ -d "$projects_dir/$1/vid/Video File Links" ] && links_dir="$projects_dir/$1/vid/Video File Links"
+  [ ! -d "$1" ] && [ -d "$projects_dir/$1/vid" ] && links_dir="$projects_dir/$1/vid"
   [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
 
   unset summary

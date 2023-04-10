@@ -55,8 +55,8 @@ to720p_x264() {
 }
 
 cutvideo() {
-  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] && cat <<EOF && return
-usage: cutvideo <START_TIME> <END_TIME> <INPUT_FILE> <OUTPUT_FILE>
+  [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
+usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>] [<OUTPUT_FILE>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -68,10 +68,23 @@ time input formats:
     hh:mm:ss.mmm    example: 01:30:52.123
     sss.mmm         example: 120.123
 
-If cutvideo fails, converting the input video from mkv to mp4 can help (via OBS > file > remux, or via ffmpeg).
+The input file remains untouched.
+A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
+Ext is the extension of the input file e.g. mp4, mkv...
+
+If cutvideo fails, converting the input video from mkv to mp4 may help.
+One way to do this is with OBS > File > Remux.
 EOF
 
-  ffmpeg -ss "$1" -to "$2" -i "$3" -c copy "$4"
+  unset input_file start_time end_time output_file
+  input_file="$1"
+  start_time="$2"
+  end_time="$3"
+  [ -z "$3" ] && end_time="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \
+    -sexagesimal "$input_file" | sed 's/\..*//g')"
+  output_file="$(prefix_extension "$input_file" cut)"
+
+  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c copy "$output_file"
 }
 
 embed-thumbnail-into-video() { # not tested

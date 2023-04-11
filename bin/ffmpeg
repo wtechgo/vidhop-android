@@ -2,7 +2,7 @@
 # TODO: https://github.com/CrypticSignal/better-ffmpeg-progress
 
 # Video.
-264encode() {
+to-x264() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
@@ -18,7 +18,7 @@
   #ffmpeg -i input.avi -c:v libx264 -crf 21 -preset faster -pix_fmt yuv420p -maxrate 5000K -bufsize 5000K -vf 'scale=if(gte(iw\,ih)\,min(1920\,iw)\,-2):if(lt(iw\,ih)\,min(1920\,ih)\,-2)' -movflags +faststart -c:a aac -b:a 160k output.mp4
 }
 
-265encode() {
+to-x265() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
@@ -32,7 +32,7 @@
   echo "file conversion to x265 completed"
 }
 
-to720p_x264() {
+to-x264-720p() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"
   ffmpeg -i "$input_file" -vf scale=-1280:720 -c:v libx264 -crf 18 -preset veryslow -c:a copy "$output_file"
@@ -40,7 +40,7 @@ to720p_x264() {
   echo "result file is at '$output_file'"
 }
 
-265encode1080p() {
+to-x265-1080p() {
   [ -z "$1" ] &&
     echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
     echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return

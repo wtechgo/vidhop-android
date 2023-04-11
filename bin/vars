@@ -23,6 +23,8 @@ website_scraper="$bin_dir/websitescraper.py"
 [ -z "$thumbnails_dir" ] && thumbnails_dir="$vidhop_dir/thumbnails"
 [ -z "$record_dir" ] && record_dir="$vidhop_dir/record"
 [ -z "$websites_dir" ] && websites_dir="$vidhop_dir/website"
+[ -z "$uploads_dir" ] && uploads_dir="$vidhop_dir/uploads"
+
 # metadata
 [ -z "$meta_dir" ] && meta_dir="$vidhop_dir/metadata"
 [ -z "$vids_meta_dir" ] && vids_meta_dir="$meta_dir/videos"

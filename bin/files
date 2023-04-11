@@ -356,9 +356,9 @@ summary_specs() {
   specs="$(mediainfo --Output=JSON "$file" | jq)"
   echo Summary
   echo -------
-  echo "Frame rate           : $(jq '.media.track[1].FrameRate'<<<"$specs" | tr -d '"')"
-  echo "Width                : $(jq '.media.track[1].Width'<<<"$specs" | tr -d '"')"
-  echo "Height               : $(jq '.media.track[1].Height'<<<"$specs" | tr -d '"')"
+  echo "Frame rate           : $(jq '.media.track[1].FrameRate' <<<"$specs" | tr -d '"')"
+  echo "Width                : $(jq '.media.track[1].Width' <<<"$specs" | tr -d '"')"
+  echo "Height               : $(jq '.media.track[1].Height' <<<"$specs" | tr -d '"')"
 }
 
 specs() {
@@ -392,6 +392,34 @@ specs() {
     mediainfo "$file" && summary_specs && return
   fi
   echo "input '$1' was not a valid URL or file"
+}
+
+uploadvideo() {
+  [ -z "$1" ] && echo "  usage: upload-video <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
+  search_text="$1"
+
+  result="$(find_one_video "$search_text")"
+  error=$?
+  [ "$error" = 1 ] && echo "found nothing" && return
+  [ "$error" = 2 ] && echo -e "found multiple:\n$result" && return
+
+  media_file="$result"
+  json_file="$(media_file2metadata_path "$media_file")"
+  [ ! -f "$json_file" ] && echo "could not find metadata file, hence directory, based on media file '$media_file', abort" && return
+  meta_dir="$(dirname "$json_file")"
+  [ -f "$meta_dir/thumbnail.jpg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpg"
+  [ -f "$meta_dir/thumbnail.jpeg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpeg"
+  [ -f "$meta_dir/thumbnail.png" ] && thumb_file="$(dirname "$json_file")/thumbnail.png"
+  [ -f "$meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
+
+  upload_dir="$uploads_dir/$(basename "$meta_dir")"
+  mkdir "$upload_dir"
+  ln -s "$media_file" "$upload_dir/$(basename "$media_file")"
+  ln -s "$thumb_file" "$upload_dir/$(basename "$thumb_file")"
+  ln -s "$json_file" "$upload_dir/metadata.json"
+
+  cd "$upload_dir"
+  echo "upload directory and files created at '$upload_dir'"
 }
 
 mediafile() {

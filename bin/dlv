@@ -1199,7 +1199,7 @@ dlcensored() {
   [ -z "$1" ] && echo "usage: dlcensored <URL>" && return || url="$1"
 
   echo "fetching public IP address via https://api.ipify.org..." # show current, public IP
-  echo "your IP-address is $(myip-public)" && sleep 2
+  echo "your IP-address is $(publicip)" && sleep 2
 
   echo "starting Tor..." && sleep 3
   sv up tor

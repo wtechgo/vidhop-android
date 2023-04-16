@@ -352,7 +352,7 @@ fvidfall() { # find video files (on disk)
   found_something="false"
 
   result=$(find -L "$shared/Movies" \
-    -not -path "* - search results*" \
+    -not \( -path "$vidhop_dir" -prune \) \
     -not -path "*.srt" \
     -not -path "*.jpg" \
     -not -path "*.webp" \

@@ -45,6 +45,23 @@ project_markdown_scaffold() {
 EOF
 }
 
+vproject() {
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage: vproject <PROJECT_NAME>" && return
+  vproject_name="$1"
+  vproject_dir="$video_projects_dir/$vproject_name"
+  [ -d "$vproject_dir" ] && echo "vproject with name '$vproject_name' already exists, abort" && return
+  # create dirs and symbolic links
+  mkdir -p "$vproject_dir" \
+    "$vproject_dir/Audio" \
+    "$vproject_dir/Images/Screenshots" \
+    "$vproject_dir/Text" \
+    "$vproject_dir/Videos"
+  touch "$vproject_dir/Text/Description.md"
+
+  cd "$vproject_dir"
+  echo "video project created at \"$vproject_dir\""
+}
+
 # Command to create a new project e.g. Nanotechnology.
 project() {
   [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage: project <PROJECT_NAME>" && return

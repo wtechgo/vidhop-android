@@ -56,7 +56,7 @@ to-x265-1080p() {
 
 cutvideo() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>] [<OUTPUT_FILE>]
+usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -85,15 +85,20 @@ EOF
   output_file="$(prefix_extension "$input_file" cut)"
 
   ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c copy "$output_file"
+  echo -e "cut video complete, result at:\n\"$output_file\""
+  cd "$(dirname "$input_file")"
 }
 
 embed-thumbnail-into-video() { # not tested
   [ $# != 3 ] && echo "usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <VIDEO_FILE>" && return
   thumb_file="$1" && [ ! -f "$thumb_file" ] && echo "not a file: '$thumb_file'" && return
   input_file="$2" && [ ! -f "$input_file" ] && echo "not a file: '$input_file'" && return
-  output_file="$(prefix_extension "$input_file" " (thumb)")"
+  output_file="$(prefix_extension "$input_file" thumb)"
+  ext_thumb="$(get_extension "$thumb_file")"
+  echo -e " input: $input_file\n output: $output_file\n thumb: $thumb_file\n ext_thumb: $ext_thumb"
 
   if [[ "$input_file" == *.mkv ]] || [[ "$input_file" == *.MKV ]]; then
+    echo "using ffmpeg for MKV..."
     if [ "$(command -v magick)" ]; then # convert image to jpg
       thumb_temp_file="$(strip_extension "$thumb_file").temp.jpg"
       magick "$thumb_file" "$thumb_temp_file" # keeps original image
@@ -105,12 +110,17 @@ embed-thumbnail-into-video() { # not tested
       -c copy "$output_file"
     [ -f "$thumb_temp_file" ] && rm "$thumb_temp_file"
   else
-    ffmpeg -i "$input_file" \
-      -i "$thumb_file" \
-      -map 1 \
-      -map 0 \
-      -c copy \
-      -disposition:0 attached_pic "$output_file"
+    echo "using ffmpeg for MP4, MOV,..."
+    ffmpeg -i "$input_file" -i "$thumb_file" -acodec copy -vcodec copy -map 0 -map 1:0 "$output_file"
+    #    ffmpeg -i "$input_file" -i "$thumb_file" -map 0 -map 1 -c copy -c:v:1 "$ext_thumb" -disposition:v:1 attached_pic "$output_file"
+    #    ffmpeg -i video.mp4 -i image.png -map 0 -map 1 -c copy -c:v:1 png -disposition:v:1 attached_pic out.mp4
+    #    ffmpeg -i "$input_file" -i "$thumb_file" -map 1 -map 0 -c copy -disposition:0 attached_pic "$output_file"
+    #    ffmpeg -i "$input_file" \
+    #      -i "$thumb_file" \
+    #      -map 1 \
+    #      -map 0:V \
+    #      -c copy \
+    #      -disposition:0 attached_pic "$output_file"
   fi
 }
 

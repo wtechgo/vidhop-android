@@ -265,9 +265,9 @@ prefix_extension() {
   echo "$new_file_abs_path"
 }
 
-myip-public() {
-  curl 'https://api.ipify.org?format=text'
-#  curl 'https://api.ipify.org?format=json'
+publicip() {
+  ip="$(curl -s 'https://api.ipify.org?format=text')"
+  echo "$ip"
 }
 
 epoch2date() {

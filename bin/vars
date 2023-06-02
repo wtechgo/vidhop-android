@@ -83,6 +83,7 @@ filename_char_count=180
 video_projects_dir="$HOME/Videos/Production"
 
 # default applications
+filemanager_app="termux-open"
 video_app="termux-open"
 audio_app="termux-open"
 picture_app="termux-open"

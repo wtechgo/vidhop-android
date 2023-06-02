@@ -162,7 +162,7 @@ fetch_subs() {
     --no-download "$url"
 
   # The mechanism that forces VLC player to pick the best English subtitles available by default.
-  # Extra info: Media Players prioritize a subs file that is next to a media file,
+  # Extra Info: Media Players prioritize a subs file that is next to a media file,
   # even if there is a subs directory too.
   if [ "$(is_media_download)" = true ] && ! [ "$function" = dlpod ]; then
     english="$subs_dir/${name}.en.srt"
@@ -1147,37 +1147,48 @@ dlt() {
 }
 
 dlfbpost() {
-  url="$1" && [ -z "$url" ] && echo "usage: dlfbpost <URL>" && return
+  url="$1" && [ -z "$url" ] && echo "Usage: dlfbpost <URL>" && return
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
   platform="$(extract_platform_name "$url")"
+  function=dlfbpost
 
   echo "fetching FB post..."
   json="$(python "$facebook_scraper" --url "$url")"
+
   text="$(jq '.text' <<<"$json")"
   [ "$text" = \"null\" ] && echo "post text was null, most likely because the post wasn't public and only available to FB friends" && return
-
-  shortened_text="$(shorten_text "$text")"
   username=$(jq .username <<<"$json" | tr -d '"')
-  fbpost_dir="${social_media_dir}/$platform/${username} - ${shortened_text}_$(timestamp)"
-  json_file="$fbpost_dir/metadata.json"
-  mkdir -p "$fbpost_dir" 2>/dev/null
+  shortened_text="$(shorten_text "$text")"
+  timestamp=$(timestamp)
+  soc_med_post_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
+  json_file="$soc_med_post_dir/metadata.json"
+
+  mkdir -p "$soc_med_post_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"
-  cd "$fbpost_dir"
+  cd "$soc_med_post_dir"
   jq . <<<"$json"
 }
 
 dltweet() {
-  url="$1" && [ -z "$url" ] && echo "usage: dltweet <URL>" && return
-  json=$(python "$twitter_scraper" --url "$url")
-  text="$(jq '.content' <<<"$json")"
-  shortened_text="$(echo "$text" | tr -dc '[:alnum:] ' | tr '[:upper:]' '[:lower:]' | cut -c -"$filename_char_count")"
+  url="$1" && [ -z "$url" ] && echo "Usage: dlfbpost <URL>" && return
+  [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
+  platform="$(extract_platform_name "$url")"
+  function=dltweet
+
+  echo "fetching tweet..."
+  json="$(python "$facebook_scraper" --url "$url")"
+
+  text="$(jq '.text' <<<"$json")"
+  [ "$text" = \"null\" ] && echo "post text was null, most likely because the post wasn't public and only available to FB friends" && return
   username=$(jq .username <<<"$json" | tr -d '"')
-  timestamp=$(date +'%d-%m-%Y_%Hh%Mm%Ss')
-  json_file="${social_media_dir}/twitter/${username}/${shortened_text}_${timestamp}.json"
-  [ -z "$shortened_text" ] && json_file="${social_media_dir}/twitter/${username}/${timestamp}.json"
-  mkdir -p "${social_media_dir}/twitter/${username}" 2>/dev/null
+  shortened_text="$(shorten_text "$text")"
+  timestamp=$(timestamp)
+  soc_med_post_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
+  json_file="$soc_med_post_dir/metadata.json"
+
+  mkdir -p "$soc_med_post_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"
-  cd "${social_media_dir}/twitter/${username}"
+  cd "$soc_med_post_dir"
   jq . <<<"$json"
 }
 
@@ -1196,7 +1207,7 @@ dlcensored() {
   [ ! "$(command -v tor)" ] && echo "tor not installed, run 'pkg install tor'" and try again && return
   [ ! "$(command -v proxychains4)" ] && echo "proxychains-ng not installed, run 'pkg install proxychains-ng'" and try again && return
   [ ! "$(command -v sv)" ] && echo "sv not installed, run 'pkg install sv'" and try again && return
-  [ -z "$1" ] && echo "usage: dlcensored <URL>" && return || url="$1"
+  [ -z "$1" ] && echo "Usage: dlcensored <URL>" && return || url="$1"
 
   echo "fetching public IP address via https://api.ipify.org..." # show current, public IP
   echo "your IP-address is $(publicip)" && sleep 2

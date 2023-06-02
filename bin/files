@@ -31,7 +31,9 @@ play() {
         -o -iname "*$searchable_text*mov" \
         -o -iname "*$searchable_text*wmv" \
         -o -iname "*$searchable_text*avi" \
-        -o -iname "*$searchable_text*m4v"
+        -o -iname "*$searchable_text*m4v" \
+        -o -iname "*$searchable_text*mp3" \
+        -o -iname "*$searchable_text*m4a"
     )
     echo "$files"
     count=$(wc -l <<<"$files")
@@ -90,7 +92,7 @@ rename_file() {
 
 # Rename a video and its metadata.
 renvid() {
-  [ -z "$1" ] || [ -z "$2" ] && echo -e "usage: renvid <OLD_NAME> <NEW_NAME>" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo -e "Usage: renvid <OLD_NAME> <NEW_NAME>" && return
   [ "$(echo -n "$1" | wc -c)" -lt 3 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
   old_name_search_text="$(enhance_searchability "$1")"
   new_name="$2"
@@ -154,22 +156,44 @@ renvid() {
   fi
 }
 
+renpost() {
+  [ -z "$1" ] && echo "Usage: renpost <NEW_NAME>" && return
+  new_name="$(dirname "${soc_med_post_dir}")/${1}_$(timestamp)"
+
+  unset answer
+  echo "Rename:"
+  echo "$soc_med_post_dir"
+  echo "To:"
+  echo "$new_name"
+  echo -n 'y/N: ' && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "abort" && return
+
+  mv "$soc_med_post_dir" "$new_name"
+  echo "post renamed"
+}
+
 renlast() {
-  [ -z "$1" ] && echo "usage: renlast <NEW_NAME>" && return
+  [ -z "$1" ] && echo "Usage: renlast <NEW_NAME>" && return
+  if [ "$function" = dlfbpost ] || [ "$function" = dltweet ]; then
+    renpost "$@"
+    return
+  fi
   old_name=$(lasttitle)
   new_name="$1"
   renvid "$old_name" "$new_name"
 }
 
 rmvid() {
-  [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
+  [ -z "$1" ] && echo "Usage: rmvid <PARTIAL_VIDEO_NAME> <PLATFORM>" && return 1
   unset search_text answer results
   search_text="$1"
+  platform="$2"
   searchable_text="$(enhance_searchability "$search_text")"
   [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
 
-  media_results=$(find "$vids_dir" -iname "*$searchable_text*")
-  meta_results=$(find "$vids_meta_dir" -iname "*$searchable_text*")
+  media_results=$(find "$vids_dir" -iwholename "*${platform}*${searchable_text}*")
+  meta_results=$(find "$vids_meta_dir" -iwholename "*${platform}*${searchable_text}*")
   [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
   echo "$media_results" && echo "$meta_results"
 
@@ -194,7 +218,7 @@ rmvid() {
 }
 
 rmpod() {
-  [ -z "$1" ] && echo "usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
+  [ -z "$1" ] && echo "Usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
   unset search_text answer results
   search_text="$1"
   searchable_text="$(enhance_searchability "$search_text")"
@@ -269,7 +293,7 @@ rmarchiveforurl() {
 }
 
 rmchan() {
-  [ -z "$1" ] && echo "usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
+  [ -z "$1" ] && echo "Usage: rmchan <PARTIAL_CHANNEL_NAME>" && return 1
   unset answer found_channel_dir found_downloaded_file found_music_channel_dir found_music_channel_meta_dir
   name="$1"
   [ -n "$2" ] && answer="$2"
@@ -310,7 +334,7 @@ rmchan() {
 }
 
 rmartist() {
-  [ -z "$1" ] && echo "usage: rmartist <PARTIAL_ARTIST_NAME>" && return 1
+  [ -z "$1" ] && echo "Usage: rmartist <PARTIAL_ARTIST_NAME>" && return 1
   unset answer found_artist_dir found_downloaded_file
 
   name="$1"
@@ -362,7 +386,7 @@ summary_specs() {
 }
 
 specs() {
-  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo -e "usage: specs <URL>\n       specs <FILE>" && return
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo -e "Usage: specs <URL>\n       specs <FILE>" && return
   if [ "$(is_url "$1")" = true ]; then
     yt-dlp -F --force-ipv4 "$1"
     yt-dlp -J --force-ipv4 "$1" | jq '{
@@ -395,7 +419,7 @@ specs() {
 }
 
 uploadvideo() {
-  [ -z "$1" ] && echo "  usage: upload-video <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
+  [ -z "$1" ] && echo "  Usage: upload-video <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
   search_text="$1"
 
   result="$(find_one_video "$search_text")"
@@ -420,6 +444,8 @@ uploadvideo() {
 
   cd "$upload_dir"
   echo "upload directory and files created at '$upload_dir'"
+  command -v "$filemanager_app" && "$filemanager_app" "$upload_dir" && return
+  command -v xdg-open && xdg-open "$upload_dir"
 }
 
 mediafile() {

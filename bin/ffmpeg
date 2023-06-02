@@ -4,8 +4,8 @@
 # Video.
 to-x264() {
   [ -z "$1" ] &&
-    echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
+    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
+    echo " Info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
 
   src="$(realpath "$1")"
   [ ! -f "$src" ] && echo "file not found '$src', abort" && return
@@ -20,8 +20,8 @@ to-x264() {
 
 to-x265() {
   [ -z "$1" ] &&
-    echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
+    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
+    echo " Info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
 
   src="$(realpath "$1")"
   [ ! -f "$src" ] && echo "file not found '$src', abort" && return
@@ -42,8 +42,8 @@ to-x264-720p() {
 
 to-x265-1080p() {
   [ -z "$1" ] &&
-    echo "usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
+    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
+    echo " Info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
 
   src="$(realpath "$1")"
   [ ! -f "$src" ] && echo "file not found '$src', abort" && return
@@ -56,17 +56,17 @@ to-x265-1080p() {
 
 cutvideo() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>]
+Usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
     h=hours, m=minutes, s=seconds, m=milliseconds
 
-    hh:mm:ss        example: 01:30:52
-    sss             example: 120
+    hh:mm:ss        Example: 01:30:52
+    sss             Example: 120
 
-    hh:mm:ss.mmm    example: 01:30:52.123
-    sss.mmm         example: 120.123
+    hh:mm:ss.mmm    Example: 01:30:52.123
+    sss.mmm         Example: 120.123
 
 The input file remains untouched.
 A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
@@ -89,8 +89,26 @@ EOF
   cd "$(dirname "$input_file")"
 }
 
+mergevideos() {
+  [ $# -lt 3 ] &&
+    echo "Usage: mergevideos <VIDEO_FILE_1> <VIDEO_FILE_2> <OUTPUT_FILE>" &&
+    echo " Info: files must have the same encoding or the second video will be black" && return
+  if [ -f "$1" ]; then file1="$1"; else echo "not a file '$1'" && return; fi
+  if [ -f "$2" ]; then file2="$2"; else echo "not a file '$2'" && return; fi
+  output_file="$3"
+
+  text_file=concat_demuxer.txt
+  touch "$text_file"
+  echo "file '$file1'" >>"$text_file"
+  echo "file '$file2'" >>"$text_file"
+
+  ffmpeg -f concat -safe 0 -i "$text_file" -c copy "$output_file"
+  rm "$text_file"
+  echo "merge video at '$output_file'"
+}
+
 embed-thumbnail-into-video() { # not tested
-  [ $# != 3 ] && echo "usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <VIDEO_FILE>" && return
+  [ $# -lt 2 ] && echo "Usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <VIDEO_FILE>" && return
   thumb_file="$1" && [ ! -f "$thumb_file" ] && echo "not a file: '$thumb_file'" && return
   input_file="$2" && [ ! -f "$input_file" ] && echo "not a file: '$input_file'" && return
   output_file="$(prefix_extension "$input_file" thumb)"
@@ -130,12 +148,25 @@ mp3+thumbnail2video() {
   output_file="$(strip_extension "$audio_file").mp4"
   [ -z "$output_file" ] && output_file="$3"
   [ -z "$audio_file" ] || [ -z "$image_file" ] || [ -z "$output_file" ] &&
-    echo "usage: mp3+thumbnail2video <AUDIO_FILE> <IMAGE_FILE> [<OUTPUT_FILE>]" && return
+    echo "Usage: mp3+thumbnail2video <AUDIO_FILE> <IMAGE_FILE> [<OUTPUT_FILE>]" && return
   ffmpeg -loop 1 -r 1 -i "$image_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
 }
 
+convert-webp2jpg-dir() {
+  [ -h "$1" ] && echo "Usage: convert-webp2jpg-dir <DIRECTORY>" && return
+  dir="$(realpath "$1")" 2>/dev/null
+  [ -z "$1" ] && dir="$(realpath "$PWD")"
+  [ ! -d "$dir" ] && echo "not a directory '$dir'" && return
+
+  while read -r file; do
+    jpgFile="$(strip_extension "$file").jpg"
+    magick "$file" "$jpgFile"
+    [ -f "$jpgFile" ] && rm "$file"
+  done < <(find "$dir" -iname "*.webp" -o -iname "*.WEBP")
+}
+
 replaceaudio() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
   video_file="$1"
   audio_file="$2"
   backup_file="$(prefix_extension "$video_file" backup)"
@@ -154,47 +185,31 @@ extract-mp3() {
 }
 
 to-mp3() {
-  input_file="$1"
+  unset input_file mp3_file
+  input_file="$(realpath "$1")"
   [ ! -f "$input_file" ] && echo "not a file: $input_file" && return 1
   [[ "$input_file" == *.mp3 ]] && return
 
   mp3_file="$(strip_extension "$input_file").mp3"
-  ffmpeg -i "$input_file" -vn -c:a libmp3lame -q:a 2 "$mp3_file"
+  # -nostdin fixes a bug ffmpeg produces in loops involving reading from stdin.
+  ffmpeg -nostdin -i "$input_file" -vn -c:a libmp3lame -q:a 2 "$mp3_file"
 }
 
 to-mp3-remove-input() {
-  to-mp3 "$1"
+  to-mp3 "$1" || return
   [ -f "$mp3_file" ] && rm "$input_file"
 }
 
 id3tags() { # uses ffprobe
-  [ $# = 0 ] && echo "usage: id3tags <AUDIO_FILE>" && return
+  [ $# = 0 ] && echo "Usage: id3tags <AUDIO_FILE>" && return
   input_file="$1"
   tags_json="$(ffprobe -show_format -print_format json "$input_file")"
   tags_json="$(jq '.format.tags' <<<"$tags_json")"
   jq <<<"$tags_json"
 }
 
-merge-videos() {
-  [ $# -lt 3 ] &&
-    echo "usage: merge-videos <VIDEO_FILE_1> <VIDEO_FILE_2> <OUTPUT_FILE>" &&
-    echo " info: files must have the same encoding or the second video will be black" &&return
-  if [ -f "$1" ]; then file1="$1"; else echo "not a file '$1'" && return; fi
-  if [ -f "$2" ]; then file2="$2"; else echo "not a file '$2'" && return; fi
-  output_file="$3"
-
-  text_file=concat_demuxer.txt
-  touch "$text_file"
-  echo "file '$file1'" >> "$text_file"
-  echo "file '$file2'" >> "$text_file"
-
-  ffmpeg -f concat -safe 0 -i "$text_file" -c copy "$output_file"
-  rm "$text_file"
-  echo "merge video at '$output_file'"
-}
-
 embed-thumbnail-into-mp3() {
-  [ $# = 0 ] && echo "usage: embed-thumbnail-into-mp3 <THUMBNAIL_FILE> <AUDIO_FILE>" && return
+  [ $# = 0 ] && echo "Usage: embed-thumbnail-into-mp3 <THUMBNAIL_FILE> <AUDIO_FILE>" && return
   thumb_file="$1"
   input_file="$2"
   output_file="$(strip_extension "$input_file")_art.mp3"

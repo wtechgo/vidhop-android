@@ -42,7 +42,7 @@ metadata() {
     [ -n "$json" ] && jq . <<<"$json" && extract_summary_vars && print_summary && return
     [ -f "$json_file" ] && json="$(jq . "$json_file")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
     [ -f "$meta_file" ] && json="$(jq . "$meta_file")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
-    echo "usage: metadata <SEARCH_TEXT>"
+    echo "Usage: metadata <SEARCH_TEXT>"
     echo "       metadata <METADATA_JSON_FILE>"
     echo "       metadata <MEDIA_FILE>"
     echo "       metadata"
@@ -76,7 +76,7 @@ set_metadata_field_json_obj() {
 # Usage: command "key" "value" ---------------------> uses "$json"
 #        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
 set_metadata_field() {
-  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] || [ "$#" = 1 ] && echo "Usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.
   [ "$#" = 3 ] && key="$1" && value="$2" && partial_filename="$3" && # three arguments implies we need to find a metadata FILE.
     meta_file="$(find_one_vmeta "$(echo "$partial_filename" | tr ' ' '*')")" &&
@@ -93,62 +93,62 @@ set_metadata_field() {
 }
 
 setdescription() {
-  [ "$#" = 0 ] && echo -e "usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setdescription <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_description' "$@" || return
   echo "'vh_description' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setsummary() {
-  [ "$#" = 0 ] && echo -e "usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setsummary <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_summary' "$@" || return
   echo "'vh_summary' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setremarks() {
-  [ "$#" = 0 ] && echo -e "usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setremarks <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_remarks' "$@" || return
   echo "'vh_remarks' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setcategories() {
-  [ "$#" = 0 ] && echo -e "usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setcategories <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_categories' "$@" || return
   echo "'vh_categories' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 settopics() {
-  [ "$#" = 0 ] && echo -e "usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: settopics <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_topics' "$@" || return
   echo "'vh_topics' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setspeakers() {
-  [ "$#" = 0 ] && echo -e "usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setspeakers <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_speakers' "$@" || return
   echo "'vh_speakers' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setcreators() {
-  [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 setcreators() {
-  [ "$#" = 0 ] && echo -e "usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: setcreators <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field 'vh_creators' "$@" || return
   echo "'vh_creators' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 settimestamps() {
-  [ "$#" = 0 ] && echo -e "usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
+  [ "$#" = 0 ] && echo -e "Usage: settimestamps <VALUE> [<PARTIAL_FILENAME>]" && return
   set_metadata_field "vh_timestamps" "$@" || return
   echo "'vh_timestamps' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
 }
 
 addtimestamps() {
-  [ -z "$1" ] && echo -e "usage: addtimestamps <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
-    echo "example: addtimestamps \"01:11:01 = talking about interesting topic X, 01:23:45 = well that escalated quickly\"" && return
+  [ -z "$1" ] && echo -e "Usage: addtimestamps <TIMESTAMP> [<PARTIAL_FILENAME>]" &&
+    echo "Example: addtimestamps \"01:11:01 = talking about interesting topic X, 01:23:45 = well that escalated quickly\"" && return
   [ -n "$json" ] && metadata="$json"
   [ -z "$metadata" ] && [ -n "$2" ] && json_file=$(find_one_vmeta "$2") && metadata=$(jq . "$json_file")
   [ -z "$metadata" ] && echo "no metadata to work with" && return 1

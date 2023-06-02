@@ -121,8 +121,8 @@ msg_multiple_channels_found() {
   echo "found more than one metadata JSON file"
   echo "$json_files"
   echo "pass the platform name to specify further"
-  [ "$command" = "fvidc" ] && echo "usage: $command <PARTIAL_CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM>" && return
-  echo "usage: $command <PARTIAL_CHANNEL_NAME> <PLATFORM>"
+  [ "$command" = "fvidc" ] && echo "Usage: $command <PARTIAL_CHANNEL_NAME> <SEARCH_TEXT> <PLATFORM>" && return
+  echo "Usage: $command <PARTIAL_CHANNEL_NAME> <PLATFORM>"
 }
 
 # `say --overwrite` will leave behind lines that are too big for the terminal size e.g. when terminal size is 80 while string is 120.
@@ -144,7 +144,7 @@ print_msg_for_error_code() {
 }
 
 find_one_video() {
-  [ -z "$1" ] && echo "usage: find_one_video <PARTIAL_NAME>" && return
+  [ -z "$1" ] && echo "Usage: find_one_video <PARTIAL_NAME>" && return
   unset search_text && search_text="$1"
   [ -f "$search_text" ] && echo "$search_text" && return
 
@@ -156,7 +156,7 @@ find_one_video() {
 }
 
 find_one() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: find_one <TYPE_FILE_OR_DIR> <PARTIAL_NAME> [<DIRECTORY>]" && return
   if [ -n "$3" ]; then search_dir="$3"; else search_dir="$projects_dir"; fi
   unset search_text && search_text="$2"
   type="$1"
@@ -171,7 +171,7 @@ find_one() {
 }
 
 find_one_vmeta() {
-  [ -z "$1" ] && echo "usage: find_one_vmeta <VIDEO_SEARCH_TEXT> [<PLATFORM>]" && return
+  [ -z "$1" ] && echo "Usage: find_one_vmeta <VIDEO_SEARCH_TEXT> [<PLATFORM>]" && return
   search_text="$1"
   platform="$2"
 
@@ -185,7 +185,7 @@ find_one_vmeta() {
 }
 
 find_one_cmeta() {
-  [ -z "$1" ] && echo "usage: find_one_cmeta <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" && return
+  [ -z "$1" ] && echo "Usage: find_one_cmeta <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" && return
   search_text="$1"
   platform="$2"
 
@@ -258,7 +258,7 @@ fvid() {
 
 fvidcv() {
   [ -z "$1" ] || [ -z "$2" ] &&
-    echo "usage: fvidcv <CHANNEL_SEARCH_TEXT> <TITLE_SEARCH_TEXT> [<PLATFORM>]" &&
+    echo "Usage: fvidcv <CHANNEL_SEARCH_TEXT> <TITLE_SEARCH_TEXT> [<PLATFORM>]" &&
     echo "       fvidcv <CHANNEL_JSON_ABS_PATH> <TITLE_SEARCH_TEXT>" && return
   channel_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
   search_text="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
@@ -283,8 +283,8 @@ fvidcv() {
 
 fvidfc() {
   [ -z "$1" ] &&
-    echo "  usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" &&
-    echo "   info: find downloaded video files for channel in VidHop videos metadata dir," &&
+    echo "  Usage: fvidfc <TITLE_SEARCH_TEXT> <CHANNEL_SEARCH_TEXT>" &&
+    echo "   Info: find downloaded video files for channel in VidHop videos metadata dir," &&
     echo "         with video titles (filenames) that match <TITLE_SEARCH_TEXT>" &&
     echo "         and a channels whose name matches <CHANNEL_SEARCH_TEXT>" && return
   [ $# = 1 ] && title_search_text="*" && channel_search_text="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
@@ -321,7 +321,7 @@ set_vars_single_result() {
 
 # Output all video files whose name match your query.
 fvidf() { # find video files (on disk)
-  [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
+  [ -z "$1" ] && echo "  Usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
   search_text="$(enhance_searchability "$1")"
   unset result
   found_something="false"
@@ -346,7 +346,7 @@ fvidf() { # find video files (on disk)
 
 # Output all video files whose name match your query.
 fvidfall() { # find video files (on disk)
-  [ -z "$1" ] && echo "  usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
+  [ -z "$1" ] && echo "  Usage: fvidf <SEARCH_TEXT>" && echo "returns: absolute paths of videos files on disk that match <SEARCH_TERM>" && return
   search_text="$(enhance_searchability "$1")"
   unset result
   found_something="false"
@@ -382,8 +382,8 @@ fvidfall() { # find video files (on disk)
 
 # Creates symlinks from fvidf results in the project /vid directory.
 fvidf-symlinks2dir() {
-  [ -z "$1" ] && echo "usage: fvidf-symlinks2dir <SEARCH_TEXT> <DEST_DIR>" &&
-    echo " info: creates symbolic links in <DEST_DIR> for all video files returned by searching for <SEARCH_TEXT>" && return
+  [ -z "$1" ] && echo "Usage: fvidf-symlinks2dir <SEARCH_TEXT> <DEST_DIR>" &&
+    echo " Info: creates symbolic links in <DEST_DIR> for all video files returned by searching for <SEARCH_TEXT>" && return
   search_text="$(enhance_searchability "$1")"
   dest_dir="$2"
   mkdir -p "$dest_dir"
@@ -498,7 +498,7 @@ print_channel_data() {
 # Show all videos of a channel, one line per video.
 chani() { # channel info
   [ -z "$1" ] &&
-    echo "usage: chani <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" &&
+    echo "Usage: chani <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" &&
     echo "       chani <ABS_FILE_PATH> [<PLATFORM>]" && return
   search_text="$1"
   platform="$2"
@@ -519,7 +519,7 @@ chani() { # channel info
 }
 
 chancount() {
-  [ -z "$1" ] && echo "usage: chancount <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
+  [ -z "$1" ] && echo "Usage: chancount <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -532,7 +532,7 @@ chancount() {
 }
 
 channel_url_from_name() {
-  [ -z "$1" ] && echo "usage: channel_url_from_name <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
+  [ -z "$1" ] && echo "Usage: channel_url_from_name <PARTIAL_CHANNEL_NAME> [<PLATFORM>]" && return
   name="$1" platform="$2"
 
   json_files=$(json_files_for_channel_name "$name" "$platform")
@@ -683,6 +683,12 @@ faudf() {
   found_something="false"
 
   result=$(find "$(realpath "$music_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> VidHop music directory search results:" &&
+    echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  result=$(find "$(realpath "$podcasts_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> VidHop music directory search results:" &&
     echo -e "${GREEN}$result${NC}" &&

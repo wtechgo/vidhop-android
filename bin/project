@@ -16,8 +16,8 @@ project_help() {
 }
 
 project_markdown_scaffold() {
+  if [ -n "$subproject_name" ]; then echo "# $subproject_name"; else echo "# $project_name"; fi
   cat <<EOF
-# $project_name
 
 ## Videos
 
@@ -46,7 +46,7 @@ EOF
 }
 
 vproject() {
-  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage: vproject <PROJECT_NAME>" && return
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "Usage: vproject <PROJECT_NAME>" && return
   vproject_name="$1"
   vproject_dir="$video_projects_dir/$vproject_name"
   [ -d "$vproject_dir" ] && echo "vproject with name '$vproject_name' already exists, abort" && return
@@ -64,7 +64,8 @@ vproject() {
 
 # Command to create a new project e.g. Nanotechnology.
 project() {
-  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "usage: project <PROJECT_NAME>" && return
+  [ -z "$1" ] || [ "$1" = "." ] || [ "$1" = ".." ] || [ "$1" = "/" ] && echo "Usage: project <PROJECT_NAME>" && return
+  unset subproject_name
   project_name="$1"
   project_dir="$projects_dir/$project_name"
   [ -d "$project_dir" ] && echo "project with name '$project_name' already exists, abort" && return
@@ -144,7 +145,7 @@ mkimgdir4subproject() {
 # Result: Symbolic link "$shared/Movies/Projects/Nanotechnology/DNA self-assembly.mp4"
 #         points to "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4".
 linkvideo4project() {
-  [ -z "$1" ] && echo -e "usage: linkvideo4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
+  [ -z "$1" ] && echo -e "Usage: linkvideo4project <VIDEO_FILE> <PROJECT_NAME>\nnote: <PROJECT_NAME> is case sensitive" && return
   unset file search_text error
   [ $# = 1 ] && file="$media_file" && project_name="$1"
   [ $# = 2 ] && [ -f "$1" ] && file="$(realpath "$1")" && project_name="$2"
@@ -167,8 +168,8 @@ linkvideo4project() {
 # Creates symlinks from fvidf results in the project /vid directory, more precisely in,
 # <PROJECT_NAME/vid/<SEARCH_TEXT>.
 linkvideos4project() {
-  [ -z "$1" ] && echo "usage: linkvideos4project <SEARCH_TEXT> <PROJECT_NAME>" &&
-    echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
+  [ -z "$1" ] && echo "Usage: linkvideos4project <SEARCH_TEXT> <PROJECT_NAME>" &&
+    echo " Info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
   search_text="$1"
   project_dir="$projects_dir/$2"
   [ ! -d "$project_dir" ] && echo "project directory '$project_dir' does not exist, abort" && return
@@ -245,7 +246,7 @@ videolinks2text() {
 }
 
 renlink+source() {
-  [ ! $# = 2 ] && echo "usage: renlink+source <LINK_PATH> <NEW_NAME>" && return
+  [ ! $# = 2 ] && echo "Usage: renlink+source <LINK_PATH> <NEW_NAME>" && return
   video_link="$1"
   new_name="$2"
   video_file="$(realpath "$video_link")"
@@ -263,8 +264,8 @@ renlink+source() {
 }
 
 fvidf4project() {
-  [ -z "$1" ] && echo "usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
-    echo " info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
+  [ -z "$1" ] && echo "Usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
+    echo " Info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
   linkvideos4project "$@"
 }
 
@@ -279,29 +280,42 @@ write_title_url_to_txt_file() {
   echo -e "$title\n$webpage_url\n" >>"$list_txt"
 }
 
-# Find files in projects root directory (all projects).
-fproj() {
-  [ -z "$1" ] && echo -e "usage: fproj <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
-  search_text="$1"
-  project_dir="$projects_dir/$2"
-  [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
-  # Display with relative paths.
-  pwd="$PWD"
-  cd "$projects_dir"
-  find -L . -type f -iname "*$search_text*" -printf '"%p"\n'
+# Write project: Opens the text document of a project at doc/<PROJECT_NAME>.md with the default $text_app, to start writing.
+wproj() {
+  [ -z "$1" ] && echo -e "Usage: wproj <PROJECT_NAME_CASE_SENSITIVE>" && return
+  project_name="$1"
+  subproject_name="$2"
+  if [ -z "$subproject_name" ]; then
+    "$text_app" "$projects_dir/$project_name/doc/$project_name.md" &
+  else
+    "$text_app" "$projects_dir/$project_name/$subproject_name/doc/$subproject_name.md" &
+  fi
 }
 
-# Identical as fproj but returns absolute paths.
-absfproj() {
-  [ -z "$1" ] && echo -e "usage: fprojabs <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
+writeproject() {
+  wproj "$@"
+}
+
+# Find files in projects root directory (all projects).
+fproj() {
+  [ -z "$1" ] && echo -e "Usage: fproj <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
+  unset result
   search_text="$1"
-  project_dir="$projects_dir/$2"
-  [ ! -d "$project_dir" ] && echo "could not find directory $project_dir" && return
-  find -L "$project_dir" -type f -iname "*$search_text*" -printf '"%p"\n'
+  if [ -z "$2" ]; then search_dir="."; else search_dir="$projects_dir/$2"; fi
+  [ ! -d "$search_dir" ] && echo "could not find directory $search_dir" && return
+  # Display with relative paths.
+  prev="$PWD"
+  [[ "$PWD" != *"$projects_dir"* ]] && cd "$projects_dir"
+  result="$(find -L "$search_dir" -type f \
+    -not -path "*.js" \
+    -not -path "*.css" \
+    -not -path "*_files/*" \
+    -iname "*$search_text*" -printf '"%p"\n')"
+  echo "${GREEN}${result}${NC}"
 }
 
 renproject() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: renproject <PROJECT_NAME> <NEW_PROJECT_NAME>" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: renproject <PROJECT_NAME> <NEW_PROJECT_NAME>" && return
   project_name="$1"
   project_dir="$projects_dir/$project_name"
   project_vids_dir="$projects_videos_dir/$project_name"
@@ -326,7 +340,7 @@ renproject() {
 
 rensubproject() {
   [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] &&
-    echo "usage: rensubproject <PROJECT_NAME> <SUB_PROJECT_NAME> <NEW_SUB_PROJECT_NAME>" && return
+    echo "Usage: rensubproject <PROJECT_NAME> <SUB_PROJECT_NAME> <NEW_SUB_PROJECT_NAME>" && return
   project_name="$1"
   sub_project_name="$2"
   new_sub_project_name="$3"
@@ -352,7 +366,7 @@ rensubproject() {
 
 # Remove a project.
 rmproject() {
-  [ -z "$1" ] && echo "usage: rmproject <PARTIAL_PROJECT_NAME>" && return
+  [ -z "$1" ] && echo "Usage: rmproject <PARTIAL_PROJECT_NAME>" && return
   result="$(find "$projects_dir" -maxdepth 1 -type d -name "$1")"
   [ "$(wc -w <<<"$result")" -eq 0 ] && echo -e "found no match for '$1', abort" && return 1
   [ "$(wc -l <<<"$result")" -gt 1 ] && echo -e "found multiple possibilities for '$1', abort\n$result" && return 2
@@ -394,7 +408,7 @@ rmproject() {
 
 # Remove a subproject.
 rmsubproject() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: rmsubproject <PROJECT_NAME> <SUB_PROJECT_NAME>" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: rmsubproject <PROJECT_NAME> <SUB_PROJECT_NAME>" && return
   project_name="$1"
   sub_project_name="$2"
   #  project_dir="$projects_dir/$project_name"

@@ -95,7 +95,7 @@ sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
 }
 
 is_dir_empty() {
-  [ -z "$1" ] && echo "usage: is_dir_empty <PATH>" && return 0
+  [ -z "$1" ] && echo "Usage: is_dir_empty <PATH>" && return 0
   [ ! -d "$1" ] && echo "'$1' is not a directory, abort" && return 1
   [ ! "$(ls -A1q "$1")" ] && echo true || echo false
 }
@@ -254,7 +254,7 @@ strip_extension() {
 }
 
 prefix_extension() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "usage: replace_filename <FILE> <NEW_NAME>" && return
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: replace_filename <FILE> <NEW_NAME>" && return
   prefix="$2"
   old_file="$1"
   old_dir="$(dirname "$(realpath "$1")")"

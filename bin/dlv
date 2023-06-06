@@ -1176,7 +1176,7 @@ dltweet() {
   function=dltweet
 
   echo "fetching tweet..."
-  json="$(python "$facebook_scraper" --url "$url")"
+  json="$(python "$twitter_scraper" --url "$url")"
 
   text="$(jq '.text' <<<"$json")"
   [ "$text" = \"null\" ] && echo "post text was null, most likely because the post wasn't public and only available to FB friends" && return

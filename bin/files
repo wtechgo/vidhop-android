@@ -24,7 +24,7 @@ play() {
   if [ -n "$search_text" ]; then
     searchable_text="$(enhance_searchability "$search_text")"
     files=$(
-      find "$vidhop_dir" \
+      find "$vidhop_dir" -not -path "$uploads_dir/*" \
         -iname "*$searchable_text*mp4" \
         -o -iname "*$searchable_text*mkv" \
         -o -iname "*$searchable_text*webm" \
@@ -99,19 +99,21 @@ renvid() {
 
   old_meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_text*/metadata.json")
   [ "$(echo "$old_meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
-  [ "$old_meta_file" = "." ] && echo "metadata file not found" && return
+  [ -z "$old_meta_file" ] && echo "no metadata file found for '$1', abort" && return
 
   old_meta_dir=$(dirname "$old_meta_file")
   old_name=$(basename "$old_meta_dir" .json)
   old_vid_dir="$(dirname "$(dirname "$old_meta_file" | sed 's;/VidHop/metadata/videos/;/VidHop/videos/;;')")"
   old_media_file="$old_vid_dir/$old_name.mp4"
   old_media_file_webm="$old_vid_dir/$old_name.webm"
+  old_media_file_mkv="$old_vid_dir/$old_name.mkv"
   old_media_file_sub="$old_vid_dir/$old_name.en.srt"
 
   # show file found
   [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
-  [ -f "$old_media_file_webm" ] && echo "found '$old_media_file'"
+  [ -f "$old_media_file_webm" ] && echo "found '$old_media_file_webm'"
+  [ -f "$old_media_file_mkv" ] && echo "found '$old_media_file_mkv'"
   [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
   # ask confirmation to rename
   echo -n "rename these files? Y/n: " && read -r answer
@@ -132,6 +134,7 @@ renvid() {
   [ -f "$old_media_file_sub" ] && mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
   # rename subs - end
 
+  # rename media file
   [ -f "$old_media_file" ] &&
     media_file="$old_vid_dir/$new_name.mp4" &&
     mv "$old_media_file" "$media_file" &&
@@ -140,6 +143,11 @@ renvid() {
     media_file="$old_vid_dir/$new_name.webm" &&
     mv "$old_media_file_webm" "$media_file" &&
     echo -e "renamed: '$old_media_file_webm'\n     to: '$media_file'"
+  [ -f "$old_media_file_mkv" ] &&
+    media_file="$old_vid_dir/$new_name.mkv" &&
+    mv "$old_media_file_mkv" "$media_file" &&
+    echo -e "renamed: '$old_media_file_mkv'\n     to: '$media_file'"
+  # rename meta dir
   [ -d "$old_meta_dir" ] &&
     meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
     mv "$old_meta_dir" "$meta_dir" &&

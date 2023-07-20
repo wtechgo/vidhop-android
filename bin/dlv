@@ -1160,12 +1160,12 @@ dlfbpost() {
   username=$(jq .username <<<"$json" | tr -d '"')
   shortened_text="$(shorten_text "$text")"
   timestamp=$(timestamp)
-  soc_med_post_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
-  json_file="$soc_med_post_dir/metadata.json"
+  social_media_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
+  json_file="$social_media_dir/metadata.json"
 
-  mkdir -p "$soc_med_post_dir" 2>/dev/null
+  mkdir -p "$social_media_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"
-  cd "$soc_med_post_dir"
+  cd "$social_media_dir"
   jq . <<<"$json"
 }
 
@@ -1183,12 +1183,12 @@ dltweet() {
   username=$(jq .username <<<"$json" | tr -d '"')
   shortened_text="$(shorten_text "$text")"
   timestamp=$(timestamp)
-  soc_med_post_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
-  json_file="$soc_med_post_dir/metadata.json"
+  social_media_dir="${social_media_dir}/$platform/${username}/${shortened_text}_$(timestamp)"
+  json_file="$social_media_dir/metadata.json"
 
-  mkdir -p "$soc_med_post_dir" 2>/dev/null
+  mkdir -p "$social_media_dir" 2>/dev/null
   jq . <<<"$json" >"$json_file"
-  cd "$soc_med_post_dir"
+  cd "$social_media_dir"
   jq . <<<"$json"
 }
 

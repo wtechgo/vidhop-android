@@ -111,6 +111,7 @@ alias cdcmeta='cd $channels_meta_dir'
 alias cdmusic='cd $music_dir'
 alias cdthumbs='cd $thumbnails_dir'
 alias cdpods='cd $podcasts_dir'
+alias cduploads='cd $uploads_dir'
 alias cddownloaded='cd $downloaded_dir'
 alias cdlogs='cd $log_dir'
 

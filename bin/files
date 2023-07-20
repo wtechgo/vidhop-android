@@ -24,7 +24,13 @@ play() {
   if [ -n "$search_text" ]; then
     searchable_text="$(enhance_searchability "$search_text")"
     files=$(
-      find "$vidhop_dir" -not -path "$uploads_dir/*" \
+      find "$vidhop_dir" \
+        -not -path "$uploads_dir/*" \
+        -not -path "$websites_dir/*" \
+        -not -path "$social_media_dir/*" \
+        -not -path "$import_dir/*" \
+        -not -path "$export_dir/*" \
+        -not -path "$log_dir/*" \
         -iname "*$searchable_text*mp4" \
         -o -iname "*$searchable_text*mkv" \
         -o -iname "*$searchable_text*webm" \
@@ -166,18 +172,18 @@ renvid() {
 
 renpost() {
   [ -z "$1" ] && echo "Usage: renpost <NEW_NAME>" && return
-  new_name="$(dirname "${soc_med_post_dir}")/${1}_$(timestamp)"
+  new_name="$(dirname "${social_media_dir}")/${1}_$(timestamp)"
 
   unset answer
   echo "Rename:"
-  echo "$soc_med_post_dir"
+  echo "$social_media_dir"
   echo "To:"
   echo "$new_name"
   echo -n 'y/N: ' && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] || [ -z "$answer" ] && echo "abort" && return
 
-  mv "$soc_med_post_dir" "$new_name"
+  mv "$social_media_dir" "$new_name"
   echo "post renamed"
 }
 
@@ -445,10 +451,18 @@ uploadvideo() {
   [ -f "$meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
 
   upload_dir="$uploads_dir/$(basename "$meta_dir")"
+  [ -d "$upload_dir" ] && rm -r "$upload_dir"
   mkdir "$upload_dir"
+
   ln -s "$media_file" "$upload_dir/$(basename "$media_file")"
   ln -s "$thumb_file" "$upload_dir/$(basename "$thumb_file")"
   ln -s "$json_file" "$upload_dir/metadata.json"
+  description_file="$upload_dir/description.txt"
+
+  upload_json="$(jq . "$json_file")"
+  title="$(strip_extension "$(basename "$media_file")")"
+  echo "$title" > "$description_file"
+  jq -r '.webpage_url, "", .description'  <<<"$upload_json" | tr -d '"' >> "$description_file"
 
   cd "$upload_dir"
   echo "upload directory and files created at '$upload_dir'"

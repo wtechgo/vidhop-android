@@ -314,6 +314,13 @@ fproj() {
   echo "${GREEN}${result}${NC}"
 }
 
+cdproj () {
+  [ -z "$1" ] && echo "Usage: cdproj <PROJECT_NAME>" && return
+  project_name="$1"
+  project_dir="$(find "$projects_dir" -type d -iname "*$project_name*" | head -n 1)"
+  [ -n "$project_dir" ] && cd "$project_dir"
+}
+
 renproject() {
   [ -z "$1" ] || [ -z "$2" ] && echo "Usage: renproject <PROJECT_NAME> <NEW_PROJECT_NAME>" && return
   project_name="$1"

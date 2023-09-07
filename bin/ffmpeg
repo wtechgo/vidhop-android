@@ -236,3 +236,14 @@ embed-thumbnail-into-mp3() {
 strip-id3tags() { # not ffmpeg
   id3convert --strip "$1" 2>/dev/null # strip all id-tags as some choke the car radio
 }
+
+# pictures
+screenshot_video_frame_changes() {
+  [ -z "$1" ] && echo "usage: screenshots_changed_frames <VIDEO_FILE>" && return
+  video_file="$1"
+  frames_dir="$(dirname "$video_file")/screenshots"
+  mkdir "$frames_dir"
+  ffmpeg -i "$video_file" \
+    -filter:v "select=bitor(gt(scene\,0.5)\,eq(n\,0)),blackframe=amount=1,metadata=mode=select:key=lavfi.blackframe.pblack:value=95:function=less" \
+    -vsync drop "$frames_dir/%04d.jpg"
+}

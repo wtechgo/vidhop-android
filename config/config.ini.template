@@ -33,6 +33,11 @@
 #USER_HOME_WS=""
 #VIDHOP_DIR_WS=""
 #VIDHOP_APP_DIR_WS=""
+#BROWSER=""
+
+## Platform logins
+## twitter_username=""
+## twitter_password=""
 
 ## Projects module.
 ## Uncomment 6 lines bellow (delete hashtag) to activate the module with default configuration, or modify to preference.

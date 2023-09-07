@@ -39,7 +39,8 @@ play() {
         -o -iname "*$searchable_text*avi" \
         -o -iname "*$searchable_text*m4v" \
         -o -iname "*$searchable_text*mp3" \
-        -o -iname "*$searchable_text*m4a"
+        -o -iname "*$searchable_text*m4a" \
+        -not -path "$uploads_dir/*"
     )
     echo "$files"
     count=$(wc -l <<<"$files")

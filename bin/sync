@@ -153,6 +153,7 @@ real_fetchvidhop() {
     --exclude="log/" \
     --exclude="import/" \
     --exclude="export/" \
+    --exclude="uploads/" \
     --include="*/" \
     --include="*.json" \
     --exclude="*" \
@@ -169,6 +170,7 @@ dry_fetchvidhop() {
     --exclude="log/" \
     --exclude="import/" \
     --exclude="export/" \
+    --exclude="uploads/" \
     --include="*/" \
     --include="*.json" \
     --exclude="*" \

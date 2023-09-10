@@ -1,0 +1,30 @@
+#!/bin/bash
+
+resize_images_dir_x_y() {
+  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] && echo "Usage: resize_images_dir_1080p <DIR> <X_WIDTH_PIXEL> <Y_WIDTH_PIXEL>" && return
+  [ ! -d "$1" ] && echo "not a directory" && return
+  [ ! "$(command -v magick)" ] && echo "image magick is not installed, abort" && return
+
+  imgs_dir="$(realpath "$1")"
+  x_pixels="$2"
+  y_pixels="$3"
+  target_dir="$imgs_dir/${x_pixels}x${y_pixels}"
+  mkdir "$target_dir" 2>/dev/null
+
+  while read -r img; do
+    echo "$img"
+    if [ -f "$img" ]; then
+      img_resized="$target_dir/$(basename "$img")"
+      convert "$img" -resize "${x_pixels}"x"${y_pixels}"\>  "$img_resized"
+    fi
+  done < <(find "$imgs_dir" -maxdepth 1 -type f)
+
+  echo "images converted to ${x_pixels}x${y_pixels} at \"${target_dir}\""
+}
+
+resize_images_dir_1080p() {
+  [ -z "$1" ] && echo "Usage: resize_images_dir_1080p <DIR>" && return
+  [ ! -d "$1" ] && echo "not a directory" && return
+
+  resize_images_dir_x_y "$1" 1920 1080
+}

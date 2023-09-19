@@ -32,26 +32,20 @@ to-x265() {
   echo "file conversion to x265 completed"
 }
 
-to-x264-720p() {
+to-720p() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"
-  ffmpeg -i "$input_file" -vf scale=-1280:720 -c:v libx264 -crf 18 -preset veryslow -c:a copy "$output_file"
+  ffmpeg -i "$input_file" -vf scale=-1280:720 -c:a copy "$output_file"
   echo "file conversion to 720p done"
   echo "result file is at '$output_file'"
 }
 
-to-x265-1080p() {
-  [ -z "$1" ] &&
-    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " Info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
-
-  src="$(realpath "$1")"
-  [ ! -f "$src" ] && echo "file not found '$src', abort" && return
-  dest="$(strip_extension "$src").mp4"                         # converts into the same location
-  [ -f "$dest" ] && dest="$(strip_extension "$dest")_x265.mp4" # append _265 if the destination is also mp4
-
-  ffmpeg -i "$src" -c:v libx265 -preset ultrafast -crf 23 -vtag hvc1 -vf scale=1920:1080 "$dest"
-  echo "file conversion to x265 completed"
+to-1080p() {
+  input_file="$1"
+  output_file="$(strip_extension "$input_file")_1080p.$(get_extension "$input_file")"
+  ffmpeg -i "$input_file" -vf scale=-1920:1080 -c:a copy "$output_file"
+  echo "file conversion to 1080p done"
+  echo "result file is at '$output_file'"
 }
 
 cutvideo() {
@@ -87,6 +81,11 @@ EOF
   ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c copy "$output_file"
   echo -e "cut video complete, result at:\n\"$output_file\""
   cd "$(dirname "$input_file")"
+
+  echo -n "replace original with cut version? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] && mv "$output_file" "$input_file"
 }
 
 mergevideos() {

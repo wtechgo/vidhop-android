@@ -85,10 +85,10 @@ project() {
 
 # Creates a directory with the name of a singular project in the videos directory.
 # Example with default behavior:
-# You create a new project 'Nanotechnology' which will create directory $shared/Projects/Nanotechnology.
-# mkviddir4project will create $shared/Movies/Projects/Nanotechnology.
-# mkviddir4project will also create a symbolic link $shared/Projects/Nanotechnology/vid
-# that points to $shared/Movies/Projects/Nanotechnology.
+# You create a new project 'Nanotechnology' which will create directory $HOME/Projects/Nanotechnology.
+# mkviddir4project will create $HOME/Videos/Projects/Nanotechnology.
+# mkviddir4project will also create a symbolic link $HOME/Projects/Nanotechnology/vid
+# that points to $HOME/Videos/Projects/Nanotechnology.
 mkviddir4project() {
   mkdir -p "$(realpath "$projects_videos_dir")/$project_name" 2>/dev/null
   ln -s "$(realpath "$projects_videos_dir")/$project_name" "$projects_dir/$project_name/vid"
@@ -351,13 +351,16 @@ rensubproject() {
   project_name="$1"
   sub_project_name="$2"
   new_sub_project_name="$3"
+
   sub_project_dir="$projects_dir/$project_name/$sub_project_name"
   sub_project_vids_dir="$projects_videos_dir/$project_name/$sub_project_name"
   sub_project_imgs_dir="$projects_images_dir/$project_name/$sub_project_name"
+
   new_sub_project_dir="$projects_dir/$project_name/$new_sub_project_name"
   new_sub_project_vids_dir="$projects_videos_dir/$project_name/$new_sub_project_name"
   new_sub_project_imgs_dir="$projects_images_dir/$project_name/$new_sub_project_name"
   [ ! -d "$sub_project_dir" ] && echo "found no subproject '$sub_project_name' in project '$project_name', abort" && return
+
   # rename main directories
   rm "$sub_project_dir/vid"
   rm "$sub_project_dir/img"
@@ -366,8 +369,9 @@ rensubproject() {
   mv "$sub_project_vids_dir" "$new_sub_project_vids_dir"
   mv "$sub_project_imgs_dir" "$new_sub_project_imgs_dir"
   # recreate symbolic links for vid & img
-  ln -s "$(realpath "$sub_project_vids_dir")" "$new_sub_project_dir/vid"
-  ln -s "$(realpath "$sub_project_imgs_dir")" "$new_sub_project_dir/img"
+  ln -s "$(realpath "$new_sub_project_vids_dir")" "$new_sub_project_dir/vid"
+  ln -s "$(realpath "$new_sub_project_imgs_dir")" "$new_sub_project_dir/img"
+
   echo "renamed subproject from '$sub_project_name' to '$new_sub_project_name'"
 }
 
@@ -460,6 +464,27 @@ rmsubproject() {
   rm -r "$sub_project_dir"
   echo "removed project '$sub_project_name'"
 }
+
+sendproject() { # sync docs only to phone
+  project_name="$1"
+  project_dir="$projects_dir/$project_name"
+  [ ! -d "$project_dir" ] && echo "directory does not exist: $project_dir" && return
+  echo -e ">> sending project..."
+  rsync -Pauv -e "ssh -p $SSH_PORT_TERMUX -i $SSH_PRIVATE_KEY_WS" \
+    --exclude=".git/" \
+    --exclude=".gitignore" \
+    --exclude=".idea/" \
+    --exclude="**/site/" \
+    --include="*/" \
+    --include="*.md" \
+    --exclude="*" \
+    "$project_dir" "$USER_PHONE@$IP_PHONE:$shared/Projects"
+}
+
+cleanproj() {
+  find "$projects_dir" -empty -type d -delete
+}
+
 
 pdf() {
   [ ! -f "$1" ] && echo "not a file: '$1'" && return

@@ -78,6 +78,9 @@ play() {
   [[ "$media_file_lowercase" == *.png ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.bmp ]] && ("$picture_app_alt" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
+  # text
+  [[ "$media_file_lowercase" == *.txt ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.md ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   echo "unknown file extension for media file '$media_file'"
 }
 

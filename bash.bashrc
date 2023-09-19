@@ -2,7 +2,7 @@ bin=$PREFIX/bin # $PREFIX is /data/data/com.termux/files/usr
 etc=$PREFIX/etc
 # User files.
 bashrc=$etc/bash.bashrc
-shared=$HOME/storage/shared # $HOME is /data/data/com.termux/files/home
+shared=/data/data/com.termux/files/home/storage/shared
 dl=$shared/Download
 
 # VidHop

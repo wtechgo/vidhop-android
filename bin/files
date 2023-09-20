@@ -81,23 +81,25 @@ play() {
   # text
   [[ "$media_file_lowercase" == *.txt ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.md ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
-  echo "unknown file extension for media file '$media_file'"
+
+  echo "unknown file extension for media file '$media_file'"echo "unknown file extension for media file '$media_file'"
 }
 
-path_newfile() {
-  old_file="$1"
-  new_name="$2"
-  dir_name=$(dirname "$old_file")
-  ext=$(get_extension "$old_file")
-  echo "$dir_name/$new_name.$ext"
-}
+renpost() {
+  [ -z "$1" ] && echo "Usage: renpost <NEW_NAME>" && return
+  new_name="$(dirname "${social_media_dir}")/${1}_$(timestamp)"
 
-rename_file() {
-  old_file="$1"
-  new_name="$2"
-  new_file=$(path_newfile "$old_file" "$new_name")
-  mv "$old_file" "$new_file"
-  echo -e "> Renamed:\n$old_file\nTo:\n$new_file"
+  unset answer
+  echo "Rename:"
+  echo "$social_media_dir"
+  echo "To:"
+  echo "$new_name"
+  echo -n 'y/N: ' && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "abort" && return
+
+  mv "$social_media_dir" "$new_name"
+  echo "post renamed"
 }
 
 # Rename a video and its metadata.
@@ -119,7 +121,7 @@ renvid() {
   old_media_file_mkv="$old_vid_dir/$old_name.mkv"
   old_media_file_sub="$old_vid_dir/$old_name.en.srt"
 
-  # show file found
+  # show files found
   [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
   [ -f "$old_media_file_webm" ] && echo "found '$old_media_file_webm'"
@@ -174,23 +176,6 @@ renvid() {
   fi
 }
 
-renpost() {
-  [ -z "$1" ] && echo "Usage: renpost <NEW_NAME>" && return
-  new_name="$(dirname "${social_media_dir}")/${1}_$(timestamp)"
-
-  unset answer
-  echo "Rename:"
-  echo "$social_media_dir"
-  echo "To:"
-  echo "$new_name"
-  echo -n 'y/N: ' && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] || [ -z "$answer" ] && echo "abort" && return
-
-  mv "$social_media_dir" "$new_name"
-  echo "post renamed"
-}
-
 renlast() {
   [ -z "$1" ] && echo "Usage: renlast <NEW_NAME>" && return
   if [ "$function" = dlfbpost ] || [ "$function" = dltweet ]; then
@@ -198,41 +183,62 @@ renlast() {
     return
   fi
   old_name=$(lasttitle)
-  new_name="$1"
-  renvid "$old_name" "$new_name"
-}
+  old_media_file="$media_file"
+  old_media_dir="$(dirname "$old_media_file")"
+  old_media_file_sub="$old_media_dir/$old_name.en.srt" # TODO: bug if sub is not srt
+  old_ext="$(get_extension "$old_media_file")"
+  old_meta_dir="$meta_dir"
+  old_meta_file="$old_meta_dir/metadata.json"
 
-rmvid() {
-  [ -z "$1" ] && echo "Usage: rmvid <PARTIAL_VIDEO_NAME> <PLATFORM>" && return 1
-  unset search_text answer results
-  search_text="$1"
-  platform="$2"
-  searchable_text="$(enhance_searchability "$search_text")"
-  [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
+  # show files found
+  [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
+  [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
+  [ -f "$old_media_file" ] && echo "found '$old_media_file'"
+  # ask confirmation to rename
+  echo -n "rename these files? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] && return
 
-  media_results=$(find "$vids_dir" -iwholename "*${platform}*${searchable_text}*")
-  meta_results=$(find "$vids_meta_dir" -iwholename "*${platform}*${searchable_text}*")
-  [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
-  echo "$media_results" && echo "$meta_results"
+  name="$1"
+  media_file="$old_media_dir/$name.$old_ext"
+  new_media_file_sub="$(dirname "$old_media_file")/$name.en.srt"
+  meta_dir="$(dirname "$old_meta_dir")/$name"
 
-  if [ -z "$answer" ]; then
-    echo -n "delete these files permanently? Y/n: " && read -r answer
-    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-    [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
+  # rename subs
+  [ -f "$old_media_file_sub" ] &&
+    mv "$old_media_file_sub" "$new_media_file_sub" &&
+    echo -e "renamed: '$old_media_file_sub'\n     to: '$new_media_file_sub"
+  old_name_search_text="$(enhance_searchability "$old_name")"
+  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+    while read -r old_sub; do
+      ext=$(get_sub_extension "$old_sub")
+      new_sub="$old_meta_dir/subs/$name.$ext"
+      mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
+    done
+  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+    while read -r old_sub; do
+      ext=$(get_sub_extension "$old_sub")
+      new_sub="$old_meta_dir/subs/auto-generated/$name.$ext"
+      mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
+    done
+  # rename subs - end
+
+  # rename meta dir
+  [ -d "$old_meta_dir" ] &&
+    mv "$old_meta_dir" "$meta_dir" &&
+    echo -e "renamed: '$old_meta_dir (metadata directory)'\n     to: '$meta_dir' (metadata directory)"
+
+  # rename media file
+  [ -f "$old_media_file" ] &&
+    mv "$old_media_file" "$media_file" &&
+    echo -e "renamed: '$old_media_file'\n     to: '$media_file'"
+
+  # rename history entry
+  if [ -f "$titles_file" ]; then
+    head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
+    echo "$new_name" >>"$log_dir/titles.tmp.log"
+    mv "$log_dir/titles.tmp.log" "$titles_file"
   fi
-
-  while read -r file; do
-    rm -rf "$file"
-  done < <(echo "$media_results") && unset file
-
-  while read -r file; do
-    rm -rf "$file"
-  done < <(echo "$meta_results")
-
-  echo "deleted files for '$search_text'"
-
-  head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
-  mv "$log_dir/titles.tmp.log" "$titles_file"
 }
 
 rmpod() {
@@ -267,9 +273,56 @@ rmpod() {
   mv "$log_dir/titles.tmp.log" "$titles_file"
 }
 
+rmvid() {
+  [ -z "$1" ] && echo "Usage: rmvid <PARTIAL_VIDEO_NAME> <PLATFORM>" && return 1
+  unset search_text answer results
+  search_text="$1"
+  [ -n "$2" ] && platform="$2"
+  searchable_text="$(enhance_searchability "$search_text")"
+  [ "$2" = "-y" ] || [ "$2" = "--yes" ] && answer=y
+
+  media_results=$(find "$vids_dir" -iwholename "*${platform}*${searchable_text}*")
+  meta_results=$(find "$vids_meta_dir" -iwholename "*${platform}*${searchable_text}*")
+  [ -z "$media_results" ] && [ -z "$meta_results" ] && echo found no matches && return
+  echo "$meta_results" && echo "$media_results"
+
+  if [ -z "$answer" ]; then
+    echo -n "delete these files permanently? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] || [ "$answer" = "no" ] && return
+  fi
+
+  while read -r file; do
+    rm -rf "$file" && echo "deleted $file"
+  done < <(echo "$meta_results")
+  while read -r file; do
+    rm -rf "$file" && echo "deleted $file"
+  done < <(echo "$media_results") && unset file
+
+  head -n -1 "$titles_file" >"$log_dir/titles.tmp.log"
+  mv "$log_dir/titles.tmp.log" "$titles_file"
+
+  echo "deleted files for '$search_text'"
+}
+
 rmlast() {
-  [ "$function" = dlpod ] || [ "$function" = dlpodi ] && rmpod "$(lasttitle)" && return
-  rmvid "$(lasttitle)"
+  old_name=$(lasttitle)
+  media_file_sub="$old_media_dir/$old_name.en.srt"
+
+  # show files found
+  [ -d "$meta_dir" ] && echo "found '$meta_dir' (metadata directory)"
+  [ -f "$media_file_sub" ] && echo "found '$media_file_sub'"
+  [ -f "$media_file" ] && echo "found '$media_file'"
+
+  # ask confirmation to rename
+  echo -n "delete these files? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ "$answer" = "n" ] && return
+
+  [ -d "$meta_dir" ] && rm -rf "$meta_dir" && echo "deleted '$meta_dir (metadata directory)'"
+  [ -f "$media_file_sub" ] && rm -rf "$media_file_sub" && echo "deleted '$media_file_sub'"
+  [ -f "$media_file" ] && rm -rf "$media_file" && echo "deleted '$media_file'"
+  echo "files deleted for $old_name"
 }
 
 find_archive_file_from_audio_channel_name() {
@@ -465,8 +518,8 @@ uploadvideo() {
 
   upload_json="$(jq . "$json_file")"
   title="$(strip_extension "$(basename "$media_file")")"
-  echo "$title" > "$description_file"
-  jq -r '.webpage_url, "", .description'  <<<"$upload_json" | tr -d '"' >> "$description_file"
+  echo "$title" >"$description_file"
+  jq -r '.webpage_url, "", .description' <<<"$upload_json" | tr -d '"' >>"$description_file"
 
   cd "$upload_dir"
   echo "upload directory and files created at '$upload_dir'"

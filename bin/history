@@ -72,7 +72,7 @@ add_to_chistory() {
   channel_url="$url"
   channel_dir="$channels_dir/$name/$platform"
   meta_file="$channels_meta_dir/$name/$platform/$name.json"
-  meta_dir="$channels_meta_dir/$name/$platform/$name"
+  meta_dir="$channels_meta_dir/$name/$platform"
   avatar_file="$channels_meta_dir/$name/$platform/avatar_data.json"
   vh_downloaded="$([ "$function" = "dlc" ] && echo true || echo false)"
   vh_downloaded_date="$(date +%s)"

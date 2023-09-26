@@ -79,13 +79,38 @@ EOF
   output_file="$(prefix_extension "$input_file" cut)"
 
   ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c copy "$output_file"
-  echo -e "cut video complete, result at:\n\"$output_file\""
+  echo -e "cut complete, result at:\n\"$output_file\""
   cd "$(dirname "$input_file")"
 
   echo -n "replace original with cut version? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "n" ] && return
   [ "$answer" = "y" ] && mv "$output_file" "$input_file"
+}
+
+cutaudio() {
+  [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
+Usage: cutaudio <INPUT_FILE> <START_TIME> [<END_TIME>]
+
+time input formats:
+    formats to be used for <START_TIME> and <END_TIME>
+    h=hours, m=minutes, s=seconds, m=milliseconds
+
+    hh:mm:ss        Example: 01:30:52
+    sss             Example: 120
+
+    hh:mm:ss.mmm    Example: 01:30:52.123
+    sss.mmm         Example: 120.123
+
+The input file remains untouched.
+A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
+Ext is the extension of the input file e.g. mp4, mkv...
+
+If cutvideo fails, converting the input video from mkv to mp4 may help.
+One way to do this is with OBS > File > Remux.
+EOF
+
+  cutvideo "$@"
 }
 
 mergevideos() {

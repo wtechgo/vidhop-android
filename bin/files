@@ -81,8 +81,7 @@ play() {
   # text
   [[ "$media_file_lowercase" == *.txt ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.md ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
-
-  echo "unknown file extension for media file '$media_file'"echo "unknown file extension for media file '$media_file'"
+  echo "unknown file extension for media file '$media_file'"
 }
 
 renpost() {

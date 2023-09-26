@@ -104,10 +104,7 @@ time input formats:
 
 The input file remains untouched.
 A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
-Ext is the extension of the input file e.g. mp4, mkv...
-
-If cutvideo fails, converting the input video from mkv to mp4 may help.
-One way to do this is with OBS > File > Remux.
+Ext is the extension of the input file e.g. mp3, m4a, wav etc.
 EOF
 
   cutvideo "$@"

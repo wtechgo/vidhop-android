@@ -240,6 +240,11 @@ get_extension() {
   echo "$ext"
 }
 
+get_name() {
+  the_name="$(basename "$1")"
+  strip_extension "$the_name"
+}
+
 get_sub_extension() {
   sub_type=$(echo -n "$1" | rev | cut -d '.' -f 1 | rev)
   lang=$(echo -n "$1" | rev | cut -d '.' -f 2 | rev)

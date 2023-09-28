@@ -62,14 +62,11 @@ installloader() { # alias for phone hand typing
   install_loader
 }
 
-fetch_github() {
-  echo "> Updating VidHop code at $vidhop_app_dir..."
-  echo "> Fetching from GitHub..." && sleep 1
-  cd "$vidhop_app_dir"
-  git fetch --all
-  git reset --hard origin/master
-  sleep 2
-  . "$PREFIX/opt/vidhop/bin/loader"
+update_system() {
+  echo "> Updating & upgrading Termux system..." && sleep 1
+  yes | pkg update
+  yes | pkg upgrade
+  yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }
 
 update_python_packages() {
@@ -88,16 +85,19 @@ update_python_packages() {
   pip install -U pywebcopy
 }
 
+fetch_github() {
+  echo "> Updating VidHop code at $vidhop_app_dir..."
+  echo "> Fetching from GitHub..." && sleep 1
+  cd "$vidhop_app_dir"
+  git fetch --all
+  git reset --hard origin/master
+  sleep 2
+  . "$PREFIX/opt/vidhop/bin/loader"
+}
+
 updateytdlp() {
   echo "> Updating YT-DLP..." && sleep 1
   pip install -U yt-dlp
-}
-
-update_system() {
-  echo "> Updating & upgrading Termux system..." && sleep 1
-  yes | pkg update
-  yes | pkg upgrade
-  yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }
 
 updatevidhop() {
@@ -159,6 +159,7 @@ vidhophelp() {
   dlv_help && echo
   fvid_help && echo
   files_help && echo
+  image_help && echo
   metadata_help && echo
   history_help && echo
   sync_help && echo

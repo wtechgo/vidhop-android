@@ -27,19 +27,21 @@ yes | pkg upgrade
 
 echo "Installing required packages from termux repositories..." && sleep 1
 # mediainfo nano openssh git ncurses moreutils python python-pip ffmpeg jq
+yes | pkg install termux-services    # enables management of services, used in the Tor workflow
 yes | pkg install git                # pull in code and updates
 yes | pkg install openssh            # install ssh client and server (sshd command)
 yes | pkg install rsync              # enables `termux-open` command, used by `play` command
-yes | pkg install mediainfo          # required for `specs`
-yes | pkg install imagemagick        # convert images
 yes | pkg install nano               # for editing code with nanodlv, nanofvid,...
-yes | pkg install ncurses-utils      # for installing tput, used in fvid
 yes | pkg install iproute2           # for fetching the current IP address
+yes | pkg install ncurses-utils      # for installing tput, used in fvid
 yes | pkg install moreutils          # better for fetching the current IP address
-yes | pkg install python ffmpeg      # required for yt-dlp, ffprobe is included in ffmpeg
+yes | pkg install ffmpeg             # movie editing, ffprobe is included
+yes | pkg install imagemagick        # image editing
+yes | pkg install tesseract          # image to text (OCR)
+yes | pkg install mediainfo          # required for `specs`
 yes | pkg install jq                 # json processor
+yes | pkg install python             # required for yt-dlp
 yes | pkg install tor proxychains-ng # tools for dealing with censored videos
-yes | pkg install termux-services    # enables management of services, used in the Tor workflow
 yes | pkg install libxml2 libxslt    # dependencies for facebook-scraper (installed by pip a little lower)
 
 echo "Installing python packages..."  # python packages at /data/data/com.termux/files/usr/lib/python3.10/site-packages

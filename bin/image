@@ -1,0 +1,170 @@
+#!/bin/bash
+
+image_help() {
+  echo "tle: dlv"
+  echo " Description: Download video(s) and channels."
+  echo " Commands:"
+  echo "    install_image_module => Install packages for image processing."
+  echo "    is_image <FILE> => Checks image extension and returns true or false."
+  echo "    extract_imgs_from_dir <DIR> => Creates <DIR>/img and copies images into it"
+  echo "    resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>"
+  echo "      => Copy and resize each image inside <IMAGES_DIR>, and put them in a child dir of <IMAGES_DIR>."
+  echo "    resize_images_dir_1080p <IMAGES_DIR> => Convenience method for resize_images_dir_x_y <IMAGES_DIR> 1920 1080."
+  echo "    ocr <IMG_FILE> [<OUTPUT_TXT_FILE>] => Write text from <IMG_FILE> into the terminal."
+  echo "    ocrtxt <IMG_FILE> [<OUTPUT_DIR>] => Saves a TXT file next to the image file, unless <OUTPUT_DIR> is given, then there."
+  echo "    ocrdir <IMGS_DIR> [<OUTPUT_DIR>] => Saves a TXT file in <IMGS_DIR>/ocr, unless <OUTPUT_DIR> is given, then there."
+  echo "    ocrdir-macfilter <IMGS_DIR> [<OUTPUT_DIR>] => Saves a TXT file in <IMGS_DIR>/ocr/filtered, containing only MAC-addresses," &&
+  echo "                                                  unless <OUTPUT_DIR> is given, then there."
+}
+
+install_image_module() {
+  [ ! "$(command -v pacman)" ] && echo "tried installing packages 'imagemagick' and 'tesseract' but the package manager 'pacman' is not installed, abort" && return
+  pkg install imagemagick
+  pkg install tesseract
+}
+
+is_image() {
+  [ -z "$1" ] && echo false && return
+  to_check="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  [[ "$to_check" == *.jpg ]] && echo true && return
+  [[ "$to_check" == *.jpeg ]] && echo true && return
+  [[ "$to_check" == *.png ]] && echo true && return
+  [[ "$to_check" == *.webp ]] && echo true && return
+  [[ "$to_check" == *.gif ]] && echo true && return
+  [[ "$to_check" == *.bmp ]] && echo true && return
+  [[ "$to_check" == *.svg ]] && echo true && return
+  echo false
+}
+
+extract_imgs_from_dir() {
+  [ -z "$1" ] && echo "Usage: extract_imgs_from_dir <DIR>" &&
+    echo " Info: Creates <DIR>/img and copies images into it" && return
+  [ ! -d "$1" ] && echo "not a directory: ${1}, abort" && return
+
+  parent_dir="$(realpath "$1")"
+  target_dir="$parent_dir/img"
+  mkdir "$target_dir"
+
+  while read -r img; do
+    if [ "$(is_image "$img")" = true ]; then
+      cp "$img" "$target_dir"
+    fi
+  done < <(find "$parent_dir" -maxdepth 1 -type f)
+
+  echo "copied images to $target_dir"
+}
+
+resize_images_dir_x_y() {
+  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] && echo "Usage: resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>" && return
+  [ ! -d "$1" ] && echo "not a directory: $1" && return
+  [ ! "$(command -v magick)" ] && echo "image magick is not installed, abort" && return
+
+  imgs_dir="$(realpath "$1")"
+  x_pixels="$2"
+  y_pixels="$3"
+  target_dir="$imgs_dir/${x_pixels}x${y_pixels}"
+  mkdir "$target_dir" 2>/dev/null
+
+  while read -r img; do
+    if [ "$(is_image "$img")" = true ]; then
+      echo "$img"
+      img_resized="$target_dir/$(basename "$img")"
+      convert "$img" -resize "${x_pixels}"x"${y_pixels}"\> "$img_resized"
+    fi
+  done < <(find "$imgs_dir" -maxdepth 1 -type f)
+
+  echo "images converted to ${x_pixels}x${y_pixels} at \"${target_dir}\""
+}
+
+resize_images_dir_1080p() {
+  [ -z "$1" ] && echo "Usage: resize_images_dir_1080p <IMAGES_DIR>" && return
+  resize_images_dir_x_y "$1" 1920 1080
+}
+
+ocr() {
+  [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
+    echo "Consider installing the package via your package manager." && return
+
+  [ -z "$1" ] && echo "Usage: ocr <IMG_FILE> [<OUTPUT_TXT_FILE>]" && return
+  img="$1"
+  tesseract "$img" - -l eng --dpi 300 | grep "\S"
+}
+
+ocr-macfilter() {
+  [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
+    echo "Consider installing the package via your package manager." && return
+
+  [ -z "$1" ] && echo "Usage: ocr <IMG_FILE> [<OUTPUT_TXT_FILE>]" && return
+  img="$1"
+  tesseract "$img" - -l eng --dpi 300 | grep "\S" | extract_mac_addresses | tr ':' '-' | sort | uniq
+}
+
+ocrtxt() {
+  [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
+    echo "Consider installing the package via your package manager." && return
+
+  [ -z "$1" ] && echo "Usage: ocrtxt <IMG_FILE> [<OUTPUT_DIR>]" &&
+    echo " Info: Saves a TXT file next to the image file, unless <OUTPUT_DIR> is given, then there." && return
+  img="$1" && [ ! -f "$img" ] && echo "input was not a file" && echo "Input: '${img}'" && echo "abort"
+  output_dir="$2"
+  if [ "$output_dir" ]; then
+    mkdir "$output_dir" 2>/dev/null
+    output="$output_dir/$(get_name "$img").txt"
+  else
+    output="$(dirname "$img")/$(get_name "$img").txt"
+  fi
+  tesseract "$img" - -l eng --dpi 300 | grep "\S" >"$output"
+  unset output_dir output
+}
+
+ocrdir() {
+  [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
+    echo "Consider installing the package via your package manager." && return
+
+  imgs_dir="$(realpath "$1")"
+  [ -z "$imgs_dir" ] && echo "Usage: ocrdir <IMGS_DIR> [<OUTPUT_DIR>]" && return
+  [ ! -d "$imgs_dir" ] && echo "not a directory '$imgs_dir', abort" && return
+  output_dir="$imgs_dir/ocr"
+  mkdir "$output_dir" 2>/dev/null
+
+  while read -r img; do
+    if [ "$(is_image "$img")" = true ]; then
+      echo "$img"
+      output="$output_dir/$(get_name "$img").txt"
+      tesseract "$img" - -l eng --dpi 300 | grep "\S" >"$output"
+    fi
+  done < <(find "$imgs_dir" -maxdepth 1 -type f)
+  unset output_dir output
+}
+
+ocrdir-macfilter() {
+  [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
+    echo "Consider installing the package via your package manager." && return
+
+  imgs_dir="$(realpath "$1")"
+  [ -z "$imgs_dir" ] && echo "Usage: ocrdir-macfilter <IMGS_DIR> [<OUTPUT_DIR>]" && return
+  [ ! -d "$imgs_dir" ] && echo "not a directory '$imgs_dir', abort" && return
+  output_dir="$imgs_dir/ocr"
+  output_dir_filtered="$output_dir/filtered"
+  mkdir -p "$output_dir_filtered" 2>/dev/null
+
+  while read -r img; do
+    if [ "$(is_image "$img")" = true ]; then
+      echo "$img"
+      name="$(get_name "$img")"
+      output="$output_dir/$name.txt"
+      output_filtered="$output_dir_filtered/$name.txt"
+
+      result="$(tesseract "$img" - -l eng --dpi 300 | grep "\S")"
+      echo "$result" >"$output"
+      echo "$result" | extract_mac_addresses | tr ':' '-' | sort | uniq >"$output_filtered"
+    fi
+  done < <(find "$imgs_dir" -maxdepth 1 -type f)
+  unset output_dir output
+}
+
+# shellcheck disable=SC2120
+extract_mac_addresses() {
+  [ -n "$1" ] && grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})' "$1" && return
+  grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})'
+}

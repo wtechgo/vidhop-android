@@ -69,20 +69,24 @@ update_system() {
   yes | pkg install libxml2 libxslt # dependencies for facebook-scraper
 }
 
+clean_python_packages() {
+  echo "> Updating Python packages..." && sleep 1
+  pip install -U requests
+  pip install -U selenium
+  pip install -U beautifulsoup4
+  pip install -U image
+  pip install -U pillow
+  pip install -U pywebcopy
+}
+
 update_python_packages() {
   echo "> Updating Python packages..." && sleep 1
   pkg install python
   pip install -U pip
   pip install -U wheel
   pip install -U yt-dlp
-  pip install -U requests
-  pip install -U selenium
-  pip install -U beautifulsoup4
-  pip install -U image
-  pip install -U pillow
   pip install -U facebook-scraper
   pip install -U snscrape
-  pip install -U pywebcopy
 }
 
 fetch_github() {
@@ -103,6 +107,7 @@ updateytdlp() {
 updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   update_system
+  clean_python_packages
   update_python_packages
   fetch_github
   install_loader

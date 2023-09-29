@@ -1,11 +1,10 @@
 #!/bin/bash
 
 image_help() {
-  echo "tle: dlv"
-  echo " Description: Download video(s) and channels."
+  echo " title: image"
+  echo " Description: Image processors."
   echo " Commands:"
   echo "    install_image_module => Install packages for image processing."
-  echo "    is_image <FILE> => Checks image extension and returns true or false."
   echo "    extract_imgs_from_dir <DIR> => Creates <DIR>/img and copies images into it"
   echo "    resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>"
   echo "      => Copy and resize each image inside <IMAGES_DIR>, and put them in a child dir of <IMAGES_DIR>."

@@ -682,11 +682,13 @@ faudf() {
   unset result
   found_something="false"
 
-  result=$(find "$(realpath "$music_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
-  [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> VidHop music directory search results:" &&
-    echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
+  if [ "$(realpath "$music_dir")" != "$(realpath "$HOME/Music")" ]; then
+    result=$(find "$(realpath "$music_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+    [ "$(wc --words <<<"$result")" -gt 0 ] &&
+      echo -e "> VidHop music directory search results:" &&
+      echo -e "${GREEN}$result${NC}" &&
+      unset result && found_something="true"
+  fi
 
   result=$(find "$(realpath "$podcasts_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&

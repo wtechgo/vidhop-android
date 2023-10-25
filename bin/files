@@ -306,7 +306,7 @@ rmvid() {
 
 rmlast() {
   old_name=$(lasttitle)
-  media_file_sub="$old_media_dir/$old_name.en.srt"
+  media_file_sub="$(strip_extension "$media_file").en.srt"
 
   # show files found
   [ -d "$meta_dir" ] && echo "found '$meta_dir' (metadata directory)"

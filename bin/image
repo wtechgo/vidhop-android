@@ -133,7 +133,16 @@ ocrdir() {
       tesseract "$img" - -l eng --dpi 300 | grep "\S" >"$output"
     fi
   done < <(find "$imgs_dir" -maxdepth 1 -type f)
-  unset output_dir output
+
+  rm "$output_dir/merged.txt" 2>/dev/null
+  while read -r txt; do
+    {
+      echo -e "$txt\n"
+      cat "$txt"
+      echo -e "\n"
+    } >>"$output_dir/merged.txt"
+  done < <(find "$output_dir" -maxdepth 1 -type f -iname "*.txt" -not -path "*/merged.txt")
+#  unset output_dir
 }
 
 ocrdir-macfilter() {

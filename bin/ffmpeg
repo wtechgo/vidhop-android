@@ -259,7 +259,7 @@ strip-id3tags() { # not ffmpeg
 }
 
 # pictures
-screenshot_video_frame_changes() {
+screenshot-video-frame-changes() {
   [ -z "$1" ] && echo "usage: screenshots_changed_frames <VIDEO_FILE>" && return
   video_file="$1"
   frames_dir="$(dirname "$video_file")/screenshots"

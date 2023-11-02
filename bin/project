@@ -10,6 +10,7 @@ project_help() {
   echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
   echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
   echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
+  echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
   echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
   echo "    absfproj <SEARCH_TEXT>   => Identical to fproj but results are displayed as absolute paths."
   echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
@@ -205,44 +206,14 @@ linkvideos4project() {
       # write title & link to file
       metadata="$(media_file2metadata_path "$file")"
       if [ -f "$metadata" ]; then
-        write_title_url_to_markdown_file
-        write_title_url_to_txt_file
+        title_url_markdown >>"$list_md"
+        title_url_txt >>"$list_txt"
       fi
     else
       echo "file error for '$file'"
     fi
   done < <(echo -e "$result")
   echo "Done creating links to video files in '$dest_dir'."
-}
-
-# When you have a directory with symbolic links to VidHop video files,
-# this function will search for the metadata for each video,
-# and write a text file containing the title, URL, channel and channel URL, for each video,
-# in the same directory provided as argument to the function.
-videolinks2text() {
-  [ -d "$1" ] && links_dir="$1"
-  [ ! -d "$1" ] && [ -d "$projects_dir/$1/vid" ] && links_dir="$projects_dir/$1/vid"
-  [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
-
-  unset summary
-  while read -r media_file; do
-    json_file="$(media_file2metadata_path "$media_file")" || continue
-    if [ -f "$json_file" ]; then
-      json="$(jq . "$json_file")"
-      title="$(jq .title <<<"$json")"
-      url="$(jq .webpage_url <<<"$json")"
-      channel_name="$(channel_name_from_obj)"
-      channel_url="$(channel_url)"
-      [ -n "$title" ] && echo -e "${GREEN}$title${NC}" | tr -d '"' && summary+="$(echo "$title" | tr -d '"')\n"
-      [ -n "$url" ] && echo -e "${GREEN}$url${NC}" | tr -d '"' && summary+="$(echo "$url" | tr -d '"')\n"
-      [ -n "$channel_name" ] && echo -e "${GREEN}$channel_name${NC}" && summary+="$channel_name\n"
-      [ -n "$channel_url" ] && echo -e "${GREEN}$channel_url${NC}" && summary+="$channel_url\n"
-      echo && summary+="\n"
-    else
-      logInfo "not a valid metadata file '$json_file'"
-    fi
-  done < <(find -L "$links_dir" -xtype l -exec realpath {} \;)
-  echo "$summary" >"$links_dir/links.txt"
 }
 
 renlink+source() {
@@ -269,15 +240,71 @@ fvidf4project() {
   linkvideos4project "$@"
 }
 
-write_title_url_to_markdown_file() {
-  line="$(jq '"- [" + .title + "](" + .webpage_url + ")"' "$metadata" | remove_leading_trailing_double_quotes)"
-  echo "$line" >>"$list_md"
+# When you have a directory with symbolic links that point to VidHop video files,
+# this function will search for the metadata for each video in the given directory (else $PWD),
+# and write a text file containing the title, URL and channel for each video.
+#
+# input: <dir>
+# output: <dir>/links.txt, <dir>/links.md
+videodir2linkslist() {
+  links_dir="$PWD"
+  if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory"; fi
+  [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
+
+  unset summary_txt summary_md
+  while read -r media_file; do
+    json_file="$(media_file2metadata_path "$media_file")" || continue
+    if [ -f "$json_file" ]; then
+      json="$(jq . "$json_file")"
+      # gather metadata
+      title="$(jq .title <<<"$json" | remove_leading_trailing_double_quotes)"
+      url="$(jq .webpage_url <<<"$json" | remove_leading_trailing_double_quotes)"
+      channel_name="$(channel_name_from_obj)"
+      # item: create, print, append to txt and md file
+      item="$(channel_title_url_txt_summary_for_terminal)"
+      if [ -n "$item" ]; then
+        echo -e "$item\n"
+        # append item to txt
+        item="$(channel_title_url_txt_summary)"
+        summary_txt+="$item\n\n"
+        # append item to markdown
+        summary_md+="$(channel_title_url_item_md)\n"
+      fi
+    else
+      logInfo "not a valid metadata file '$json_file'"
+    fi
+  done < <(find -L "$links_dir" -type f ! -name '*.txt' ! -name '*.md' -exec realpath {} \;)
+  echo -e "$summary_txt" >"$links_dir/links.txt"
+  echo -e "$summary_md" >"$links_dir/links.md"
 }
 
-write_title_url_to_txt_file() {
+channel_title_url_item_md() {
+  if [ -n "$channel_name" ]; then
+    echo -e "- [$channel_name - $title]($url)\n"
+  else
+    echo -e "- [$title]($url)\n"
+  fi
+}
+
+channel_title_url_txt_summary() {
+  unset summary_item
+  [ -n "$channel_name" ] && summary_item+="$channel_name - "
+  [ -n "$title" ] && summary_item+="$title\n"
+  [ -n "$url" ] && summary_item+="$url\n\n"
+  echo -e "$summary_item"
+}
+
+channel_title_url_txt_summary_for_terminal() {
+  [ -n "$channel_name" ] && summary_item+="$channel_name - "
+  [ -n "$title" ] && summary_item+="$title\n"
+  [ -n "$url" ] && summary_item+="${GREEN}${url}${NC}\n\n"
+  echo "$summary_item"
+}
+
+title_url_txt() {
   title="$(jq '.title' "$metadata" | remove_leading_trailing_double_quotes)"
   webpage_url="$(jq '.webpage_url' "$metadata" | remove_leading_trailing_double_quotes)"
-  echo -e "$title\n$webpage_url\n" >>"$list_txt"
+  echo -e "$title\n$webpage_url\n"
 }
 
 # Write project: Opens the text document of a project at doc/<PROJECT_NAME>.md with the default $text_app, to start writing.
@@ -314,7 +341,7 @@ fproj() {
   echo "${GREEN}${result}${NC}"
 }
 
-cdproj () {
+cdproj() {
   [ -z "$1" ] && echo "Usage: cdproj <PROJECT_NAME>" && return
   project_name="$1"
   project_dir="$(find "$projects_dir" -type d -iname "*$project_name*" | head -n 1)"
@@ -484,7 +511,6 @@ sendproject() { # sync docs only to phone
 cleanproj() {
   find "$projects_dir" -empty -type d -delete
 }
-
 
 pdf() {
   [ ! -f "$1" ] && echo "not a file: '$1'" && return

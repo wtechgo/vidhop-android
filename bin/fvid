@@ -184,6 +184,20 @@ find_one_vmeta() {
   return 0
 }
 
+find_one_ameta() {
+  [ -z "$1" ] && echo "Usage: find_one_vmeta <VIDEO_SEARCH_TEXT> [<PLATFORM>]" && return
+  search_text="$1"
+  platform="$2"
+
+  [ -f "$search_text" ] && echo "$search_text" && return
+  result=$(find_one f "*$platform*$search_text*metadata.json" "$music_meta_dir")
+  error=$?
+  echo "$result"
+  [ "$error" = 1 ] && return 1
+  [ "$error" = 2 ] && return 2
+  return 0
+}
+
 find_one_cmeta() {
   [ -z "$1" ] && echo "Usage: find_one_cmeta <CHANNEL_SEARCH_TEXT> [<PLATFORM>]" && return
   search_text="$1"

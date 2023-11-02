@@ -56,11 +56,20 @@ metadata() {
   [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" &&
     jq . <<<"$json" && extract_summary_vars && print_summary && return
   # find json file based search text arg
+  ## search in video metadata
   result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
-  [ "$error" = 0 ] && json="$(jq . "$result")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
-  [ ! "$error" = 0 ] && print_msg_for_error_code "$error" && return
-  echo "could not resolve a json file or variable to process, abort" && return
+  [ "$error" = 0 ] &&
+    json="$(jq . "$result")" && jq . <<<"$json" &&
+    extract_summary_vars && print_summary
+  [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
+  ## search in audio metadata
+  result="$(find_one_ameta "$(echo "$search_text" | tr ' ' '*')")"
+  error=$?
+  [ "$error" = 0 ] &&
+    json="$(jq . "$result")" && jq . <<<"$json" &&
+    extract_summary_vars && print_summary
+  [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
 }
 
 filesize-channel-meta-files() {

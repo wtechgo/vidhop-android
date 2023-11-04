@@ -49,6 +49,7 @@ metadata() {
     echo "       => shows metadata from the last download"
     return
   fi
+  found=false
   # json file arg
   [ -f "$search_text" ] && [[ "$search_text" == *.json ]] &&
     json="$(jq . "$search_text")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
@@ -60,16 +61,15 @@ metadata() {
   result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
   [ "$error" = 0 ] &&
-    json="$(jq . "$result")" && jq . <<<"$json" &&
-    extract_summary_vars && print_summary
-  [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
+    json="$(jq . "$result")" &&jq . <<<"$json" &&
+    extract_summary_vars && print_summary && found=true
   ## search in audio metadata
   result="$(find_one_ameta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
   [ "$error" = 0 ] &&
     json="$(jq . "$result")" && jq . <<<"$json" &&
-    extract_summary_vars && print_summary
-  [ ! "$error" = 0 ] && print_msg_for_error_code "$error"
+    extract_summary_vars && print_summary && found=true
+  [ $found = false ] && echo "found nothing for '$search_text'"
 }
 
 filesize-channel-meta-files() {

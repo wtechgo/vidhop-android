@@ -206,7 +206,7 @@ linkvideos4project() {
       # write title & link to file
       metadata="$(media_file2metadata_path "$file")"
       if [ -f "$metadata" ]; then
-        title_url_markdown >>"$list_md"
+        channel_title_url_item_md >>"$list_md"
         title_url_txt >>"$list_txt"
       fi
     else
@@ -248,7 +248,7 @@ fvidf4project() {
 # output: <dir>/links.txt, <dir>/links.md
 videodir2linkslist() {
   links_dir="$PWD"
-  if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory"; fi
+  if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory" && echo; fi
   [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
 
   unset summary_txt summary_md
@@ -261,11 +261,11 @@ videodir2linkslist() {
       url="$(jq .webpage_url <<<"$json" | remove_leading_trailing_double_quotes)"
       channel_name="$(channel_name_from_obj)"
       # item: create, print, append to txt and md file
-      item="$(channel_title_url_txt_summary_for_terminal)"
+      item="$(channel_title_url_item_terminal)"
       if [ -n "$item" ]; then
         echo -e "$item\n"
         # append item to txt
-        item="$(channel_title_url_txt_summary)"
+        item="$(channel_title_url_item_txt)"
         summary_txt+="$item\n\n"
         # append item to markdown
         summary_md+="$(channel_title_url_item_md)\n"
@@ -276,6 +276,10 @@ videodir2linkslist() {
   done < <(find -L "$links_dir" -type f ! -name '*.txt' ! -name '*.md' -exec realpath {} \;)
   echo -e "$summary_txt" >"$links_dir/links.txt"
   echo -e "$summary_md" >"$links_dir/links.md"
+
+  echo "output above was written to a .txt file and a .md file at:"
+  echo "$links_dir/links.txt"
+  echo "$links_dir/links.md"
 }
 
 channel_title_url_item_md() {
@@ -286,7 +290,7 @@ channel_title_url_item_md() {
   fi
 }
 
-channel_title_url_txt_summary() {
+channel_title_url_item_txt() {
   unset summary_item
   [ -n "$channel_name" ] && summary_item+="$channel_name - "
   [ -n "$title" ] && summary_item+="$title\n"
@@ -294,7 +298,7 @@ channel_title_url_txt_summary() {
   echo -e "$summary_item"
 }
 
-channel_title_url_txt_summary_for_terminal() {
+channel_title_url_item_terminal() {
   [ -n "$channel_name" ] && summary_item+="$channel_name - "
   [ -n "$title" ] && summary_item+="$title\n"
   [ -n "$url" ] && summary_item+="${GREEN}${url}${NC}\n\n"

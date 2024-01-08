@@ -12,7 +12,6 @@ project_help() {
   echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
   echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
   echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
-  echo "    absfproj <SEARCH_TEXT>   => Identical to fproj but results are displayed as absolute paths."
   echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
 }
 
@@ -81,7 +80,7 @@ project() {
   project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$project_dir"
-  "$text_app" "$document_file"
+  #"$text_app" "$document_file"
 }
 
 # Creates a directory with the name of a singular project in the videos directory.
@@ -117,14 +116,14 @@ subproject() { # create a new project in dir /data/projects/wickedtruths.org
   mkdir -p "$subproject_dir"
   mkviddir4subproject "$project_name" "$subproject_name" # symlink to the newly created video dir for this project
   mkimgdir4subproject "$project_name" "$subproject_name" # symlink to the newly created images dir for this project
-  mkdir "$subproject_dir/site"
-  mkdir "$subproject_dir/doc"
+  mkdir -p "$subproject_dir/site"
+  mkdir -p "$subproject_dir/doc"
   # create a markdown document with some boilerplate
   document_file="$subproject_dir/doc/$subproject_name.md"
   project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$subproject_dir"
-  "$text_app" "$document_file"
+#  "$text_app" "$document_file"
 }
 
 # See mkviddir4project.
@@ -313,6 +312,7 @@ title_url_txt() {
 
 # Write project: Opens the text document of a project at doc/<PROJECT_NAME>.md with the default $text_app, to start writing.
 wproj() {
+  [ -z "$1" ] && [ -n "$document_file" ] && "$text_app" "$document_file" && return
   [ -z "$1" ] && echo -e "Usage: wproj <PROJECT_NAME_CASE_SENSITIVE>" && return
   project_name="$1"
   subproject_name="$2"
@@ -341,11 +341,28 @@ fproj() {
     -not -path "*.js" \
     -not -path "*.css" \
     -not -path "*_files/*" \
-    -iname "*$search_text*" -printf '"%p"\n')"
+    -iname "*$search_text*" -exec realpath {} \; | sort | uniq | prefix_suffix_with_double_quotes)"
   echo "${GREEN}${result}${NC}"
 }
 
-cdproj() {
+#fproj() {
+#  [ -z "$1" ] && echo -e "Usage: fproj <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
+#  unset result
+#  search_text="$1"
+#  if [ -z "$2" ]; then search_dir="."; else search_dir="$projects_dir/$2"; fi
+#  [ ! -d "$search_dir" ] && echo "could not find directory $search_dir" && return
+#  # Display with relative paths.
+#  prev="$PWD"
+#  [[ "$PWD" != *"$projects_dir"* ]] && cd "$projects_dir"
+#  result="$(find -L "$search_dir" -type f \
+#    -not -path "*.js" \
+#    -not -path "*.css" \
+#    -not -path "*_files/*" \
+#    -iname "*$search_text*" -printf '"%p"\n')"
+#  echo "${GREEN}${result}${NC}"
+#}
+
+cdproject() {
   [ -z "$1" ] && echo "Usage: cdproj <PROJECT_NAME>" && return
   project_name="$1"
   project_dir="$(find "$projects_dir" -type d -iname "*$project_name*" | head -n 1)"
@@ -512,11 +529,26 @@ sendproject() { # sync docs only to phone
     "$project_dir" "$USER_PHONE@$IP_PHONE:$shared/Projects"
 }
 
+# Solves issues with viewing offline webpages, saved with 'Save As' in the browser (Firefox).
+rmjs() {
+  dir="$1"
+  [ -z "$dir" ] && dir=$PWD
+  ! [ -d "$dir" ] && echo "not a directory '$dir', abort" && return
+  find "$dir" -iname "*.js"
+
+  unset answer
+  echo -n "Remove these files? Y/n: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "y" ] &&
+    find "$dir" -iname "*.js" -exec rm {} \; &&
+    echo "files removed"
+}
+
 cleanproj() {
   find "$projects_dir" -empty -type d -delete
 }
 
 pdf() {
   [ ! -f "$1" ] && echo "not a file: '$1'" && return
-  "$pdf_reader_app" "$1"
+  "$pdf_reader_app" "$1" &
 }

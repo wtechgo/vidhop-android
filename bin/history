@@ -191,14 +191,15 @@ add_to_phistory() {
 
   title="$name"
   url="$url"
-  channel_name="$(channel_name_from_obj "$json")"
-  channel_url="$(channel_url_from_obj "$json")"
+  channel_name="$(channel_name_from_obj)"
+  channel_url="$(channel_url_from_obj)"
   media_file="$podcasts_dir/$platform/$name.$ext"
   meta_file="$podcasts_meta_dir/$platform/$name/metadata.json"
   meta_dir="$podcasts_meta_dir/$platform/$name"
   avatar_file="$podcasts_meta_dir/$platform/$name/avatar_data.json"
   vh_downloaded="$([ "$function" = "dlpod" ] && echo true || echo false)"
   vh_downloaded_date="$(date +%s)"
+  upload_date="$(jq '.upload_date' <<<"$json" | tr -d '"')"
   [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.jpg" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.jpg"
   [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.jpeg" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.jpeg"
   [ -f "$podcasts_meta_dir/$platform/$name/thumbnail.png" ] && thumb_file="$podcasts_meta_dir/$platform/$name/thumbnail.png"
@@ -209,11 +210,13 @@ add_to_phistory() {
 {
     "title": "$name",
     "url": "$url",
+    "channel_name": "$channel_name",
     "media_file": "$media_file",
     "meta_file": "$meta_file",
     "avatar_file": "$avatar_file",
     "vh_downloaded": "$vh_downloaded",
-    "vh_downloaded_date": "$vh_downloaded_date"
+    "vh_downloaded_date": "$vh_downloaded_date",
+    "upload_date": "$upload_date"
 }
 JSON
   )

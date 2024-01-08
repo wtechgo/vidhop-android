@@ -32,7 +32,7 @@ extract_summary_vars() {
   title="$(jq .title <<<"$json")"
   url="$(jq .webpage_url <<<"$json")"
   channel_name="$(channel_name_from_obj "$json")"
-  channel_url="$(channel_url_from_obj "$json")"
+  channel_url="$(channel_url_from_obj)"
   true # if channel_url fails, exit code is still 0, so && won't fail
 }
 
@@ -275,4 +275,13 @@ rm_meta_file() {
 rm_thumb_file() {
   rm_metadata_field 'vh_thumb_file' || return
   echo "'vh_thumb_file' was removed $([ -f "$meta_file" ] && echo -e "from metadata file:\n$meta_file")"
+}
+
+# inspect video file specs
+is-streamable() {
+  mediainfo --Language=raw --Full --Inform="General;%IsStreamable%" "$1"
+}
+
+is-web-optimized() {
+  is-streamable "$1"
 }

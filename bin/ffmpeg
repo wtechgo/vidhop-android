@@ -48,6 +48,20 @@ to-1080p() {
   echo "result file is at '$output_file'"
 }
 
+to-cfr() {
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" _cfr)"
+  ffmpeg -i "$input_file" -vsync cfr "$output_file"
+  echo -e "file converted to constant frame rate (cfr) at:\n$output_file"
+}
+
+to-cfr-fast() {
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" _cfr)"
+  ffmpeg -i "$input_file" -vsync cfr -c:a copy "$output_file"
+  echo -e "file converted to constant frame rate (cfr) at:\n$output_file"
+}
+
 cutvideo() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
 Usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>]
@@ -78,7 +92,47 @@ EOF
     -sexagesimal "$input_file" | sed 's/\..*//g')"
   output_file="$(prefix_extension "$input_file" cut)"
 
-  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c copy "$output_file"
+  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" -c:v copy -c:a copy "$output_file"
+  echo -e "cut complete, result at:\n\"$output_file\""
+  cd "$(dirname "$input_file")"
+
+  echo -n "replace original with cut version? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] && mv "$output_file" "$input_file"
+}
+
+cutvideo-recode() {
+  [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
+Usage: cutvideo-recode <INPUT_FILE> <START_TIME> [<END_TIME>]
+
+time input formats:
+    formats to be used for <START_TIME> and <END_TIME>
+    h=hours, m=minutes, s=seconds, m=milliseconds
+
+    hh:mm:ss        Example: 01:30:52
+    sss             Example: 120
+
+    hh:mm:ss.mmm    Example: 01:30:52.123
+    sss.mmm         Example: 120.123
+
+The input file remains untouched.
+A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
+Ext is the extension of the input file e.g. mp4, mkv...
+
+If cutvideo-recode fails, converting the input video from mkv to mp4 may help.
+One way to do this is with OBS > File > Remux.
+EOF
+
+  unset input_file start_time end_time output_file
+  input_file="$1"
+  start_time="$2"
+  end_time="$3"
+  [ -z "$3" ] && end_time="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \
+    -sexagesimal "$input_file" | sed 's/\..*//g')"
+  output_file="$(prefix_extension "$input_file" cut)"
+
+  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" "$output_file"
   echo -e "cut complete, result at:\n\"$output_file\""
   cd "$(dirname "$input_file")"
 
@@ -126,6 +180,30 @@ mergevideos() {
   ffmpeg -f concat -safe 0 -i "$text_file" -c copy "$output_file"
   rm "$text_file"
   echo "merge video at '$output_file'"
+}
+
+sharpen-video() {
+  [ -z "$1" ] && echo "Usage: sharpen-video <VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying sharpening settings lx=3, ly=3, la=2.3 (luma_msize_x, luma_msize_y, luma_amount)..."
+  ffmpeg -i "$input_file" -vf unsharp=3:3:2.3 "$output_file"
+  #  ffmpeg -i "$input_file" -vf unsharp=3:3:2.3 "$(prefix_extension "$output_file" x3_y3_amount_2-3)"
+  #  ffmpeg -i "$input_file" -vf unsharp=5:5:3 "$(prefix_extension "$output_file" x5_y5_amount_3)"
+}
+
+bitchute2hd(){
+  [ -z "$1" ] && echo "Usage: bitchute2hd <VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying upscaling to 1080 and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.2 "$output_file"
 }
 
 embed-thumbnail-into-video() { # not tested
@@ -259,12 +337,35 @@ strip-id3tags() { # not ffmpeg
 }
 
 # pictures
-screenshot-video-frame-changes() {
+#
+# generates all frames, then removes all duplicate images (imagemagick)
+# 1 hour at 30 fps is 108000 frames     6 digits
+# 20 hours at 30 fps is 2160000 frames   7 digits
+screenshots-from-video-file() {
   [ -z "$1" ] && echo "usage: screenshots_changed_frames <VIDEO_FILE>" && return
   video_file="$1"
   frames_dir="$(dirname "$video_file")/screenshots"
   mkdir "$frames_dir"
-  ffmpeg -i "$video_file" \
-    -filter:v "select=bitor(gt(scene\,0.5)\,eq(n\,0)),blackframe=amount=1,metadata=mode=select:key=lavfi.blackframe.pblack:value=95:function=less" \
-    -vsync drop "$frames_dir/%04d.jpg"
+
+  echo "creating screenshots from video file '$video_file'"
+  ffmpeg -i "$video_file" -r 1 "$frames_dir/%07d.png" # creates a screenshot every second
+  #  ffmpeg -i "$video_file" -r 0.5 "$frames_dir/%07d.png" # creates a screenshot every 2 seconds
+  #  ffmpeg -i "$video_file" -r 0.25 "$frames_dir/%07d.png" # creates a screenshot every 4 seconds
+  echo "screenshots created at directory '$frames_dir', contains duplicates" && sleep 1
+
+  echo "removing duplicate screenshots, this can take a while"
+  unset img1 img2
+  while read -r file; do
+    [ -z "$img1" ] && img1="$file" && continue
+    img2="$file"
+    # -fuzz defines a threshold for allowed differences to deal with invisible differences caused by image compression
+    compare -metric ae -fuzz 20% "$img1" "$img2" null: 2>/dev/null # x: opens a GUI to inspect the differences, null: declares that's not required
+    [ $? = 0 ] &&
+      echo "removing duplicate screenshot '$img2'" &&
+      rm "$img2" && continue
+    img1="$img2"
+    echo "found new unique screenshot '$img1'"
+  done < <(find "$frames_dir" -iname "*.png" | sort)
+  echo "duplicate screenshots removed from directory $frames_dir"
+  echo "screenshots created at directory '$frames_dir'"
 }

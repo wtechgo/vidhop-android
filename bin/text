@@ -1,0 +1,22 @@
+#!/bin/bash
+
+text_help() {
+  echo " Title: text"
+  echo " Description: text manipulation and extraction."
+  echo " Commands:"
+  echo "    fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata"
+}
+
+extract-missing-lines() {
+  [ -z "$1" ] &&
+    echo " Usage: extract-missing-lines <INPUT1> <INPUT2>" &&
+    echo "Inputs: files or strings" && return
+
+  if [ -f "$1" ] && [ -f "$2" ]; then
+    echo "Lines that were present in \$input1, and missing in \$input2:"
+    grep -vxFf "$2" "$1"
+  else
+    echo "Lines that were present in \$input1, and missing in \$input2:"
+    grep -vxF "$2" <<<"$1"
+  fi
+}

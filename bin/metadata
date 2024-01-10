@@ -56,20 +56,33 @@ metadata() {
   # media file arg
   [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" &&
     jq . <<<"$json" && extract_summary_vars && print_summary && return
+
   # find json file based search text arg
   ## search in video metadata
   result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
-  [ "$error" = 0 ] &&
-    json="$(jq . "$result")" &&jq . <<<"$json" &&
-    extract_summary_vars && print_summary && found=true
+  if [ "$error" = 0 ]; then
+    json="$(jq . "$result")" &&jq . <<<"$json"
+    extract_summary_vars && print_summary
+    return
+  elif [ "$error" = 2 ]; then
+    echo "metadata function shows metadata from 1 specific media file, but there were multiple multiple options"
+    echo "$result" && return
+  fi
+
   ## search in audio metadata
   result="$(find_one_ameta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
-  [ "$error" = 0 ] &&
-    json="$(jq . "$result")" && jq . <<<"$json" &&
-    extract_summary_vars && print_summary && found=true
-  [ $found = false ] && echo "found nothing for '$search_text'"
+  if [ "$error" = 0 ]; then
+    json="$(jq . "$result")" &&jq . <<<"$json"
+    extract_summary_vars && print_summary
+    return
+  elif [ "$error" = 2 ]; then
+    echo "metadata function shows metadata from 1 specific media file, but there were multiple multiple options"
+    echo "$result" && return
+  fi
+
+  echo "found nothing for '$search_text'"
 }
 
 filesize-channel-meta-files() {

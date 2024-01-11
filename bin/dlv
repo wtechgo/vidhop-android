@@ -129,7 +129,7 @@ fetch_sanitized_title() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '-' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 }
 
 fetch_song_filename() {
@@ -146,7 +146,7 @@ fetch_song_filename() {
     --replace-in-metadata "artist,title" '\\' '' \
     --replace-in-metadata "artist,title" '\|' '-' \
     --replace-in-metadata "artist,title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 }
 
 fetch_subs() {
@@ -208,7 +208,7 @@ fetch_thumbnail() {
   yt-dlp --cookies "$config_dir/cookies.txt" \
     --write-thumbnail --convert-thumbnails jpg \
     -P "$meta_dir_dest" -o "thumbnail.%(ext)s" \
-    --no-download --verbose "$url"
+    --no-download "$url"
 }
 
 # Download video information. Video metadata and thumbnail.
@@ -261,7 +261,7 @@ dlv() {
   yt-dlp --cookies "$config_dir/cookies.txt" \
     --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" \
     $([ -n "$res" ] && echo " -S res:$res") \
-    --verbose "$url"
+    "$url"
 
   print_metadata
   cd "$vids_dir/$platform" || return
@@ -302,7 +302,7 @@ fetch_channel_metadata() {
 
   json=$(
     yt-dlp --cookies "$config_dir/cookies.txt" \
-      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") --verbose "$url" | jq '
+      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") "$url" | jq '
        {
          title: .title,
          description: .description,
@@ -435,7 +435,7 @@ dlci() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   #  TODO: Selenium scraper doesn't work in Termux.
   #  logInfo "fetch channel avatar img"
@@ -498,7 +498,7 @@ dlc() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   save_channel_entries_to_archive
   print_metadata
@@ -511,7 +511,7 @@ fetch_playlist_metadata() {
 
   json=$(
     yt-dlp --cookies "$config_dir/cookies.txt" \
-      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") --verbose "$url" | jq '
+      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") "$url" | jq '
        {
          title: .title,
          description: .description,
@@ -626,7 +626,7 @@ dlvpli() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
@@ -671,7 +671,7 @@ dlvpl() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   save_channel_entries_to_archive
   add_to_chistory
@@ -756,11 +756,11 @@ dla() {
   # download media
   yt-dlp --cookies "$config_dir/cookies.txt" \
     -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
-    -P "$music_dir" -o "$name.%(ext)s" --verbose "$url"
+    -P "$music_dir" -o "$name.%(ext)s" "$url"
   # download thumbnail
   yt-dlp --cookies "$config_dir/cookies.txt" \
     --write-thumbnail --convert-thumbnails jpg --no-download \
-    -P "$music_meta_dir" -o "$name.%(ext)s" --verbose "$url"
+    -P "$music_meta_dir" -o "$name.%(ext)s" "$url"
 
   json_file="$music_meta_dir/$name.json"
   add_to_ahistory
@@ -777,7 +777,7 @@ fetch_music_playlist_metadata() {
 
   json=$(
     yt-dlp --cookies "$config_dir/cookies.txt" \
-      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") --verbose "$url" | jq '
+      --dump-single-json $([ "$has_archive" = "true" ] && echo "$archive_args") "$url" | jq '
        {
          title: .title,
          description: .description,
@@ -898,7 +898,7 @@ dlaci() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
@@ -942,7 +942,7 @@ dlac() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   save_channel_entries_to_archive
   print_metadata
@@ -1025,7 +1025,7 @@ dlapli() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   logInfo "write json metadata to file"
   logJq "4: final JSON written to file"
@@ -1070,7 +1070,7 @@ dlapl() {
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
-    --verbose "$url"
+    "$url"
 
   save_channel_entries_to_archive
   print_metadata
@@ -1130,7 +1130,7 @@ dlpod() {
   if [ "$(has_audio_formats)" = true ]; then
     yt-dlp $(insert_cookies_param) \
       -f "ba*[ext=m4a] / ba[ext=mp3]" --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
-      -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+      -P "$podcasts_dir/$platform" -o "$name.%(ext)s" "$url"
   else
     echo "default podcast download failed"
     echo "starting fallback strategy:"
@@ -1140,7 +1140,7 @@ dlpod() {
     echo "this can take a few minutes..."
     ext="$(yt-dlp $(insert_cookies_param) --print ext "$url")"
     yt-dlp $(insert_cookies_param) \
-      --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+      --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" "$url"
     video_file_tmp="$podcasts_dir/$platform/$name.$ext"
     media_file="$podcasts_dir/$platform/$name.mp3"
     thumb_file="$podcast_meta_dir/thumbnail.jpg"
@@ -1168,7 +1168,7 @@ dlt() {
 
   yt-dlp --cookies "$config_dir/cookies.txt" \
     --write-thumbnail --convert-thumbnails jpg --no-download \
-    -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" --verbose "$url"
+    -P "$thumbnails_dir/$platform" -o "$name.%(ext)s" "$url"
 
   add_to_thistory
   augment_json

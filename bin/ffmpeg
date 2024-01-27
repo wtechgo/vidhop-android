@@ -132,7 +132,7 @@ EOF
     -sexagesimal "$input_file" | sed 's/\..*//g')"
   output_file="$(prefix_extension "$input_file" cut)"
 
-  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" "$output_file"
+  ffmpeg -i "$input_file" -ss "$start_time" -t "$end_time" "$output_file"
   echo -e "cut complete, result at:\n\"$output_file\""
   cd "$(dirname "$input_file")"
 
@@ -182,28 +182,37 @@ mergevideos() {
   echo "merge video at '$output_file'"
 }
 
-sharpen-video() {
-  [ -z "$1" ] && echo "Usage: sharpen-video <VIDEO_FILE>"
+sharpenvideo() {
+  [ -z "$1" ] && echo "Usage: sharpenvideo <VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
     -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
 
   echo "applying sharpening settings lx=3, ly=3, la=2.3 (luma_msize_x, luma_msize_y, luma_amount)..."
-  ffmpeg -i "$input_file" -vf unsharp=3:3:2.3 "$output_file"
-  #  ffmpeg -i "$input_file" -vf unsharp=3:3:2.3 "$(prefix_extension "$output_file" x3_y3_amount_2-3)"
-  #  ffmpeg -i "$input_file" -vf unsharp=5:5:3 "$(prefix_extension "$output_file" x5_y5_amount_3)"
+  ffmpeg -i "$input_file" -vf unsharp=3:3:1.9 "$output_file"
 }
 
-bitchute2hd(){
-  [ -z "$1" ] && echo "Usage: bitchute2hd <VIDEO_FILE>"
+to-720p-sharp() {
+  [ -z "$1" ] && echo "Usage: to-720p-sharp <VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
     -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
 
-  echo "applying upscaling to 1080 and sharpening..."
-  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.2 "$output_file"
+  echo "applying upscaling to 720p and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=1280x720,unsharp=3:3:2.3 "$output_file"
+}
+
+to-1080p-sharp() {
+  [ -z "$1" ] && echo "Usage: to-1080p-sharp <VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying upscaling to 1080p and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.3 "$output_file"
 }
 
 embed-thumbnail-into-video() { # not tested
@@ -259,9 +268,12 @@ convert-webp2jpg-dir() {
 
   while read -r file; do
     jpgFile="$(strip_extension "$file").jpg"
+    echo "processing $file"
     magick "$file" "$jpgFile"
     [ -f "$jpgFile" ] && rm "$file"
   done < <(find "$dir" -iname "*.webp" -o -iname "*.WEBP")
+  echo "done" && sleep 1
+  ls -l
 }
 
 replaceaudio() {

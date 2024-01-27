@@ -194,10 +194,15 @@ renlast() {
   [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
   [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
+
   # ask confirmation to rename
-  echo -n "rename these files? Y/n: " && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] && return
+  if [ "$2" = "-y" ] || [ "$2" = "y" ]; then
+    true
+  else
+    echo -n "rename these files? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] && return
+  fi
 
   name="$1"
   media_file="$old_media_dir/$name.$old_ext"
@@ -239,6 +244,16 @@ renlast() {
     echo "$new_name" >>"$log_dir/titles.tmp.log"
     mv "$log_dir/titles.tmp.log" "$titles_file"
   fi
+}
+
+renlasty() {
+  renlast "$1" -y
+}
+
+prepend-channelname() {
+  [ -n "$1" ] && channel_name="$1"
+  [ -z "$channel_name" ] && echo "no value in \$channel_name, cannot prepend"
+  renlast "${channel_name} - ${title}" -y
 }
 
 rmpod() {

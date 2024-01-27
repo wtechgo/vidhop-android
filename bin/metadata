@@ -66,7 +66,7 @@ metadata() {
     extract_summary_vars && print_summary
     return
   elif [ "$error" = 2 ]; then
-    echo "metadata function shows metadata from 1 specific media file, but there were multiple multiple options"
+    echo "metadata function shows metadata from 1 specific media file, but multiple files were found"
     echo "$result" && return
   fi
 
@@ -78,7 +78,7 @@ metadata() {
     extract_summary_vars && print_summary
     return
   elif [ "$error" = 2 ]; then
-    echo "metadata function shows metadata from 1 specific media file, but there were multiple multiple options"
+    echo "metadata function shows metadata from 1 specific media file, but multiple files were found"
     echo "$result" && return
   fi
 

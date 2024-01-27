@@ -1163,6 +1163,7 @@ dlpod() {
     thumb_file="$podcast_meta_dir/thumbnail.jpg"
     to-mp3-remove-input "$video_file_tmp"
     embed-thumbnail-into-mp3 "$thumb_file" "$media_file"
+    set_media_file "$media_file"
   fi
 
   cd "$podcasts_dir/$platform" || return

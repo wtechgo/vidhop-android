@@ -197,6 +197,11 @@ set_downloaded_date() {
   set_metadata_field_json_obj "vh_downloaded_date" "$(date +%s)"
 }
 
+set_media_file() {
+  set_metadata_field "vh_media_file" "$1" || return
+  echo "'vh_media_file' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"
+}
+
 set_thumb_file() {
   set_metadata_field "vh_thumb_file" "$1" || return
   echo "'vh_thumb_file' was set to '$1' $([ -f "$meta_file" ] && echo -e "in metadata file:\n $meta_file")"

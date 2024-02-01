@@ -4,15 +4,26 @@
 
 project_help() {
   echo " Title: project"
-  echo " Description: Create projects scaffolding and link VidHop video files."
+  echo " Description: Create and manage projects with as scaffold directory structure 'doc, img, vid and site'."
   echo " Commands:"
   echo "    project <PROJECT_NAME> => Create new project with <PROJECT_NAME> in \$projects_dir."
-  echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
-  echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>      => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
-  echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
-  echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
+  echo "    renproject <PROJECT_NAME> <NEW_PROJECT_NAME> => Rename all directories from <PROJECT_NAME> to <NEW_PROJECT_NAME>."
   echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
+  echo "    cdproject <PROJECT_NAME> => Change the terminal working directory to the project directory."
+  echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
+  echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>   => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
+  echo "    fvidf4project <PROJECT_NAME> => Alias for function 'linkvideo4project'."
+  echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
+  echo "    renlink+source <SYMLINK_FILE_NAME> => Rename symbolic link file name and the file name of the source it points to."
+  echo "    writeproject <PROJECT_NAME> => Write project. Opens  <PROJECT_NAME>.md with the text editor configured in config.ini."
+  echo "    wproj <PROJECT_NAME> => Alias for 'writeproject'."
+  echo "    cleanproj <PROJECT_NAME> => Removes all files but keep the directory structure for project with <PROJECT_NAME>."
   echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
+  echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
+  echo "    rensubproject <SUB_PROJECT_NAME> <NEW_SUB_PROJECT_NAME> => Rename all directories from <SUB_PROJECT_NAME> to <NEW_SUB_PROJECT_NAME>."
+  echo "    rmsubproject <PROJECT_NAME> <SUB_PROJECT_NAME> => Remove sub project with name <SUB_PROJECT_NAME> from parent project with name <PROJECT_NAME>."
+  echo "    vproject <VIDEO_PROJECT_NAME> => Create video project in \$video_projects_dir, variable defined in config.ini."
+  echo "    rmjs <DIR_PATH> => Remove all .js files recursively, startS in  <DIR_PATH>."
 }
 
 project_markdown_scaffold() {
@@ -548,9 +559,4 @@ rmjs() {
 
 cleanproj() {
   find "$projects_dir" -empty -type d -delete
-}
-
-pdf() {
-  [ ! -f "$1" ] && echo "not a file: '$1'" && return
-  "$pdf_reader_app" "$1" &
 }

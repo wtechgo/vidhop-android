@@ -546,6 +546,13 @@ mediafile() {
   echo "$media_file"
 }
 
+pdf() {
+  [ ! -f "$1" ] && echo "not a file: '$1'" && return
+  "$pdf_reader_app" "$1" &
+}
+
+# ---
+
 treevidhopbefore() {
   ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
   tree "$vidhop_dir" >"$log_dir/tree_vidhop_before"

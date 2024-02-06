@@ -546,11 +546,6 @@ mediafile() {
   echo "$media_file"
 }
 
-pdf() {
-  [ ! -f "$1" ] && echo "not a file: '$1'" && return
-  "$pdf_reader_app" "$1" &
-}
-
 # ---
 
 treevidhopbefore() {

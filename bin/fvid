@@ -692,6 +692,20 @@ faudf() {
   unset result
   found_something="false"
 
+  result=$(find "$(realpath "$podcasts_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> VidHop music directory search results:" &&
+    echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  # Search in Android music dir: $shared/Music
+  result=$(find "$(realpath "$music_dir_phone")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> User music directory search results:" &&
+    echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  # search in VidHop music dir: $shared/vidhop/music.
   if [ "$(realpath "$music_dir")" != "$(realpath "$HOME/Music")" ]; then
     result=$(find "$(realpath "$music_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
     [ "$(wc --words <<<"$result")" -gt 0 ] &&
@@ -700,21 +714,32 @@ faudf() {
       unset result && found_something="true"
   fi
 
-  result=$(find "$(realpath "$podcasts_dir")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
-  [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> VidHop music directory search results:" &&
-    echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
-
-  result=$(find "$(realpath "$music_dir_ws")" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
-  [ "$(wc --words <<<"$result")" -gt 0 ] &&
-    echo -e "> User music directory search results:" &&
-    echo -e "${GREEN}$result${NC}" &&
-    unset result && found_something="true"
-
   [ "$found_something" = "false" ] && echo "found nothing"
 }
 
 fpodf() {
   faudf "$@"
+}
+
+# Find image files.
+fimgf() {
+  search_text="$(echo "$1" | tr ' ' '*')"
+  unset result
+  found_something="false"
+
+  result=$(find "$(realpath "$shared/Pictures")" -type f \
+    -iname "*$search_text*.jpg" \
+    -o -iname "*$search_text*.jpeg" \
+    -o -iname "*$search_text*.png" \
+    -o -iname "*$search_text*.webp" \
+    -o -iname "*$search_text*.tiff" \
+    -o -iname "*$search_text*.psd" \
+    -o -iname "*$search_text*.xcf" \
+    | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+  [ "$(wc --words <<<"$result")" -gt 0 ] &&
+    echo -e "> Images search results:" &&
+    echo -e "${GREEN}$result${NC}" &&
+    unset result && found_something="true"
+
+  [ "$found_something" = "false" ] && echo "found nothing"
 }

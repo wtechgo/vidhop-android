@@ -514,6 +514,7 @@ dlc() {
 }
 
 fetch_playlist_metadata() {
+  echo "[vidhop] fetching metadata"
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 
@@ -689,7 +690,9 @@ dlvpl() {
 }
 
 fetch_music_metadata() {
+  echo "[vidhop] fetching metadata"
   url="$1"
+  name="$(fetch_song_filename | sed 's/NA - //')"
   json=$(
     yt-dlp $(insert_cookies_param) \
       $([ "$dl_comments" = true ] && echo -n --write-comments) \
@@ -758,8 +761,6 @@ dla() {
   [ $# = 2 ] && dl_comments=true && url="$2"
   mkdir -p "$music_meta_dir" 2>/dev/null
 
-  # download metadata
-  name="$(fetch_song_filename | sed 's/NA - //')"
   fetch_music_metadata "$url" # populates json
   # download media
   yt-dlp $(insert_cookies_param) \
@@ -780,6 +781,7 @@ dla() {
 }
 
 fetch_music_playlist_metadata() {
+  echo "[vidhop] fetching metadata"
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 
@@ -1108,6 +1110,7 @@ dlpodi() {
   [ "$1" = -c ] || [ "$1" = --comments ] && dl_comments=true
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
 
+  echo "[vidhop] fetching metadata"
   name="$(fetch_sanitized_title)"
   platform=$(extract_platform_name "$url")
   podcast_meta_dir="$podcasts_meta_dir/$platform/$name"

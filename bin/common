@@ -193,10 +193,9 @@ has_entries() {
 
 # Create name for downloaded archive file.
 url_to_filename() {
-  echo "$1" |
+  echo "${1/@/AT}" |
     tr '/' '-' |
     tr '.' '_' |
-    tr '@' 'AT' |
     tr ':' '_' |
     tr '=' '_' |
     tr -d '"' |

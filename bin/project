@@ -7,23 +7,24 @@ project_help() {
   echo " Description: Create and manage projects with as scaffold directory structure 'doc, img, vid and site'."
   echo " Commands:"
   echo "    project <PROJECT_NAME> => Create new project with <PROJECT_NAME> in \$projects_dir."
-  echo "    renproject <PROJECT_NAME> <NEW_PROJECT_NAME> => Rename all directories from <PROJECT_NAME> to <NEW_PROJECT_NAME>."
+  echo "    writeproject <PROJECT_NAME> => Write project. Opens  <PROJECT_NAME>.md with the text editor configured in config.ini."
+  echo "    wproj <PROJECT_NAME> => Alias for 'writeproject'."
   echo "    fproj <SEARCH_TEXT>      => Find files whose name match <SEARCH_TEXT> in all projects."
   echo "    cdproject <PROJECT_NAME> => Change the terminal working directory to the project directory."
+  echo "    renproject <PROJECT_NAME> <NEW_PROJECT_NAME> => Rename all directories from <PROJECT_NAME> to <NEW_PROJECT_NAME>."
   echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
   echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>   => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
   echo "    fvidf4project <PROJECT_NAME> => Alias for function 'linkvideo4project'."
   echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
   echo "    renlink+source <SYMLINK_FILE_NAME> => Rename symbolic link file name and the file name of the source it points to."
-  echo "    writeproject <PROJECT_NAME> => Write project. Opens  <PROJECT_NAME>.md with the text editor configured in config.ini."
-  echo "    wproj <PROJECT_NAME> => Alias for 'writeproject'."
-  echo "    cleanproj <PROJECT_NAME> => Removes all files but keep the directory structure for project with <PROJECT_NAME>."
+  echo "    cleanproj <PROJECT_NAME> => Remove all files but keep the directory structure for project with <PROJECT_NAME>."
   echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
-  echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME>      => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
+  echo "    subproject <PROJECT_NAME> <SUBPROJECT_NAME> => Create new subproject in <PROJECT_NAME> as <SUBPROJECT_NAME>."
   echo "    rensubproject <SUB_PROJECT_NAME> <NEW_SUB_PROJECT_NAME> => Rename all directories from <SUB_PROJECT_NAME> to <NEW_SUB_PROJECT_NAME>."
   echo "    rmsubproject <PROJECT_NAME> <SUB_PROJECT_NAME> => Remove sub project with name <SUB_PROJECT_NAME> from parent project with name <PROJECT_NAME>."
   echo "    vproject <VIDEO_PROJECT_NAME> => Create video project in \$video_projects_dir, variable defined in config.ini."
-  echo "    rmjs <DIR_PATH> => Remove all .js files recursively, startS in  <DIR_PATH>."
+  echo "    rmjs <DIR_PATH> => Remove all .js files recursively, start in <DIR_PATH>."
+  echo "    wlink <URL> [<DIRECTORY]> => Create a shortcut to a web page."
 }
 
 project_markdown_scaffold() {
@@ -134,7 +135,7 @@ subproject() { # create a new project in dir /data/projects/wickedtruths.org
   project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$subproject_dir"
-#  "$text_app" "$document_file"
+  #  "$text_app" "$document_file"
 }
 
 # See mkviddir4project.
@@ -218,7 +219,7 @@ linkvideos4project() {
       if [ -f "$metadata" ]; then
         title="$(jq '.title' "$metadata" | remove_leading_trailing_double_quotes)"
         url="$(jq '.webpage_url' "$metadata" | remove_leading_trailing_double_quotes)"
-        channel_name="$(channel_name_from_json_file  "$metadata" | remove_leading_trailing_double_quotes)"
+        channel_name="$(channel_name_from_json_file "$metadata" | remove_leading_trailing_double_quotes)"
         channel_title_url_item_md >>"$list_md"
         title_url_txt >>"$list_txt"
       fi
@@ -559,4 +560,39 @@ rmjs() {
 
 cleanproj() {
   find "$projects_dir" -empty -type d -delete
+}
+
+pdf() {
+  [ ! -f "$1" ] && echo "not a file: '$1'" && return
+  "$pdf_reader_app" "$1" &
+}
+
+wlink() {
+  [ -z "$1" ] &&
+    echo " Usage: wlink <URL> [<DIRECTORY]>" &&
+    echo "  Info: Create a shortcut to a web page." && return
+
+  wlink_dir="$(pwd)"
+  [ -n "$2" ] && wlink_dir="$2"
+  ! [ -d "$wlink_dir" ] && echo "not a directory '$wlink_dir', abort" && return
+
+  wlink_url="$1"
+  wlink_url="$(echo "$wlink_url" | sed 's/\\//g')" # remove backslashes
+  sanitized_url="$(url_to_filename "$wlink_url")"
+  sanitized_url="${sanitized_url#https_--}"
+  wlink_file="${wlink_dir}/${sanitized_url}.desktop"
+
+  {
+    echo "[Desktop Entry]"
+    echo "Encoding=UTF-8"
+    echo "Name=$wlink_file"
+    echo "Type=Link"
+    echo "URL=$wlink_url"
+    echo "Icon=text-html"
+  } >>"$wlink_file"
+
+  echo "created shortcut for url:"
+  echo "${wlink_url}"
+  echo "at:"
+  echo "${wlink_file}"
 }

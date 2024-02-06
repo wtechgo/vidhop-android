@@ -4,7 +4,8 @@ text_help() {
   echo " Title: text"
   echo " Description: text manipulation and extraction."
   echo " Commands:"
-  echo "    fvid <SEARCH_TEXT>  => find videos where title or description matches <SEARCH_TEXT> in all videos and channels metadata"
+  echo "    extract-missing-lines <FILE_1> <FILE_2> => Show lines that where in <FILE_1>, and missing in <FILE_2>."
+  echo "    extract-missing-lines <TEXT_INPUT_1> <TEXT_INPUT_2> => Show lines that where in <TEXT_INPUT_1>, and missing in <TEXT_INPUT_2>."
 }
 
 extract-missing-lines() {
@@ -12,10 +13,10 @@ extract-missing-lines() {
     echo " Usage: extract-missing-lines <INPUT1> <INPUT2>" &&
     echo "Inputs: files or strings" && return
 
-  if [ -f "$1" ] && [ -f "$2" ]; then
+  if [ -f "$1" ] && [ -f "$2" ]; then # compare file contents
     echo "Lines that were present in \$input1, and missing in \$input2:"
     grep -vxFf "$2" "$1"
-  else
+  else  # compare string inputs
     echo "Lines that were present in \$input1, and missing in \$input2:"
     grep -vxF "$2" <<<"$1"
   fi

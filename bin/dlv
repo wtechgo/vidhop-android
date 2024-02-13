@@ -514,7 +514,7 @@ dlc() {
 }
 
 fetch_playlist_metadata() {
-  echo "[vidhop] fetching metadata"
+  echo "[vidhop] fetching playlist metadata"
   url="$1"
   archive_args="$(echo "--download-archive $archive_file")"
 

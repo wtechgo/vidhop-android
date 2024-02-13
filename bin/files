@@ -166,6 +166,7 @@ renvid() {
     echo -e "renamed: '$old_meta_dir'\n     to: '$meta_dir' (metadata directory)"
   # set vars for metadata command & rerun of renvid
   name="$new_name"
+  title="$new_name"
   meta_file="$meta_dir/metadata.json"
 
   # rename history entry
@@ -244,6 +245,7 @@ renlast() {
     echo "$new_name" >>"$log_dir/titles.tmp.log"
     mv "$log_dir/titles.tmp.log" "$titles_file"
   fi
+  title="$name"
 }
 
 renlasty() {
@@ -254,6 +256,22 @@ prepend-channelname() {
   [ -n "$1" ] && channel_name="$1"
   [ -z "$channel_name" ] && echo "no value in \$channel_name, cannot prepend"
   renlast "${channel_name} - ${title}" -y
+}
+
+prepend-text() {
+  [ -z "$1" ] &&
+    echo "Usage: prepend-text <TEXT>" &&
+    echo " Info: Executes renlast, using the original title while prepending it with <TEXT>." && return
+  text_input="$1"
+  renlast "${text_input}${title}" -y
+}
+
+append-text() {
+  [ -z "$1" ] &&
+    echo "Usage: append-text <TEXT>" &&
+    echo " Info: Executes renlast, using the original title while appending it with <TEXT>." && return
+  text_input="$1"
+  renlast "${title}${text_input}" -y
 }
 
 rmpod() {
@@ -349,6 +367,11 @@ find_archive_file_from_audio_channel_name() {
   channel_url=$(jq '.original_url' "$found_json")
   archive_filename="$downloaded_dir/$(url_to_filename "$channel_url")"
   echo "$archive_filename"
+}
+
+channel-url-to-archive_file(){
+  channel_url="$1"
+  echo "$downloaded_dir/$(url_to_filename "$channel_url")"
 }
 
 find_archive_file_from_channel_name() {

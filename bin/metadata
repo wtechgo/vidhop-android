@@ -85,6 +85,17 @@ metadata() {
   echo "found nothing for '$search_text'"
 }
 
+url() {
+  result="$(metadata "$1")"
+  webpage_url="$(echo "$result" | \
+    grep '  "webpage_url": "' | \
+    sed 's/"webpage_url": "//' | \
+    sed 's/",//' | sed 's/^[ \t]*//;s/[ \t]*$//'
+  )"
+  [ -z "$webpage_url" ] && echo "$result" && return
+  echo "$webpage_url"
+}
+
 filesize-channel-meta-files() {
   find "$channels_meta_dir" -type f -iname "*metadata.json" -exec du -hs {} \;
 }
@@ -97,6 +108,7 @@ set_metadata_field_json_obj() {
 # Sets JSON field with 'key' to 'value' and writes to $meta_file if available.
 # Usage: command "key" "value" ---------------------> uses "$json"
 #        command "key" "value" "partial_filename" --> seeks metadata file, stores path, in $metadata and loads it "$json"
+## Bug: calling this function after renlast failed.
 set_metadata_field() {
   [ "$#" = 0 ] || [ "$#" = 1 ] && echo "Usage: set_metadata_field <KEY> <VALUE> [<PARTIAL_FILENAME>]" && return
   [ "$#" = 2 ] && key="$1" && value="$2" && metadata="$json" # Two arguments (key & value), implies to use $json as metadata.

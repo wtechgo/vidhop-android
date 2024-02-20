@@ -326,16 +326,16 @@ embed-thumbnail-into-mp3() {
   output_file="$(strip_extension "$input_file")_art.mp3"
 
   tags_json="$(id3tags "$input_file")"
-  title="$(jq .title <<<"$tags_json" | tr -d '"')"
-  artist="$(jq .artist <<<"$tags_json" | tr -d '"')"
-  album="$(jq .album <<<"$tags_json" | tr -d '"')"
-  year="$(jq .date <<<"$tags_json" | tr -d '"')"
+  title_tag="$(jq .title <<<"$tags_json" | tr -d '"')"
+  artist_tag="$(jq .artist <<<"$tags_json" | tr -d '"')"
+  album_tag="$(jq .album <<<"$tags_json" | tr -d '"')"
+  year_tag="$(jq .date <<<"$tags_json" | tr -d '"')"
 
   ffmpeg -i "$input_file" -i "$thumb_file" -map 0:0 -map 1:0 -c copy -id3v2_version 3 \
-    -metadata title="$title" \
-    -metadata artist="$artist" \
-    -metadata album="$album" \
-    -metadata year="$year" \
+    -metadata title="$title_tag" \
+    -metadata artist="$artist_tag" \
+    -metadata album="$album_tag" \
+    -metadata year="$year_tag" \
     -metadata:s:v title="Album cover" \
     -metadata:s:v comment="Cover (front)" \
     "$output_file"

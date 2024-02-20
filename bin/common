@@ -365,3 +365,13 @@ shorten_text() {
 timestamp() {
   date +'%Y-%m-%d_%Hh%Mm%Ss'  # removed H:M:S format for Termux compatibility
 }
+
+rp() {
+  realpath "$1" | prefix_suffix_with_double_quotes
+}
+alias rpp="realpath"
+
+reloadshell () {
+  shellzoid="${SHELL//\/data\/data\/com.termux\/files\/usr\/bin\/}" # remove all from path except shell name
+  . "$HOME/.${shellzoid}rc"
+}

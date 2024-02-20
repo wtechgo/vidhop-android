@@ -275,6 +275,12 @@ dlv() {
   unset dl_comments function
 }
 
+dlv480() {
+  res=480
+  dlv "$@"
+  unset res
+}
+
 dlv720p() {
   res=720
   dlv "$@"
@@ -1161,11 +1167,14 @@ dlpod() {
     ext="$(yt-dlp $(insert_cookies_param) --print ext "$url")"
     yt-dlp $(insert_cookies_param) \
       --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" "$url"
+
     video_file_tmp="$podcasts_dir/$platform/$name.$ext"
     media_file="$podcasts_dir/$platform/$name.mp3"
     thumb_file="$podcast_meta_dir/thumbnail.jpg"
     to-mp3-remove-input "$video_file_tmp"
     embed-thumbnail-into-mp3 "$thumb_file" "$media_file"
+
+    [[ "$url" == *substack.com* ]] && media_file="${media_file//.unknown_video/}" # substack workaround
     set_media_file "$media_file"
   fi
 

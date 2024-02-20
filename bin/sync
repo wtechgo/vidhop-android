@@ -268,14 +268,14 @@ cleandownloads() {
   exts="jpg png webp jpeg mp4 webm mkv mov avi doc docx xls xlsx pdf txt md mp3 m4a wav flacc aac"
 
   for ext in $exts; do
-    rm -rf "$dl/*.$ext"
-    rm -rf "$youcut/*.$ext"
-    rm -rf "$screenshots/*.$ext"
-    rm -rf "$screen_rec/*.$ext"
-    rm -rf "$fb1/*.$ext"
-    rm -rf "$fb2/*.$ext"
-    rm -rf "$messenger/*.$ext"
-    rm -rf "$twitter/*.$ext"
+    rm -rf "$dl_phone/*.$ext"
+    rm -rf "$youcut_phone/*.$ext"
+    rm -rf "$screenshots_phone/*.$ext"
+    rm -rf "$screen_rec_phone/*.$ext"
+    rm -rf "$fb1_phone/*.$ext"
+    rm -rf "$fb2_phone/*.$ext"
+    rm -rf "$messenger_phone/*.$ext"
+    rm -rf "$twitter_phone/*.$ext"
   done
 }
 

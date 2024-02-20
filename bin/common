@@ -19,7 +19,6 @@ create_app_dirs() {
     "$websites_dir" \
     "$uploads_dir" \
     2>/dev/null
-  [ -n "$projects_dir" ] && mkdir -p "$projects_dir" 2>/dev/null
   touch "$meta_dir/.nomedia" 2>/dev/null
   touch "$websites_dir/.nomedia" 2>/dev/null
   touch "$social_media_dir/.nomedia" 2>/dev/null

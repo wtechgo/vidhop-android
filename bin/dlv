@@ -1116,19 +1116,20 @@ dlpodi() {
   [ "$1" = -c ] || [ "$1" = --comments ] && dl_comments=true
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
 
-  echo "[vidhop] fetching metadata"
+  echo "[vidhop] fetching title"
   name="$(fetch_sanitized_title)"
   platform=$(extract_platform_name "$url")
   podcast_meta_dir="$podcasts_meta_dir/$platform/$name"
   mkdir -p "$podcast_meta_dir" 2>/dev/null
   json_file="$podcast_meta_dir/metadata.json"
 
+  fetch_video_metadata "$url"
   formats="$(yt-dlp -F "$url")"
   grep -q mp3 <<<"$formats" && ext="mp3"
   grep -q m4a <<<"$formats" && ext="m4a"
 
-  fetch_video_metadata "$url"
   fetch_thumbnail "$podcast_meta_dir"
+  thumb_file="$podcast_meta_dir/thumbnail.jpg"
   fetch_subs
 
   add_to_phistory
@@ -1164,17 +1165,20 @@ dlpod() {
     echo "  2. extract audio"
     echo "  3. delete video"
     echo "this can take a few minutes..."
-    ext="$(yt-dlp $(insert_cookies_param) --print ext "$url")"
+#    ext="$(yt-dlp $(insert_cookies_param) --print ext "$url")"
+
     yt-dlp $(insert_cookies_param) \
       --no-mtime --add-metadata --force-overwrites -P "$podcasts_dir/$platform" -o "$name.%(ext)s" "$url"
 
-    video_file_tmp="$podcasts_dir/$platform/$name.$ext"
     media_file="$podcasts_dir/$platform/$name.mp3"
-    thumb_file="$podcast_meta_dir/thumbnail.jpg"
-    to-mp3-remove-input "$video_file_tmp"
-    embed-thumbnail-into-mp3 "$thumb_file" "$media_file"
+    video_file_tmp="$(find "$podcasts_dir/$platform/${name}."*)"
+    [[ "$url" == *substack.com* ]] && \
+      old_video_file_tmp="$video_file_tmp"  && \
+      video_file_tmp="${video_file_tmp//.unknown_video/}.mp3" && \
+      mv "$old_video_file_tmp" "$video_file_tmp"
 
-    [[ "$url" == *substack.com* ]] && media_file="${media_file//.unknown_video/}" # substack workaround
+    to-mp3-remove-input "$video_file_tmp" && [ -f "$video_file_tmp" ] && rm "$video_file_tmp"
+    embed-thumbnail-into-mp3 "$thumb_file" "$media_file"
     set_media_file "$media_file"
   fi
 

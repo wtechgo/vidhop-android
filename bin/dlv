@@ -37,10 +37,15 @@ clear_vars_dlv() {
   return 0
 }
 
-remove_url_query_parms() {
+remove_url_tracking_params() {
   url=${url%?si=*}   # remove youtube's ?si= param
   url=${url%?igsh=*} # remove instagram's ?igsh= param
   url=${url%/mediaViewer?*} # remove twitter's mediaViewer? params
+}
+
+remove_all_url_params() {
+  url="${url%\\\?*}" # removes question mark and all that follows from an escaped URL
+  url="${url%%\?*}" # removes question mark and all that follows from a non-escaped URL
 }
 
 # Fetch video metadata (yt-dlp), select relevant fields and pretty print (jq).
@@ -209,7 +214,8 @@ augment_json() {
 
 fetch_thumbnail() {
   echo "[vidhop] fetching thumbnail"
-  meta_dir_dest="$1" # Example input for podcasts: "$podcasts_meta_dir/$platform/$name"
+  meta_dir_dest="$1" # Eample input for podcasts: "$podcasts_meta_dir/$platform/$name"
+  thumb_file="$meta_dir_dest/thumbnail.jpg"
   yt-dlp $(insert_cookies_param) \
     --write-thumbnail --convert-thumbnails jpg \
     -P "$meta_dir_dest" -o "thumbnail.%(ext)s" \
@@ -259,7 +265,7 @@ dlv() {
   function=dlv
 
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
-  remove_url_query_parms
+  remove_url_tracking_params
 
   platform=$(extract_platform_name "$url") || return 1
   mkdir "$vids_dir/$platform" 2>/dev/null
@@ -1115,6 +1121,7 @@ dlpodi() {
   [ $# = 2 ] && url="$2"
   [ "$1" = -c ] || [ "$1" = --comments ] && dl_comments=true
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
+  [[ "$url" == *substack.com* ]] && remove_all_url_params
 
   echo "[vidhop] fetching title"
   name="$(fetch_sanitized_title)"
@@ -1129,7 +1136,6 @@ dlpodi() {
   grep -q m4a <<<"$formats" && ext="m4a"
 
   fetch_thumbnail "$podcast_meta_dir"
-  thumb_file="$podcast_meta_dir/thumbnail.jpg"
   fetch_subs
 
   add_to_phistory

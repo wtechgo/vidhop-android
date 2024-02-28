@@ -135,7 +135,6 @@ subproject() { # create a new project in dir /data/projects/wickedtruths.org
   project_markdown_scaffold >>"$document_file"
   # open document with text editor
   cd "$subproject_dir"
-  #  "$text_app" "$document_file"
 }
 
 # See mkviddir4project.
@@ -150,6 +149,42 @@ mkimgdir4subproject() {
   mkdir -p "$(realpath "$projects_images_dir")/$project_name/$subproject_name" 2>/dev/null
   ln -s "$(realpath "$projects_images_dir")/$project_name/$subproject_name" \
     "$(realpath "$projects_dir")/$project_name/$subproject_name/img"
+}
+
+add2project() {
+  [ "-h" = "$1" ] || [ "--help" = "$1" ] &&
+    echo -e "Usage: add2project" &&
+    echo -e "Usage: add2project <PROJECT_RELATIVE_PATH>" &&
+    echo -e "Usage: add2project <VIDEO_FILE> <PROJECT_RELATIVE_PATH>" &&
+    echo -e " Info: Creates a symbolic link that points to a video file in VidHop, inside the /vid directory of a given project." &&
+    echo -e "       Running 'add2project' without arguments uses the video file of the last video download, and the project of the previous 'add2project' run." &&
+    echo -e "       <PROJECT_RELATIVE_PATH> should NOT include the /vid segment at the end." && return
+
+  [ -z "$1" ] && [ -z "$project_dir" ] && echo -e "I don't know which project you want to add the video to.\nTry 'add2project <PROJECT_RELATIVE_PATH>'" && return
+  [ -z "$1" ] && [ -z "$media_file" ] && echo -e "I don't know which video you'd like to add.\nTry downloading a video first with 'dlv', or use 'add2project <VIDEO_FILE>." && return
+  file="$media_file"
+
+  if [ $# = 1 ]; then
+    [ -z "$media_file" ] && echo -e "I don't know which video you'd like to add.\nTry downloading a video first with 'dlv', or use 'add2project <VIDEO_FILE>." && return
+    project_rel_path="$1"
+    project_dir="$projects_dir/$project_rel_path"
+    ! [ -d "$project_dir" ] && echo -e "not a directory '$project_dir'\n<PROJECT_RELATIVE_PATH> has to match a project in your projects directory, abort" && return
+  fi
+
+  if [ $# = 2 ]; then
+    file="$(realpath "$1")"
+    project_rel_path="$2"
+    project_dir="$projects_dir/$project_rel_path"
+    ! [ -f "$file" ] && echo "not a file '$file', <VIDEO_FILE> has to match an existing video file, abort" && return
+    ! [ -d "$project_dir" ] && echo -e "not a directory '$project_dir'\n<PROJECT_RELATIVE_PATH> has to match a project in your projects directory, abort" && return
+  fi
+
+  link_path="$project_dir/vid/$(basename "$file")"
+  ln -s "$file" "$link_path"
+  [ $? = 1 ] && echo "failed to create link from '$file' to '$link_path'" && return
+  echo -e "  video file: '$file'"
+  echo -e "project link: '$link_path'"
+  unset project_rel_path file
 }
 
 # Create a symbolic link to a video file (arg) in the videos directory of a project.
@@ -562,6 +597,7 @@ cleanproj() {
   find "$projects_dir" -empty -type d -delete
 }
 
+# Read PDF file.
 pdf() {
   [ ! -f "$1" ] && echo "not a file: '$1'" && return
   "$pdf_reader_app" "$1" &
@@ -579,7 +615,7 @@ wlink() {
   wlink_url="$1"
   wlink_url="$(echo "$wlink_url" | sed 's/\\//g')" # remove backslashes
   sanitized_url="$(url_to_filename "$wlink_url")"
-  sanitized_url="${sanitized_url#https_--}"
+  sanitized_url="${sanitized_url#https_--www_}"
   wlink_file="${wlink_dir}/${sanitized_url}.desktop"
 
   {

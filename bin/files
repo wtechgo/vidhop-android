@@ -150,6 +150,11 @@ renvid() {
   [ -f "$old_media_file_sub" ] && mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
   # rename subs - end
 
+  # rename meta dir
+  [ -d "$old_meta_dir" ] &&
+    meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
+    mv "$old_meta_dir" "$meta_dir" &&
+    echo -e "renamed: '$old_meta_dir' (metadata directory)\n     to: '$meta_dir' (metadata directory)"
   # rename media file
   [ -f "$old_media_file" ] &&
     media_file="$old_vid_dir/$new_name.mp4" &&
@@ -163,11 +168,6 @@ renvid() {
     media_file="$old_vid_dir/$new_name.mkv" &&
     mv "$old_media_file_mkv" "$media_file" &&
     echo -e "renamed: '$old_media_file_mkv'\n     to: '$media_file'"
-  # rename meta dir
-  [ -d "$old_meta_dir" ] &&
-    meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
-    mv "$old_meta_dir" "$meta_dir" &&
-    echo -e "renamed: '$old_meta_dir'\n     to: '$meta_dir' (metadata directory)"
   # set vars for metadata command & rerun of renvid
   name="$new_name"
   title="$new_name"

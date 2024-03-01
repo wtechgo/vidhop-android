@@ -605,23 +605,33 @@ pdf() {
 
 wlink() {
   [ -z "$1" ] &&
-    echo " Usage: wlink <URL> [<DIRECTORY]>" &&
+    echo " Usage: wlink <URL> [<NAME>|<DIRECTORY>] [NAME]" &&
     echo "  Info: Create a shortcut to a web page." && return
-
-  wlink_dir="$(pwd)"
-  [ -n "$2" ] && wlink_dir="$2"
-  ! [ -d "$wlink_dir" ] && echo "not a directory '$wlink_dir', abort" && return
 
   wlink_url="$1"
   wlink_url="$(echo "$wlink_url" | sed 's/\\//g')" # remove backslashes
   sanitized_url="$(url_to_filename "$wlink_url")"
   sanitized_url="${sanitized_url#https_--www_}"
-  wlink_file="${wlink_dir}/${sanitized_url}.desktop"
+  sanitized_url="${sanitized_url#https_--}"
+
+  wlink_dir="$(pwd)"
+  wlink_name="${sanitized_url}"
+
+  if [ -n "$2" ]; then
+    [ -d "$2" ] && wlink_dir="$(realpath "$2")"
+    ! [ -d "$2" ] && wlink_name="$2"
+  fi
+  if [ -n "$3" ]; then
+    ! [ -d "$2" ] && echo "not a directory: '$2', abort'" && return
+    wlink_dir="$(realpath "$2")"
+    wlink_name="$3"
+  fi
+  wlink_file="${wlink_dir}/${wlink_name}.desktop"
 
   {
     echo "[Desktop Entry]"
     echo "Encoding=UTF-8"
-    echo "Name=$wlink_file"
+    echo "Name=$wlink_name"
     echo "Type=Link"
     echo "URL=$wlink_url"
     echo "Icon=text-html"

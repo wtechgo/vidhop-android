@@ -311,6 +311,11 @@ to-mp3-remove-input() {
   [ -f "$mp3_file" ] && rm "$input_file"
 }
 
+to-mp3-mv2music() {
+  to-mp3 "$@"
+  mv "$mp3_file" "$music_dir"
+}
+
 id3tags() { # uses ffprobe
   [ $# = 0 ] && echo "Usage: id3tags <AUDIO_FILE>" && return
   input_file="$1"

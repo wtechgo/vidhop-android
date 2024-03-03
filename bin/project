@@ -265,6 +265,12 @@ linkvideos4project() {
   echo "Done creating links to video files in '$dest_dir'."
 }
 
+fvidf4project() {
+  [ -z "$1" ] && echo "Usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
+    echo " Info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
+  linkvideos4project "$@"
+}
+
 renlink+source() {
   [ ! $# = 2 ] && echo "Usage: renlink+source <LINK_PATH> <NEW_NAME>" && return
   video_link="$1"
@@ -281,12 +287,6 @@ renlink+source() {
   new_video_link="$(dirname "$video_link")/$new_name.$ext"
   ln -s "$new_video_file" "$new_video_link"
   [ $? = 0 ] && rm "$video_link" && echo "renamed the video file and created a new link"
-}
-
-fvidf4project() {
-  [ -z "$1" ] && echo "Usage: fvidf4project <SEARCH_TEXT> <PROJECT_NAME>" &&
-    echo " Info: creates symbolic links in <PROJECT_NAME>/vid/<SEARCH_TEXT> for all search results that match <SEARCH_TEXT>" && return
-  linkvideos4project "$@"
 }
 
 # When you have a directory with symbolic links that point to VidHop video files,
@@ -393,29 +393,11 @@ fproj() {
   echo "${GREEN}${result}${NC}"
 }
 
-# Find files in projects root directory (all projects).
-#fproj() {
-#  [ -z "$1" ] && echo -e "Usage: fproj <SEARCH_TEXT> <PROJECT_NAME_CASE_SENSITIVE>" && return
-#  unset result
-#  search_text="$1"
-#  if [ -z "$2" ]; then search_dir="."; else search_dir="$projects_dir/$2"; fi
-#  [ ! -d "$search_dir" ] && echo "could not find directory $search_dir" && return
-#  # Display with relative paths.
-#  prev="$PWD"
-#  [[ "$PWD" != *"$projects_dir"* ]] && cd "$projects_dir"
-#  result="$(find -L "$search_dir" -type f \
-#    -not -path "*.js" \
-#    -not -path "*.css" \
-#    -not -path "*_files/*" \
-#    -iname "*$search_text*" -printf '"%p"\n')"
-#  echo "${GREEN}${result}${NC}"
-#}
-
 cdproject() {
-  [ -z "$1" ] && echo "Usage: cdproj <PROJECT_NAME>" && return
-  project_name="$1"
-  project_dir="$(find "$projects_dir" -type d -iname "*$project_name*" | head -n 1)"
-  [ -n "$project_dir" ] && cd "$project_dir"
+  [ -z "$1" ] && echo "Usage: cdproj <PROJECT_REL_PATH>" && return
+  project_dir="$projects_dir/$1"
+  ! [ -d "$project_dir" ] && echo -e "not a directory '$project_dir', abort" && return
+  cd "$project_dir"
 }
 
 renproject() {

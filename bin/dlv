@@ -232,7 +232,7 @@ dlvi() {
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
   platform=$(extract_platform_name "$url")
 
-  fetch_video_metadata "$url" # populates $json
+  fetch_video_metadata "$url" # populates $json, calls yt-dlp 2 times
   name="$(fetch_sanitized_title)"
   channel_name="$(channel_name_from_obj)"
   [ "$(is_platform_facebook)" = true ] && name="$(shorten_text "$name")_$(timestamp)"
@@ -242,7 +242,7 @@ dlvi() {
   json_file="$video_meta_dir/metadata.json"
 
   fetch_thumbnail "$video_meta_dir"
-  fetch_subs
+  [[ "$url" != *bitchute* ]] && fetch_subs
 
   add_to_vhistory
   augment_json
@@ -256,6 +256,7 @@ dlvi() {
 }
 
 # Download video. Plus thumbnail and metadata.
+# bitchute 'too many requests' on 5 subsequent yt-dlp calls
 dlv() {
   clear_vars_dlv
   [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0

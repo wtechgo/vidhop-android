@@ -624,3 +624,12 @@ wlink() {
   echo "at:"
   echo "${wlink_file}"
 }
+
+wlinks() {
+  urls="$import_dir/urls.tmp"
+  echo "$1" > "$urls"
+  while read -r url; do
+    wlink "$url"
+  done <"$urls"
+  rm "$urls"
+}

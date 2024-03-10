@@ -25,12 +25,12 @@ play() {
     searchable_text="$(enhance_searchability "$search_text")"
     files=$(
       find "$vidhop_dir" \
-        -path "$uploads_dir" -prune \
-        -path "$websites_dir" -prune \
-        -path "$social_media_dir" -prune \
-        -path "$import_dir" -prune \
-        -path "$export_dir" -prune \
-        -path "$log_dir" -prune \
+        -not -path "$uploads_dir/*" \
+        -not -path "$websites_dir/*" \
+        -not -path "$social_media_dir/*" \
+        -not -path "$import_dir/*" \
+        -not -path "$export_dir/*" \
+        -not -path "$log_dir/*" \
         -iname "*$searchable_text*mp4" \
         -o -iname "*$searchable_text*mkv" \
         -o -iname "*$searchable_text*webm" \

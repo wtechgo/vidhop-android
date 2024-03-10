@@ -168,9 +168,9 @@ add2project() {
 
   if [ $# = 1 ]; then
     [ -f "$1" ] && ! [ -d "$project_dir" ] && echo "I have a file, but no project directory, abort" && return
-    [ -d "$projects_dir/$1" ] && ! [ -f "$media_file" ] && echo "I have a project directory, but no file, abort" && return
-    [ -f "$1" ] && [ -d "$project_dir" ] && media_file="$1"
-    [ -d "$projects_dir/$1" ] && [ -f "$media_file" ] && project_dir="$projects_dir/$1"
+    [ -d "$projects_dir/$1" ] && ! [ -f "$file" ] && echo "I have a project directory, but no file, abort" && return
+    [ -f "$1" ] && [ -d "$project_dir" ] && file="$1"
+    [ -d "$projects_dir/$1" ] && [ -f "$file" ] && project_dir="$projects_dir/$1"
   fi
 
   if [ $# = 2 ]; then

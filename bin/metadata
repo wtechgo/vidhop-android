@@ -49,37 +49,47 @@ metadata() {
     echo "       => shows metadata from the last download"
     return
   fi
-  found=false
-  # json file arg
-  [ -f "$search_text" ] && [[ "$search_text" == *.json ]] &&
-    json="$(jq . "$search_text")" && jq . <<<"$json" && extract_summary_vars && print_summary && return
-  # media file arg
-  [ -f "$(media_file2metadata_path "$search_text")" ] && json="$(jq . "$(media_file2metadata_path "$search_text")")" &&
-    jq . <<<"$json" && extract_summary_vars && print_summary && return
+
+  if [ -f "$search_text" ]; then
+    # input is a json file
+    [[ "$search_text" == *.json ]] &&
+      json="$(jq . "$search_text")" &&
+      jq . <<<"$json" && extract_summary_vars && print_summary && return
+    # input is a media file
+    json_file_guess="$(media_file2metadata_path "$search_text")"
+    [ -f "$json_file_guess" ] &&
+      json="$(jq . "$json_file_guess")" &&
+      jq . <<<"$json" && extract_summary_vars && print_summary && return
+    # fallback, search by file name
+    search_text="$(strip_extension "$(basename "$search_text")")"
+  else
+    echo "input '$search_text' is not a file"
+    echo "searching for a json filename that matches the input"
+  fi
 
   # find json file based search text arg
   ## search in video metadata
-  result="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
+  found_json_file="$(find_one_vmeta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
   if [ "$error" = 0 ]; then
-    json="$(jq . "$result")" &&jq . <<<"$json"
+    json="$(jq . "$found_json_file")" &&jq . <<<"$json"
     extract_summary_vars && print_summary
     return
   elif [ "$error" = 2 ]; then
     echo "metadata function shows metadata from 1 specific media file, but multiple files were found"
-    echo "$result" && return
+    echo "$found_json_file" && return
   fi
 
   ## search in audio metadata
-  result="$(find_one_ameta "$(echo "$search_text" | tr ' ' '*')")"
+  found_json_file="$(find_one_ameta "$(echo "$search_text" | tr ' ' '*')")"
   error=$?
   if [ "$error" = 0 ]; then
-    json="$(jq . "$result")" &&jq . <<<"$json"
+    json="$(jq . "$found_json_file")" &&jq . <<<"$json"
     extract_summary_vars && print_summary
     return
   elif [ "$error" = 2 ]; then
     echo "metadata function shows metadata from 1 specific media file, but multiple files were found"
-    echo "$result" && return
+    echo "$found_json_file" && return
   fi
 
   echo "found nothing for '$search_text'"

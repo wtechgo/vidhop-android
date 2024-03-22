@@ -9,6 +9,7 @@ image_help() {
   echo "    resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>"
   echo "      => Copy and resize each image inside <IMAGES_DIR>, and put them in a child dir of <IMAGES_DIR>."
   echo "    resize_images_dir_1080p <IMAGES_DIR> => Convenience method for resize_images_dir_x_y <IMAGES_DIR> 1920 1080."
+  echo "    convert-webp2jpg-dir <DIR> => Convert all webp images to jpg in <DIR>."
   echo "    ocr <IMG_FILE> [<OUTPUT_TXT_FILE>] => Write text from <IMG_FILE> into the terminal."
   echo "    ocrtxt <IMG_FILE> [<OUTPUT_DIR>] => Saves a TXT file next to the image file, unless <OUTPUT_DIR> is given, then there."
   echo "    ocrdir <IMGS_DIR> [<OUTPUT_DIR>] => Saves a TXT file in <IMGS_DIR>/ocr, unless <OUTPUT_DIR> is given, then there."
@@ -78,6 +79,22 @@ resize_images_dir_x_y() {
 resize_images_dir_1080p() {
   [ -z "$1" ] && echo "Usage: resize_images_dir_1080p <IMAGES_DIR>" && return
   resize_images_dir_x_y "$1" 1920 1080
+}
+
+convert-webp2jpg-dir() {
+  [ -h "$1" ] && echo "Usage: convert-webp2jpg-dir <DIRECTORY>" && return
+  dir="$(realpath "$1")" 2>/dev/null
+  [ -z "$1" ] && dir="$(realpath "$PWD")"
+  [ ! -d "$dir" ] && echo "not a directory '$dir'" && return
+
+  while read -r file; do
+    jpgFile="$(strip_extension "$file").jpg"
+    echo "processing $file"
+    magick "$file" "$jpgFile"
+    [ -f "$jpgFile" ] && rm "$file"
+  done < <(find "$dir" -iname "*.webp" -o -iname "*.WEBP")
+  echo "done" && sleep 1
+  ls -l
 }
 
 ocr() {

@@ -15,7 +15,7 @@ project_help() {
   echo "    linkvideos4project <SEARCH_TEXT> <PROJECT_NAME> => Creates symbolic links in <PROJECT_NAME> for all video files found by fvidf <SEARCH_TEXT> (happens in the background)."
   echo "    linkvideo4project <VIDEO_FILE> <PROJECT_NAME>   => Creates a symbolic link of given <VIDEO_FILE> in project with name <PROJECT_NAME>."
   echo "    fvidf4project <PROJECT_NAME> => Alias for function 'linkvideo4project'."
-  echo "    videodir2linkslist [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
+  echo "    videos2links [<DIR>] => Write channel, title and url of each video file (or symlink) in <DIR> to links.txt and links.md in <DIR> or \$PWD if <DIR> was not provided."
   echo "    renlink+source <SYMLINK_FILE_NAME> => Rename symbolic link file name and the file name of the source it points to."
   echo "    cleanproj <PROJECT_NAME> => Remove all files but keep the directory structure for project with <PROJECT_NAME>."
   echo "    rmproject <PROJECT_NAME> => Remove the project with as name <PROJECT_NAME>."
@@ -297,7 +297,7 @@ renlink+source() {
 #
 # input: <dir>
 # output: <dir>/links.txt, <dir>/links.md
-videodir2linkslist() {
+videos2links() {
   links_dir="$PWD"
   if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory" && echo; fi
   [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return

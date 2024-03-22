@@ -171,5 +171,6 @@ vidhophelp() {
   project_help && echo
   history_help && echo
   sync_help && echo
+  ffmpeg_help && echo
   loader_help && return
 }

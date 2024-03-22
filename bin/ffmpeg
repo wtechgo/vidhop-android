@@ -1,11 +1,42 @@
 #!/bin/bash
 # TODO: https://github.com/CrypticSignal/better-ffmpeg-progress
 
+ffmpeg_help() {
+  echo " Title: ffmpeg"
+  echo " Description: Edit video and audio files with ffmpeg."
+  echo " Commands:"
+  echo "    to-x264 <INPUT_VIDEO_FILE> [<OUTPUT_FILE>] => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-x265 <INPUT_VIDEO_FILE> [<OUTPUT_FILE>] => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-720p <INPUT_VIDEO_FILE>   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-1080p <INPUT_VIDEO_FILE>   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-cfr <INPUT_VIDEO_FILE>   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-cfr-fast <INPUT_VIDEO_FILE> => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cutvideo   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cutvideo-recode   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cutaudio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    mergevideos   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    sharpenvideo   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-720p-sharp   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-1080p-sharp   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    embed-thumbnail-into-video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    mp3+thumbnail2video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    replaceaudio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    mergeaudiotracks   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    extract-mp3   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-mp3   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-mp3-remove-input   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    to-mp3-mv2music   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    id3tags   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    embed-thumbnail-into-mp3   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    strip-id3tags   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    screenshots-from-video-file   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+}
+
 # Video.
 to-x264() {
   [ -z "$1" ] &&
-    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " Info: converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
+    echo "Usage: to-x264 <INPUT_VIDEO_FILE> [<OUTPUT_FILE>]" &&
+    echo " Info: Converts the source file to x264 in the same location and appends '_264' if the destination filename was identical" && return
 
   src="$(realpath "$1")"
   [ ! -f "$src" ] && echo "file not found '$src', abort" && return
@@ -20,8 +51,8 @@ to-x264() {
 
 to-x265() {
   [ -z "$1" ] &&
-    echo "Usage: convert264 <SRC_FILE.EXT> [<DEST_FILE.EXT>]" &&
-    echo " Info: converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
+    echo "Usage: to-x265 <INPUT_VIDEO_FILE> [<OUTPUT_FILE>]" &&
+    echo " Info: Converts the source file to x265 in the same location and appends '_265' if the destination filename was identical" && return
 
   src="$(realpath "$1")"
   [ ! -f "$src" ] && echo "file not found '$src', abort" && return
@@ -64,7 +95,7 @@ to-cfr-fast() {
 
 cutvideo() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutvideo <INPUT_FILE> <START_TIME> [<END_TIME>]
+Usage: cutvideo <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -104,7 +135,7 @@ EOF
 
 cutvideo-recode() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutvideo-recode <INPUT_FILE> <START_TIME> [<END_TIME>]
+Usage: cutvideo-recode <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -144,7 +175,7 @@ EOF
 
 cutaudio() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutaudio <INPUT_FILE> <START_TIME> [<END_TIME>]
+Usage: cutaudio <INPUT_AUDIO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -166,7 +197,7 @@ EOF
 
 mergevideos() {
   [ $# -lt 3 ] &&
-    echo "Usage: mergevideos <VIDEO_FILE_1> <VIDEO_FILE_2> <OUTPUT_FILE>" &&
+    echo "Usage: mergevideos <INPUT_VIDEO_FILE_1> <INPUT_VIDEO_FILE_2> <OUTPUT_FILE>" &&
     echo " Info: files must have the same encoding or the second video will be black" && return
   if [ -f "$1" ]; then file1="$1"; else echo "not a file '$1'" && return; fi
   if [ -f "$2" ]; then file2="$2"; else echo "not a file '$2'" && return; fi
@@ -183,7 +214,7 @@ mergevideos() {
 }
 
 sharpenvideo() {
-  [ -z "$1" ] && echo "Usage: sharpenvideo <VIDEO_FILE>"
+  [ -z "$1" ] && echo "Usage: sharpenvideo <INPUT_VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
@@ -194,7 +225,7 @@ sharpenvideo() {
 }
 
 to-720p-sharp() {
-  [ -z "$1" ] && echo "Usage: to-720p-sharp <VIDEO_FILE>"
+  [ -z "$1" ] && echo "Usage: to-720p-sharp <INPUT_VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
@@ -205,7 +236,7 @@ to-720p-sharp() {
 }
 
 to-1080p-sharp() {
-  [ -z "$1" ] && echo "Usage: to-1080p-sharp <VIDEO_FILE>"
+  [ -z "$1" ] && echo "Usage: to-1080p-sharp <INPUT_VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
@@ -216,7 +247,7 @@ to-1080p-sharp() {
 }
 
 embed-thumbnail-into-video() { # not tested
-  [ $# -lt 2 ] && echo "Usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <VIDEO_FILE>" && return
+  [ $# -lt 2 ] && echo "Usage: embed-thumbnail-into-video <THUMBNAIL_FILE> <INPUT_VIDEO_FILE>" && return
   thumb_file="$1" && [ ! -f "$thumb_file" ] && echo "not a file: '$thumb_file'" && return
   input_file="$2" && [ ! -f "$input_file" ] && echo "not a file: '$input_file'" && return
   output_file="$(prefix_extension "$input_file" thumb)"
@@ -260,31 +291,47 @@ mp3+thumbnail2video() {
   ffmpeg -loop 1 -r 1 -i "$image_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
 }
 
-convert-webp2jpg-dir() {
-  [ -h "$1" ] && echo "Usage: convert-webp2jpg-dir <DIRECTORY>" && return
-  dir="$(realpath "$1")" 2>/dev/null
-  [ -z "$1" ] && dir="$(realpath "$PWD")"
-  [ ! -d "$dir" ] && echo "not a directory '$dir'" && return
-
-  while read -r file; do
-    jpgFile="$(strip_extension "$file").jpg"
-    echo "processing $file"
-    magick "$file" "$jpgFile"
-    [ -f "$jpgFile" ] && rm "$file"
-  done < <(find "$dir" -iname "*.webp" -o -iname "*.WEBP")
-  echo "done" && sleep 1
-  ls -l
-}
-
 replaceaudio() {
   [ -z "$1" ] || [ -z "$2" ] && echo "Usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
-  video_file="$1"
+  input_file="$1"
   audio_file="$2"
-  backup_file="$(prefix_extension "$video_file" backup)"
-  cp "$video_file" "$backup_file"
-  ffmpeg -i "$backup_file" -i "$audio_file" -c copy -map 0:v:0 -map 1:a:0 "$video_file"
-  #  mv "$backup_file" "$video_file"
+  backup_file="$(prefix_extension "$input_file" backup)"
+  cp "$input_file" "$backup_file"
+  ffmpeg -i "$backup_file" -i "$audio_file" -c copy -map 0:v:0 -map 1:a:0 "$input_file"
+  #  mv "$backup_file" "$input_file"
 }
+
+mergeaudiotracks() {
+  [ -z "$1" ] &&
+    echo "Usage: mergeaudiotracks <INPUT_VIDEO_FILE>" &&
+    echo " Info: Merge all audio tracks of video file into one audio track." && return
+  ! [ -f "$1" ] && echo "not a file, abort" && return
+
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" amerge)"
+
+  count_audio_tracks="$(ffprobe -loglevel error -select_streams a -show_entries stream=index -of csv=p=0 "$input_file" | wc -l)"
+
+  ffmpeg -i "$input_file" \
+    -c:v copy -c:a aac -b:a 160k -ac 2 \
+    -filter_complex amerge=inputs="$count_audio_tracks" "$output_file"
+
+  echo -n "replace original with merged audio version? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] && mv "$output_file" "$input_file"
+}
+
+#mergeaudiotracks() {
+#  ! [ -f "$1" ] && echo "not a file, abort" && return
+#  input_file="$1"
+#  output_file="$(prefix_extension "$input_file" amerge)"
+#
+#  ffmpeg -i "$input_file" -map 0:v:0 \
+#    -map -0:a:0 \
+#    -map 0:a:1 -map 0:a:0 \
+#    -disposition:a:0 default "$output_file"
+#}
 
 # Audio.
 extract-mp3() {
@@ -359,15 +406,15 @@ strip-id3tags() { # not ffmpeg
 # 1 hour at 30 fps is 108000 frames     6 digits
 # 20 hours at 30 fps is 2160000 frames   7 digits
 screenshots-from-video-file() {
-  [ -z "$1" ] && echo "usage: screenshots_changed_frames <VIDEO_FILE>" && return
-  video_file="$1"
-  frames_dir="$(dirname "$video_file")/screenshots"
+  [ -z "$1" ] && echo "usage: screenshots_changed_frames <INPUT_VIDEO_FILE>" && return
+  input_file="$1"
+  frames_dir="$(dirname "$input_file")/screenshots"
   mkdir "$frames_dir"
 
-  echo "creating screenshots from video file '$video_file'"
-  ffmpeg -i "$video_file" -r 1 "$frames_dir/%07d.png" # creates a screenshot every second
-  #  ffmpeg -i "$video_file" -r 0.5 "$frames_dir/%07d.png" # creates a screenshot every 2 seconds
-  #  ffmpeg -i "$video_file" -r 0.25 "$frames_dir/%07d.png" # creates a screenshot every 4 seconds
+  echo "creating screenshots from video file '$input_file'"
+  ffmpeg -i "$input_file" -r 1 "$frames_dir/%07d.png" # creates a screenshot every second
+  #  ffmpeg -i "$input_file" -r 0.5 "$frames_dir/%07d.png" # creates a screenshot every 2 seconds
+  #  ffmpeg -i "$input_file" -r 0.25 "$frames_dir/%07d.png" # creates a screenshot every 4 seconds
   echo "screenshots created at directory '$frames_dir', contains duplicates" && sleep 1
 
   echo "removing duplicate screenshots, this can take a while"

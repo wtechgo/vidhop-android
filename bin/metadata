@@ -96,6 +96,7 @@ metadata() {
 }
 
 url() {
+  [ -z "$1" ] && echo "$webpage_url" && return
   result="$(metadata "$1")"
   webpage_url="$(echo "$result" | \
     grep '  "webpage_url": "' | \

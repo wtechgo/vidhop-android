@@ -330,6 +330,7 @@ set_vars_single_result() {
   if [ "$(echo "$result" | wc -l)" = 1 ]; then
     media_file="$(remove_leading_trailing_double_quotes "$result")"
     filename="$(basename "$media_file")"
+    webpage_url="$(url "$media_file")"
   fi
 }
 

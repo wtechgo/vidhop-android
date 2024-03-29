@@ -89,6 +89,11 @@ play() {
   echo "unknown file extension for media file '$media_file'"
 }
 
+browse() {
+  [ -n "$webpage_url" ] && ("$browser_app" "$webpage_url" 2>/dev/null &) && return
+  [ -n "$1" ] && ("$browser_app" "$1" 2>/dev/null &) && return
+}
+
 renpost() {
   [ -z "$1" ] && echo "Usage: renpost <NEW_NAME>" && return
   new_name="$(dirname "${social_media_dir}")/${1}_$(timestamp)"

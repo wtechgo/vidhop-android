@@ -74,10 +74,12 @@ play() {
   [[ "$media_file_lowercase" == *.aiff ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.alac ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   # images
+  [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.webp ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.png ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.bmp ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
-  [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.tiff ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.gif ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   # text
   [[ "$media_file_lowercase" == *.txt ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.md ]] && ("$text_app" "$media_file" 2>/dev/null &) && return

@@ -391,6 +391,10 @@ fvidfall() { # find video files (on disk)
   [ "$found_something" = "false" ] && echo "found nothing"
 }
 
+list-videos-asc() {
+  find "${vids_dir}" -not -path "*.srt" -printf "%T@ %Tc %p\n" | sort -n | cut -d ' ' -f 3-
+}
+
 # Creates symlinks from fvidf results in the project /vid directory.
 fvidf-symlinks2dir() {
   [ -z "$1" ] && echo "Usage: fvidf-symlinks2dir <SEARCH_TEXT> <DEST_DIR>" &&

@@ -193,3 +193,17 @@ extract_mac_addresses() {
   [ -n "$1" ] && grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})' "$1" && return
   grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})'
 }
+
+find-images() {
+  ! [ -d "$1" ] || [ -z "$2" ] && echo "Usage: find-images <DIRECTORY> <SEARCH_TEXT>" && return
+  search_dir="$1"
+  search_text="$2"
+  find "$search_dir" \
+    -iname "*$search_text*.jpg" \
+    -o -iname "*$search_text*.jpeg" \
+    -o -iname "*$search_text*.webp" \
+    -o -iname "*$search_text*.png" \
+    -o -iname "*$search_text*.bmp" \
+    -o -iname "*$search_text*.tiff" \
+    -o -iname "*$search_text*.gif" 2>/dev/null
+}

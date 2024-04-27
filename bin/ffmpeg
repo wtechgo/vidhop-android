@@ -408,7 +408,7 @@ strip-id3tags() { # not ffmpeg
 screenshots-from-video-file() {
   [ -z "$1" ] && echo "usage: screenshots_changed_frames <INPUT_VIDEO_FILE>" && return
   input_file="$1"
-  frames_dir="$(dirname "$input_file")/screenshots"
+  frames_dir="$(dirname "$input_file")/Screenshots_$(get_name "$input_file")"
   mkdir "$frames_dir"
 
   echo "creating screenshots from video file '$input_file'"

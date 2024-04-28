@@ -70,8 +70,8 @@ dlvpllist="$import_list_dir/dlvpl.list"
 dlvplilist="$import_list_dir/dlvpli.list"
 
 
+filename_char_count=70
 termux_screen_char_count=53
-filename_char_count=180
 # VidHop app dirs -- end
 
 # Project module: uncomment defaults or set values in config/config.ini

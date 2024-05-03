@@ -63,8 +63,7 @@ metadata() {
     # fallback, search by file name
     search_text="$(strip_extension "$(basename "$search_text")")"
   else
-    echo "input '$search_text' is not a file"
-    echo "searching for a json filename that matches the input"
+    echo "searching through metadata files for search text '$search_text'..."
   fi
 
   # find json file based search text arg

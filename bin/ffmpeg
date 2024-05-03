@@ -32,6 +32,7 @@ ffmpeg_help() {
   echo "    screenshots-from-video-file   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
 }
 
+
 # Video.
 to-x264() {
   [ -z "$1" ] &&
@@ -301,7 +302,7 @@ replaceaudio() {
   #  mv "$backup_file" "$input_file"
 }
 
-mergeaudiotracks() {
+merge-audiotracks() {
   [ -z "$1" ] &&
     echo "Usage: mergeaudiotracks <INPUT_VIDEO_FILE>" &&
     echo " Info: Merge all audio tracks of video file into one audio track." && return
@@ -315,6 +316,46 @@ mergeaudiotracks() {
   ffmpeg -i "$input_file" \
     -c:v copy -c:a aac -b:a 160k -ac 2 \
     -filter_complex amerge=inputs="$count_audio_tracks" "$output_file"
+
+  echo -n "replace original with merged audio version? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] && mv "$output_file" "$input_file"
+}
+
+remove-audiotrack() {
+  [ -z "$1" ] &&
+    echo "Usage: remove-audiotrack <INPUT_VIDEO_FILE> [<TRACK_NUMBER>]" &&
+    echo " Info: Removes audio track with number <TRACK_NUMBER>." &&
+    echo "       When no track number is supplied, 1 will be used which is the second audio track." && return
+  ! [ -f "$1" ] && echo "not a file, abort" && return
+
+  input_file="$1"
+  if [ -n "$2" ]; then track_number="$2"; else track_number=1; fi
+  output_file="$(prefix_extension "$input_file" stripped_atrack)"
+
+  ffmpeg -i "$input_file" \
+    -map 0 -map -0:a:"$track_number" -c copy "$output_file"
+
+  echo -n "replace original with merged audio version? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] && mv "$output_file" "$input_file"
+}
+
+remove-videotrack() {
+  [ -z "$1" ] &&
+    echo "Usage: remove-videotrack <INPUT_VIDEO_FILE> [<TRACK_NUMBER>]" &&
+    echo " Info: Removes video track with number <TRACK_NUMBER>." &&
+    echo "       When no track number is supplied, 1 will be used which is the second video track." && return
+  ! [ -f "$1" ] && echo "not a file, abort" && return
+
+  input_file="$1"
+  if [ -n "$2" ]; then track_number="$2"; else track_number=1; fi
+  output_file="$(prefix_extension "$input_file" stripped_atrack)"
+
+  ffmpeg -i "$input_file" \
+    -map 0 -map -0:v:"$track_number" -c copy "$output_file"
 
   echo -n "replace original with merged audio version? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')

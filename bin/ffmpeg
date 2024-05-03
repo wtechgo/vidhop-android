@@ -11,16 +11,16 @@ ffmpeg_help() {
   echo "    to-1080p <INPUT_VIDEO_FILE>   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    to-cfr <INPUT_VIDEO_FILE>   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    to-cfr-fast <INPUT_VIDEO_FILE> => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    cutvideo   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    cutvideo-recode   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    cutaudio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    mergevideos   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    sharpenvideo   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cut-video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cut-video-recode   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    cut-audio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    merge-videos   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    sharpen-video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    to-720p-sharp   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    to-1080p-sharp   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    embed-thumbnail-into-video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    mp3+thumbnail2video   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
-  echo "    replaceaudio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
+  echo "    replace-audio   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    mergeaudiotracks   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    extract-mp3   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
   echo "    to-mp3   => No docs atm. Try command without args to learn more, or which <command>, or type <command>."
@@ -94,9 +94,9 @@ to-cfr-fast() {
   echo -e "file converted to constant frame rate (cfr) at:\n$output_file"
 }
 
-cutvideo() {
+cut-video() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutvideo <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
+Usage: cut-video <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -112,7 +112,7 @@ The input file remains untouched.
 A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
 Ext is the extension of the input file e.g. mp4, mkv...
 
-If cutvideo fails, converting the input video from mkv to mp4 may help.
+If cut-video fails, converting the input video from mkv to mp4 may help.
 One way to do this is with OBS > File > Remux.
 EOF
 
@@ -134,9 +134,9 @@ EOF
   [ "$answer" = "y" ] && mv "$output_file" "$input_file"
 }
 
-cutvideo-recode() {
+cut-video-recode() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutvideo-recode <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
+Usage: cut-video-recode <INPUT_VIDEO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -152,7 +152,7 @@ The input file remains untouched.
 A new file will be created with filename <TITLE>.cut.ext in the directory of the input file.
 Ext is the extension of the input file e.g. mp4, mkv...
 
-If cutvideo-recode fails, converting the input video from mkv to mp4 may help.
+If cut-video-recode fails, converting the input video from mkv to mp4 may help.
 One way to do this is with OBS > File > Remux.
 EOF
 
@@ -174,9 +174,9 @@ EOF
   [ "$answer" = "y" ] && mv "$output_file" "$input_file"
 }
 
-cutaudio() {
+cut-audio() {
   [ -z "$1" ] || [ -z "$2" ] && cat <<EOF && return
-Usage: cutaudio <INPUT_AUDIO_FILE> <START_TIME> [<END_TIME>]
+Usage: cut-audio <INPUT_AUDIO_FILE> <START_TIME> [<END_TIME>]
 
 time input formats:
     formats to be used for <START_TIME> and <END_TIME>
@@ -193,12 +193,12 @@ A new file will be created with filename <TITLE>.cut.ext in the directory of the
 Ext is the extension of the input file e.g. mp3, m4a, wav etc.
 EOF
 
-  cutvideo "$@"
+  cut-video "$@"
 }
 
-mergevideos() {
+merge-videos() {
   [ $# -lt 3 ] &&
-    echo "Usage: mergevideos <INPUT_VIDEO_FILE_1> <INPUT_VIDEO_FILE_2> <OUTPUT_FILE>" &&
+    echo "Usage: merge-videos <INPUT_VIDEO_FILE_1> <INPUT_VIDEO_FILE_2> <OUTPUT_FILE>" &&
     echo " Info: files must have the same encoding or the second video will be black" && return
   if [ -f "$1" ]; then file1="$1"; else echo "not a file '$1'" && return; fi
   if [ -f "$2" ]; then file2="$2"; else echo "not a file '$2'" && return; fi
@@ -214,8 +214,8 @@ mergevideos() {
   echo "merge video at '$output_file'"
 }
 
-sharpenvideo() {
-  [ -z "$1" ] && echo "Usage: sharpenvideo <INPUT_VIDEO_FILE>"
+sharpen-video() {
+  [ -z "$1" ] && echo "Usage: sharpen-video <INPUT_VIDEO_FILE>"
   input_file="$1"
   output_file="$(prefix_extension "$input_file" sharp)"
   end_time="$(ffprobe -v error -show_entries format=duration \
@@ -292,8 +292,8 @@ mp3+thumbnail2video() {
   ffmpeg -loop 1 -r 1 -i "$image_file" -i "$audio_file" -c:a copy -shortest -c:v libx264 "$output_file"
 }
 
-replaceaudio() {
-  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: replaceaudio <VIDEO_FILE> <AUDIO_FILE>" && return
+replace-audio() {
+  [ -z "$1" ] || [ -z "$2" ] && echo "Usage: replace-audio <VIDEO_FILE> <AUDIO_FILE>" && return
   input_file="$1"
   audio_file="$2"
   backup_file="$(prefix_extension "$input_file" backup)"

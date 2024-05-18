@@ -24,7 +24,7 @@ play() {
   if [ -n "$search_text" ]; then
     searchable_text="$(enhance_searchability "$search_text")"
     files=$(
-      find "$vidhop_dir" \
+      find -L "$vidhop_dir" \
         -not -path "$uploads_dir/*" \
         -not -path "$websites_dir/*" \
         -not -path "$social_media_dir/*" \
@@ -590,4 +590,31 @@ treevidhopbefore() {
 treevidhopafter() {
   ! [ -x "$(command -v tree)" ] && echo "'tree' command not installed" && return
   tree "$vidhop_dir" >"$log_dir/tree_vidhop_after"
+}
+
+setdate-modified-created-today(){
+  [ -z "$1" ] && echo "Usage: setdate-modified-created-today <FILE>" && return
+  file="$1"
+  ! [ -f "$file" ] && echo "not a file, '$file', abort" && return
+
+  touch -a -m -t "$(date +'%Y%m%d%H%M').00" "$file"
+
+  echo "date modified and date created modified, running command 'stat'"
+
+  stat "$file"
+}
+
+setdate-modified-created(){
+  [ -z "$1" ] || [ -z "$2" ] &&
+    echo "Usage: setdate-modified-created <FILE> <DATETIME>" &&
+    echo " Info: Date-time format is YYYYMMDDHHMM e.g. 200012011530." && return
+  file="$1"
+  datetime="$2"
+  ! [ -f "$file" ] && echo "not a file, '$file', abort" && return
+
+  touch -a -m -t "${datetime}.00" "$file"
+
+  echo "date modified and date created modified, running command 'stat'"
+
+  stat "$file"
 }

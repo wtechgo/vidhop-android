@@ -63,7 +63,7 @@ installloader() { # alias for phone hand typing
   install_loader
 }
 
-update_system() {
+updatesystem() {
   echo "> Updating & upgrading Termux system..." && sleep 1
   yes | pkg update
   yes | pkg upgrade
@@ -80,7 +80,7 @@ clean-python-packages() {
   pip uninstall -y pywebcopy
 }
 
-update_python_packages() {
+updatepythonpackages() {
   echo "> Updating Python packages..." && sleep 1
   pkg install python
   pip install -U pip
@@ -107,9 +107,9 @@ updateytdlp() {
 
 updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
-  update_system
+  updatesystem
   clean-python-packages
-  update_python_packages
+  updatepythonpackages
   fetch_github
   install_loader
   echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
@@ -120,7 +120,7 @@ updatevidhop() {
 updatevidhopbin() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   fetch_github
-  update_python_packages
+  updatepythonpackages
   install_loader
   echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
@@ -158,7 +158,7 @@ loader_help() {
   echo "    installloader   => alias for install_loader"
   echo "    install_loader  => enables users to reload with '. vidhop"
   echo "    fetch_github    => download the newest VidHop code from GitHub"
-  echo "    update_python_packages => updates Python packages with pip (package manager)"
+  echo "    updatepythonpackages => updates Python packages with pip (package manager)"
 }
 
 vidhophelp() {

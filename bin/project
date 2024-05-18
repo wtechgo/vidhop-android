@@ -391,7 +391,7 @@ fproj() {
     -not -path "*.js" \
     -not -path "*.css" \
     -not -path "*_files/*" \
-    -iname "*$search_text*" -exec realpath {} \; | sort | uniq | prefix_suffix_with_double_quotes)"
+    -iname "*$search_text*" -exec realpath {} \; 2>/dev/null | sort | uniq | prefix_suffix_with_double_quotes)"
   echo "${GREEN}${result}${NC}"
 }
 

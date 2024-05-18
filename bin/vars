@@ -91,12 +91,14 @@ picture_app="termux-open"
 picture_editor_app="termux-open"
 browser_app="termux-open"
 text_app="termux-open"
+text_editor="termux-open"
 pdf_reader_app="termux-open"
 
-# User media (outside VidHop dir)
-music_dir_ws=""                 # set value in config.ini
-music_dir_phone="$shared/Music" # set value in config.ini
-vidhop_backup_dir=""            # set value in config.ini
+# User directories (outside VidHop)
+[ -z "$video_projects_dir" ] && video_projects_dir="$shared/Movies/Production"
+[ -z "$screenshots_dir" ] && screenshots_dir="$shared/Pictures/Screenshots"
+[ -z "$music_dir_phone" ] && music_dir_phone="$shared/Music"
+[ -z "$vidhop_backup_dir" ] && vidhop_backup_dir=""
 
 # .bashrc shortkeys
 alias loadconfig='. "$bin_dir/config'

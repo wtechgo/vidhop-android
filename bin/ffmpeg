@@ -337,7 +337,7 @@ remove-audiotrack() {
   ffmpeg -i "$input_file" \
     -map 0 -map -0:a:"$track_number" -c copy "$output_file"
 
-  echo -n "replace original with merged audio version? N/y: " && read -r answer
+  echo -n "replace original with merged stripped audio track version? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "n" ] && return
   [ "$answer" = "y" ] && mv "$output_file" "$input_file"
@@ -357,7 +357,7 @@ remove-videotrack() {
   ffmpeg -i "$input_file" \
     -map 0 -map -0:v:"$track_number" -c copy "$output_file"
 
-  echo -n "replace original with merged audio version? N/y: " && read -r answer
+  echo -n "replace original with stripped video track version? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "n" ] && return
   [ "$answer" = "y" ] && mv "$output_file" "$input_file"

@@ -207,3 +207,17 @@ find-images() {
     -o -iname "*$search_text*.tiff" \
     -o -iname "*$search_text*.gif" 2>/dev/null
 }
+
+cpscreenshot() {
+  dest_dir="$PWD"
+  [ -n "$1" ] && dest_dir"$1"
+  !  [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+  cp "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)" .
+}
+
+mvscreenshot() {
+  dest_dir="$PWD"
+  [ -n "$1" ] && dest_dir"$1"
+  !  [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+  mv "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)" .
+}

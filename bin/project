@@ -189,6 +189,45 @@ add2project() {
   unset project_rel_path file
 }
 
+mv2project() {
+  [ "-h" = "$1" ] || [ "--help" = "$1" ] &&
+    echo -e "Usage: mv2project" &&
+    echo -e "Usage: mv2project <VIDEO_FILE>" &&
+    echo -e "Usage: mv2project <PROJECT_RELATIVE_PATH>" &&
+    echo -e "Usage: mv2project <VIDEO_FILE> <PROJECT_RELATIVE_PATH>" &&
+    echo -e " Info: Creates a symbolic link that points to a video file in VidHop, inside the /vid directory of a given project." &&
+    echo -e "       Running 'mv2project' without arguments uses the video file of the last video download, and the project of the previous 'mv2project' run." &&
+    echo -e "       Similar to running 'mv2project' without arguments, using one argument will check for values from the previous run." &&
+    echo -e "       <PROJECT_RELATIVE_PATH> should NOT include the /vid segment at the end." && return
+
+  [ -z "$1" ] && [ -z "$project_dir" ] && echo -e "I don't know which project you want to add the video to.\nTry 'mv2project <PROJECT_RELATIVE_PATH>'" && return
+  [ -z "$1" ] && [ -z "$media_file" ] && echo -e "I don't know which video you'd like to add.\nTry downloading a video first with 'dlv', or use 'mv2project <VIDEO_FILE>." && return
+  file="$media_file"
+
+  # TODO: use fvidf to obtain one result and populate $file with it, otherwise abort
+  if [ $# = 1 ]; then
+    [ -f "$1" ] && ! [ -d "$project_dir" ] && echo "I have a file, but no project directory, abort" && return
+    [ -d "$projects_dir/$1" ] && ! [ -f "$file" ] && echo "I have a project directory, but no file, abort" && return
+    [ -f "$1" ] && [ -d "$project_dir" ] && file="$1"
+    [ -d "$projects_dir/$1" ] && [ -f "$file" ] && project_dir="$projects_dir/$1"
+  fi
+
+  if [ $# = 2 ]; then
+    file="$(realpath "$1")"
+    project_rel_path="$2"
+    project_dir="$projects_dir/$project_rel_path"
+    ! [ -f "$file" ] && echo "not a file '$file', <VIDEO_FILE> has to match an existing video file, abort" && return
+    ! [ -d "$project_dir" ] && echo -e "not a directory '$project_dir'\n<PROJECT_RELATIVE_PATH> has to match a project in your projects directory, abort" && return
+  fi
+
+  dest_path="$project_dir/vid/$(basename "$file")"
+  mv "$file" "$dest_path"
+  [ $? = 1 ] && echo "failed to move '$file' to '$dest_path'" && return
+  echo -e "moved: '$file'"
+  echo -e "   to: '$dest_path'"
+  unset project_rel_path file
+}
+
 # Create a symbolic link to a video file (arg) in the videos directory of a project.
 # Example: linkvideo4project "$shared/Movies/VidHop/videos/youtube.com/DNA self-assembly.mp4" "Nanotechnology"
 # Result: Symbolic link "$shared/Movies/Projects/Nanotechnology/DNA self-assembly.mp4"
@@ -376,6 +415,10 @@ wproj() {
 
 writeproject() {
   wproj "$@"
+}
+
+lsprojects() {
+  find "$projects_dir" -maxdepth 1 -type d -exec basename {} \; | sort
 }
 
 fproj() {

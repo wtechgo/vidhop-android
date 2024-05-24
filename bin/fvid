@@ -346,7 +346,7 @@ fvidf() { # find video files (on disk)
     echo -e "> Channel downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     set_vars_single_result && unset result && found_something="true"
 
-  result=$(find -L "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
+  result=$(find -L "$vids_dir" -not -path "*.srt" -type f -iname "*$search_text*" 2>/dev/null | prefix_suffix_with_double_quotes | sort) # sed adds quotes for filenames with spaces
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Video downloads in VidHop directory search result:" && echo -e "${GREEN}$result${NC}" &&
     set_vars_single_result && unset result && found_something="true"
@@ -373,7 +373,7 @@ fvidfall() { # find video files (on disk)
     -not -path "*.jpg" \
     -not -path "*.webp" \
     -not -path "*.png" \
-    -type f -iname "*$search_text*" | prefix_suffix_with_double_quotes | sort)
+    -type f -iname "*$search_text*" 2>/dev/null | prefix_suffix_with_double_quotes | sort)
   [ "$(wc --words <<<"$result")" -gt 0 ] &&
     echo -e "> Videos in user home directory result:" && echo -e "${GREEN}$result${NC}" &&
     unset result && found_something="true"

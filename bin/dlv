@@ -282,6 +282,24 @@ dlv() {
   unset dl_comments function
 }
 
+dlv144p() {
+  res=144
+  dlv "$@"
+  unset res
+}
+
+dlv240p() {
+  res=240
+  dlv "$@"
+  unset res
+}
+
+dlv380p() {
+  res=380
+  dlv "$@"
+  unset res
+}
+
 dlv480p() {
   res=480
   dlv "$@"

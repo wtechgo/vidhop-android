@@ -44,7 +44,8 @@ to-x264() {
   dest="$(strip_extension "$src").mp4"                         # converts into the same location
   [ -f "$dest" ] && dest="$(strip_extension "$dest")_x264.mp4" # append _264 if the destination is also mp4
 
-  ffmpeg -i "$src" -c:v libx264 -profile:v high -preset slow -f mp4 -tune film -crf 18 "$dest"
+  ffmpeg -i "$src" -c:v libx264 -profile:v high -preset slow -f mp4 -crf 18  -b:v 4M "$dest"
+#  ffmpeg -i "$src" -c:v libx264 -profile:v high -preset slow -f mp4 -tune film -crf 18 "$dest"
   echo "file conversion to x264 completed"
   ## instructions from https://lbry.com/faq/video-publishing-guide
   #ffmpeg -i input.avi -c:v libx264 -crf 21 -preset faster -pix_fmt yuv420p -maxrate 5000K -bufsize 5000K -vf 'scale=if(gte(iw\,ih)\,min(1920\,iw)\,-2):if(lt(iw\,ih)\,min(1920\,ih)\,-2)' -movflags +faststart -c:a aac -b:a 160k output.mp4
@@ -64,6 +65,38 @@ to-x265() {
   echo "file conversion to x265 completed"
 }
 
+to-144p() {
+  input_file="$1"
+  output_file="$(strip_extension "$input_file")_144p.$(get_extension "$input_file")"
+  ffmpeg -i "$input_file" -vf scale=-256:144 -c:a copy "$output_file"
+  echo "file conversion to 144p done"
+  echo "result file is at '$output_file'"
+}
+
+to-240p() {
+  input_file="$1"
+  output_file="$(strip_extension "$input_file")_240p.$(get_extension "$input_file")"
+  ffmpeg -i "$input_file" -vf scale=-426:240 -c:a copy "$output_file"
+  echo "file conversion to 240p done"
+  echo "result file is at '$output_file'"
+}
+
+to-360p() {
+  input_file="$1"
+  output_file="$(strip_extension "$input_file")_360p.$(get_extension "$input_file")"
+  ffmpeg -i "$input_file" -vf scale=:640x360 -c:a copy "$output_file"
+  echo "file conversion to 360p done"
+  echo "result file is at '$output_file'"
+}
+
+to-480p() {
+  input_file="$1"
+  output_file="$(strip_extension "$input_file")_480p.$(get_extension "$input_file")"
+  ffmpeg -i "$input_file" -vf scale=-854:480 -c:a copy "$output_file"
+  echo "file conversion to 480p done"
+  echo "result file is at '$output_file'"
+}
+
 to-720p() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"
@@ -72,12 +105,34 @@ to-720p() {
   echo "result file is at '$output_file'"
 }
 
+to-720p-sharp() {
+  [ -z "$1" ] && echo "Usage: to-720p-sharp <INPUT_VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying upscaling to 720p and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=1280x720,unsharp=3:3:2.3 "$output_file"
+}
+
 to-1080p() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_1080p.$(get_extension "$input_file")"
   ffmpeg -i "$input_file" -vf scale=-1920:1080 -c:a copy "$output_file"
   echo "file conversion to 1080p done"
   echo "result file is at '$output_file'"
+}
+
+to-1080p-sharp() {
+  [ -z "$1" ] && echo "Usage: to-1080p-sharp <INPUT_VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying upscaling to 1080p and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.3 "$output_file"
 }
 
 to-cfr() {
@@ -223,28 +278,6 @@ sharpen-video() {
 
   echo "applying sharpening settings lx=3, ly=3, la=2.3 (luma_msize_x, luma_msize_y, luma_amount)..."
   ffmpeg -i "$input_file" -vf unsharp=3:3:1.9 "$output_file"
-}
-
-to-720p-sharp() {
-  [ -z "$1" ] && echo "Usage: to-720p-sharp <INPUT_VIDEO_FILE>"
-  input_file="$1"
-  output_file="$(prefix_extension "$input_file" sharp)"
-  end_time="$(ffprobe -v error -show_entries format=duration \
-    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
-
-  echo "applying upscaling to 720p and sharpening..."
-  ffmpeg -i "$input_file" -filter_complex scale=1280x720,unsharp=3:3:2.3 "$output_file"
-}
-
-to-1080p-sharp() {
-  [ -z "$1" ] && echo "Usage: to-1080p-sharp <INPUT_VIDEO_FILE>"
-  input_file="$1"
-  output_file="$(prefix_extension "$input_file" sharp)"
-  end_time="$(ffprobe -v error -show_entries format=duration \
-    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
-
-  echo "applying upscaling to 1080p and sharpening..."
-  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.3 "$output_file"
 }
 
 embed-thumbnail-into-video() { # not tested

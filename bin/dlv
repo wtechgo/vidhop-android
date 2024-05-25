@@ -294,8 +294,8 @@ dlv240p() {
   unset res
 }
 
-dlv380p() {
-  res=380
+dlv360p() {
+  res=360
   dlv "$@"
   unset res
 }

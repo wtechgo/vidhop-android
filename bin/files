@@ -39,8 +39,7 @@ play() {
         -o -iname "*$searchable_text*avi" \
         -o -iname "*$searchable_text*m4v" \
         -o -iname "*$searchable_text*mp3" \
-        -o -iname "*$searchable_text*m4a" \
-        -not -path "$uploads_dir/*"
+        -o -iname "*$searchable_text*m4a"
     )
     echo "$files"
     count=$(wc -l <<<"$files")
@@ -75,8 +74,8 @@ play() {
   [[ "$media_file_lowercase" == *.alac ]] && ("$audio_app" "$media_file" 2>/dev/null &) && return
   # images
   [[ "$media_file_lowercase" == *.jpg ]] || [[ "$media_file_lowercase" == *.jpeg ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
-  [[ "$media_file_lowercase" == *.webp ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.png ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
+  [[ "$media_file_lowercase" == *.webp ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.bmp ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.tiff ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.gif ]] && ("$picture_app" "$media_file" 2>/dev/null &) && return
@@ -84,8 +83,8 @@ play() {
   [[ "$media_file_lowercase" == *.txt ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.md ]] && ("$text_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.pdf ]] && ("$pdf_reader_app" "$media_file" 2>/dev/null &) && return
-
-  # site
+  # website
+  [[ "$media_file_lowercase" == *.desktop ]] && ("$browser_app" "$media_file" 2>/dev/null &) && return
   [[ "$media_file_lowercase" == *.html ]] && ("$browser_app" "$media_file" 2>/dev/null &) && return
 
   echo "unknown file extension for media file '$media_file'"
@@ -113,8 +112,12 @@ renpost() {
   echo "post renamed"
 }
 
+playall() {
+  vlc --sout-all --sout '#display' "$1"
+}
+
 # Rename a video and its metadata.
-renvid() {
+renvid() { # TODO: rewrite
   [ -z "$1" ] || [ -z "$2" ] && echo -e "Usage: renvid <OLD_NAME> <NEW_NAME>" && return
   [ "$(echo -n "$1" | wc -c)" -lt 3 ] && echo "old name has too few chars, abort" && return # a minimal safeguard
   old_name_search_text="$(enhance_searchability "$1")"
@@ -154,14 +157,17 @@ renvid() {
       ext=$(get_sub_extension "$file")
       mv "$file" "$old_meta_dir/subs/auto-generated/$new_name.$ext"
     done
-  [ -f "$old_media_file_sub" ] && mv "$old_media_file_sub" "$old_vid_dir/$new_name.en.srt"
+  media_file_sub="$old_vid_dir/$new_name.en.srt"
+  [ -f "$old_media_file_sub" ] && mv "$old_media_file_sub" "$media_file_sub"
   # rename subs - end
 
   # rename meta dir
   [ -d "$old_meta_dir" ] &&
-    meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
-    mv "$old_meta_dir" "$meta_dir" &&
-    echo -e "renamed: '$old_meta_dir' (metadata directory)\n     to: '$meta_dir' (metadata directory)"
+    video_meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
+    mv "$old_meta_dir" "$video_meta_dir" &&
+    echo -e "renamed: '$old_meta_dir' (metadata directory)\n     to: '$video_meta_dir' (metadata directory)"
+  # print rename media file sub
+  echo -e "renamed: '$old_media_file_sub\n     to: $media_file_sub"
   # rename media file
   [ -f "$old_media_file" ] &&
     media_file="$old_vid_dir/$new_name.mp4" &&
@@ -178,7 +184,7 @@ renvid() {
   # set vars for metadata command & rerun of renvid
   name="$new_name"
   title="$new_name"
-  meta_file="$meta_dir/metadata.json"
+  meta_file="$video_meta_dir/metadata.json"
 
   # rename history entry
   if [ -f "$titles_file" ]; then
@@ -199,11 +205,12 @@ renlast() {
   old_media_dir="$(dirname "$old_media_file")"
   old_media_file_sub="$old_media_dir/$old_name.en.srt" # TODO: bug if sub is not srt
   old_ext="$(get_extension "$old_media_file")"
-  old_meta_dir="$meta_dir"
-  old_meta_file="$old_meta_dir/metadata.json"
+
+  old_video_meta_dir="$video_meta_dir"
+  old_meta_file="$old_video_meta_dir/metadata.json"
 
   # show files found
-  [ -d "$old_meta_dir" ] && echo "found '$old_meta_dir' (metadata directory)"
+  [ -d "$old_video_meta_dir" ] && echo "found '$old_video_meta_dir' (metadata directory)"
   [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
 
@@ -218,32 +225,32 @@ renlast() {
 
   name="$1"
   media_file="$old_media_dir/$name.$old_ext"
-  new_media_file_sub="$(dirname "$old_media_file")/$name.en.srt"
-  meta_dir="$(dirname "$old_meta_dir")/$name"
+  media_file_sub="$(dirname "$old_media_file")/$name.en.srt"
+  video_meta_dir="$(dirname "$old_video_meta_dir")/$name"
 
   # rename subs
   [ -f "$old_media_file_sub" ] &&
-    mv "$old_media_file_sub" "$new_media_file_sub" &&
-    echo -e "renamed: '$old_media_file_sub'\n     to: '$new_media_file_sub"
+    mv "$old_media_file_sub" "$media_file_sub" &&
+    echo -e "renamed: '$old_media_file_sub'\n     to: '$media_file_sub"
   old_name_search_text="$(enhance_searchability "$old_name")"
-  find "$old_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+  find "$old_video_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r old_sub; do
       ext=$(get_sub_extension "$old_sub")
-      new_sub="$old_meta_dir/subs/$name.$ext"
+      new_sub="$old_video_meta_dir/subs/$name.$ext"
       mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
     done
-  find "$old_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+  find "$old_video_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r old_sub; do
       ext=$(get_sub_extension "$old_sub")
-      new_sub="$old_meta_dir/subs/auto-generated/$name.$ext"
+      new_sub="$old_video_meta_dir/subs/auto-generated/$name.$ext"
       mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
     done
   # rename subs - end
 
   # rename meta dir
-  [ -d "$old_meta_dir" ] &&
-    mv "$old_meta_dir" "$meta_dir" &&
-    echo -e "renamed: '$old_meta_dir (metadata directory)'\n     to: '$meta_dir' (metadata directory)"
+  [ -d "$old_video_meta_dir" ] &&
+    mv "$old_video_meta_dir" "$video_meta_dir" &&
+    echo -e "renamed: '$old_video_meta_dir (metadata directory)'\n     to: '$video_meta_dir' (metadata directory)"
 
   # rename media file
   [ -f "$old_media_file" ] &&
@@ -354,7 +361,7 @@ rmlast() {
   media_file_sub="$(strip_extension "$media_file").en.srt"
 
   # show files found
-  [ -d "$meta_dir" ] && echo "found '$meta_dir' (metadata directory)"
+  [ -d "$video_meta_dir" ] && echo "found '$video_meta_dir' (metadata directory)"
   [ -f "$media_file_sub" ] && echo "found '$media_file_sub'"
   [ -f "$media_file" ] && echo "found '$media_file'"
 
@@ -363,7 +370,7 @@ rmlast() {
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] && return
 
-  [ -d "$meta_dir" ] && rm -rf "$meta_dir" && echo "deleted '$meta_dir (metadata directory)'"
+  [ -d "$video_meta_dir" ] && rm -rf "$video_meta_dir" && echo "deleted '$video_meta_dir (metadata directory)'"
   [ -f "$media_file_sub" ] && rm -rf "$media_file_sub" && echo "deleted '$media_file_sub'"
   [ -f "$media_file" ] && rm -rf "$media_file" && echo "deleted '$media_file'"
   echo "files deleted for $old_name"
@@ -550,13 +557,13 @@ uploadvideo() {
   media_file="$result"
   json_file="$(media_file2metadata_path "$media_file")"
   [ ! -f "$json_file" ] && echo "could not find metadata file, hence directory, based on media file '$media_file', abort" && return
-  meta_dir="$(dirname "$json_file")"
-  [ -f "$meta_dir/thumbnail.jpg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpg"
-  [ -f "$meta_dir/thumbnail.jpeg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpeg"
-  [ -f "$meta_dir/thumbnail.png" ] && thumb_file="$(dirname "$json_file")/thumbnail.png"
-  [ -f "$meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
+  video_meta_dir="$(dirname "$json_file")"
+  [ -f "$video_meta_dir/thumbnail.jpg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpg"
+  [ -f "$video_meta_dir/thumbnail.jpeg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpeg"
+  [ -f "$video_meta_dir/thumbnail.png" ] && thumb_file="$(dirname "$json_file")/thumbnail.png"
+  [ -f "$video_meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
 
-  upload_dir="$uploads_dir/$(basename "$meta_dir")"
+  upload_dir="$uploads_dir/$(basename "$video_meta_dir")"
   [ -d "$upload_dir" ] && rm -r "$upload_dir"
   mkdir "$upload_dir"
 

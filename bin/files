@@ -163,9 +163,9 @@ renvid() { # TODO: rewrite
 
   # rename meta dir
   [ -d "$old_meta_dir" ] &&
-    video_meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
-    mv "$old_meta_dir" "$video_meta_dir" &&
-    echo -e "renamed: '$old_meta_dir' (metadata directory)\n     to: '$video_meta_dir' (metadata directory)"
+    entry_meta_dir="$(dirname "$old_meta_dir")/$new_name" &&
+    mv "$old_meta_dir" "$entry_meta_dir" &&
+    echo -e "renamed: '$old_meta_dir' (metadata directory)\n     to: '$entry_meta_dir' (metadata directory)"
   # print rename media file sub
   echo -e "renamed: '$old_media_file_sub\n     to: $media_file_sub"
   # rename media file
@@ -184,7 +184,7 @@ renvid() { # TODO: rewrite
   # set vars for metadata command & rerun of renvid
   name="$new_name"
   title="$new_name"
-  meta_file="$video_meta_dir/metadata.json"
+  meta_file="$entry_meta_dir/metadata.json"
 
   # rename history entry
   if [ -f "$titles_file" ]; then
@@ -206,11 +206,11 @@ renlast() {
   old_media_file_sub="$old_media_dir/$old_name.en.srt" # TODO: bug if sub is not srt
   old_ext="$(get_extension "$old_media_file")"
 
-  old_video_meta_dir="$video_meta_dir"
-  old_meta_file="$old_video_meta_dir/metadata.json"
+  old_entry_meta_dir="$entry_meta_dir"
+  old_meta_file="$old_entry_meta_dir/metadata.json"
 
   # show files found
-  [ -d "$old_video_meta_dir" ] && echo "found '$old_video_meta_dir' (metadata directory)"
+  [ -d "$old_entry_meta_dir" ] && echo "found '$old_entry_meta_dir' (metadata directory)"
   [ -f "$old_media_file_sub" ] && echo "found '$old_media_file_sub'"
   [ -f "$old_media_file" ] && echo "found '$old_media_file'"
 
@@ -226,31 +226,34 @@ renlast() {
   name="$1"
   media_file="$old_media_dir/$name.$old_ext"
   media_file_sub="$(dirname "$old_media_file")/$name.en.srt"
-  video_meta_dir="$(dirname "$old_video_meta_dir")/$name"
+  entry_meta_dir="$(dirname "$old_entry_meta_dir")/$name"
 
   # rename subs
   [ -f "$old_media_file_sub" ] &&
     mv "$old_media_file_sub" "$media_file_sub" &&
     echo -e "renamed: '$old_media_file_sub'\n     to: '$media_file_sub"
   old_name_search_text="$(enhance_searchability "$old_name")"
-  find "$old_video_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+  find "$old_entry_meta_dir/subs" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r old_sub; do
       ext=$(get_sub_extension "$old_sub")
-      new_sub="$old_video_meta_dir/subs/$name.$ext"
+      new_sub="$old_entry_meta_dir/subs/$name.$ext"
       mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
     done
-  find "$old_video_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
+  find "$old_entry_meta_dir/subs/auto-generated" -maxdepth 1 -type f -iname "*$old_name_search_text*.srt" 2>/dev/null |
     while read -r old_sub; do
       ext=$(get_sub_extension "$old_sub")
-      new_sub="$old_video_meta_dir/subs/auto-generated/$name.$ext"
+      new_sub="$old_entry_meta_dir/subs/auto-generated/$name.$ext"
       mv "$old_sub" "$new_sub" && echo -e "renamed: '$old_sub'\n     to: '$new_sub"
     done
   # rename subs - end
 
   # rename meta dir
-  [ -d "$old_video_meta_dir" ] &&
-    mv "$old_video_meta_dir" "$video_meta_dir" &&
-    echo -e "renamed: '$old_video_meta_dir (metadata directory)'\n     to: '$video_meta_dir' (metadata directory)"
+  [ -d "$old_entry_meta_dir" ] &&
+    mv "$old_entry_meta_dir" "$entry_meta_dir" &&
+    echo -e "renamed: '$old_entry_meta_dir (metadata directory)'\n     to: '$entry_meta_dir' (metadata directory)"
+
+  [ "$function" = dlt ] &&
+    mv "$json_file" "$thumbnails_meta_dir/$platform/$name.json"
 
   # rename media file
   [ -f "$old_media_file" ] &&
@@ -361,18 +364,20 @@ rmlast() {
   media_file_sub="$(strip_extension "$media_file").en.srt"
 
   # show files found
-  [ -d "$video_meta_dir" ] && echo "found '$video_meta_dir' (metadata directory)"
+  [ -d "$entry_meta_dir" ] && echo "found '$entry_meta_dir' (metadata directory)"
   [ -f "$media_file_sub" ] && echo "found '$media_file_sub'"
   [ -f "$media_file" ] && echo "found '$media_file'"
+  [ "$function" = dlt ] && echo "found '$json_file'" # TODO
 
   # ask confirmation to rename
   echo -n "delete these files? Y/n: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ "$answer" = "n" ] && return
 
-  [ -d "$video_meta_dir" ] && rm -rf "$video_meta_dir" && echo "deleted '$video_meta_dir (metadata directory)'"
+  [ -d "$entry_meta_dir" ] && rm -rf "$entry_meta_dir" && echo "deleted '$entry_meta_dir (metadata directory)'"
   [ -f "$media_file_sub" ] && rm -rf "$media_file_sub" && echo "deleted '$media_file_sub'"
   [ -f "$media_file" ] && rm -rf "$media_file" && echo "deleted '$media_file'"
+  [ "$function" = dlt ] && rm "$json_file" # TODO
   echo "files deleted for $old_name"
 }
 
@@ -557,13 +562,13 @@ uploadvideo() {
   media_file="$result"
   json_file="$(media_file2metadata_path "$media_file")"
   [ ! -f "$json_file" ] && echo "could not find metadata file, hence directory, based on media file '$media_file', abort" && return
-  video_meta_dir="$(dirname "$json_file")"
-  [ -f "$video_meta_dir/thumbnail.jpg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpg"
-  [ -f "$video_meta_dir/thumbnail.jpeg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpeg"
-  [ -f "$video_meta_dir/thumbnail.png" ] && thumb_file="$(dirname "$json_file")/thumbnail.png"
-  [ -f "$video_meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
+  entry_meta_dir="$(dirname "$json_file")"
+  [ -f "$entry_meta_dir/thumbnail.jpg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpg"
+  [ -f "$entry_meta_dir/thumbnail.jpeg" ] && thumb_file="$(dirname "$json_file")/thumbnail.jpeg"
+  [ -f "$entry_meta_dir/thumbnail.png" ] && thumb_file="$(dirname "$json_file")/thumbnail.png"
+  [ -f "$entry_meta_dir/thumbnail.webp" ] && thumb_file="$(dirname "$json_file")/thumbnail.webp"
 
-  upload_dir="$uploads_dir/$(basename "$video_meta_dir")"
+  upload_dir="$uploads_dir/$(basename "$entry_meta_dir")"
   [ -d "$upload_dir" ] && rm -r "$upload_dir"
   mkdir "$upload_dir"
 

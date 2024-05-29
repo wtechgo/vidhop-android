@@ -237,11 +237,11 @@ dlvi() {
   channel_name="$(channel_name_from_obj)"
   [ "$(is_platform_facebook)" = true ] && name="$(shorten_text "$name")_$(timestamp)"
 
-  video_meta_dir="$vids_meta_dir/$platform/$name"
-  mkdir -p "$video_meta_dir"
-  json_file="$video_meta_dir/metadata.json"
+  entry_meta_dir="$vids_meta_dir/$platform/$name"
+  mkdir -p "$entry_meta_dir"
+  json_file="$entry_meta_dir/metadata.json"
 
-  fetch_thumbnail "$video_meta_dir"
+  fetch_thumbnail "$entry_meta_dir"
   [[ "$url" != *bitchute* ]] && fetch_subs
 
   add_to_vhistory
@@ -790,7 +790,6 @@ dla() {
   clear_vars_dlv
   [ $# = 1 ] && url="$1"
   [ $# = 2 ] && dl_comments=true && url="$2"
-  mkdir -p "$music_meta_dir" 2>/dev/null
 
   fetch_music_metadata "$url" # populates json
   # download media
@@ -1145,16 +1144,16 @@ dlpodi() {
   echo "[vidhop] fetching title"
   name="$(fetch_sanitized_title)"
   platform=$(extract_platform_name "$url")
-  podcast_meta_dir="$podcasts_meta_dir/$platform/$name"
-  mkdir -p "$podcast_meta_dir" 2>/dev/null
-  json_file="$podcast_meta_dir/metadata.json"
+  entry_meta_dir="$podcasts_meta_dir/$platform/$name"
+  mkdir -p "$entry_meta_dir" 2>/dev/null
+  json_file="$entry_meta_dir/metadata.json"
 
   fetch_video_metadata "$url"
   formats="$(yt-dlp -F "$url")"
   grep -q mp3 <<<"$formats" && ext="mp3"
   grep -q m4a <<<"$formats" && ext="m4a"
 
-  fetch_thumbnail "$podcast_meta_dir"
+  fetch_thumbnail "$entry_meta_dir"
   fetch_subs
 
   add_to_phistory
@@ -1163,7 +1162,7 @@ dlpodi() {
 
   if [ "$(is_media_download)" = false ]; then
     print_metadata
-    cd "$podcast_meta_dir"
+    cd "$entry_meta_dir"
     unset dl_comments function
   fi
 }
@@ -1223,6 +1222,7 @@ dlt() {
 
   name="$(fetch_sanitized_title)"
   json_file="$thumbnails_meta_dir/$platform/$name.json"
+  unset entry_meta_dir # TODO: rewrite code so thumbs and songs have their own meta dir. # dirty hack
   fetch_video_metadata "$url"
 
   yt-dlp $(insert_cookies_param) \

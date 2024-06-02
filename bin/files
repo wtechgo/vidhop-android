@@ -269,6 +269,10 @@ renlast() {
   title="$name"
 }
 
+renlast-initcap() {
+  renlast "$(initcap "$(lasttitle)")"
+}
+
 renlasty() {
   renlast "$1" -y
 }

@@ -219,7 +219,7 @@ EOF
     -sexagesimal "$input_file" | sed 's/\..*//g')"
   output_file="$(prefix_extension "$input_file" cut)"
 
-  ffmpeg -i "$input_file" -ss "$start_time" -t "$end_time" "$output_file"
+  ffmpeg -i "$input_file" -ss "$start_time" -to "$end_time" "$output_file"
   echo -e "cut complete, result at:\n\"$output_file\""
   cd "$(dirname "$input_file")"
 

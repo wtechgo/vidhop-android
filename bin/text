@@ -6,6 +6,13 @@ text_help() {
   echo " Commands:"
   echo "    extract-missing-lines <FILE_1> <FILE_2> => Show lines that where in <FILE_1>, and missing in <FILE_2>."
   echo "    extract-missing-lines <TEXT_INPUT_1> <TEXT_INPUT_2> => Show lines that where in <TEXT_INPUT_1>, and missing in <TEXT_INPUT_2>."
+  echo "    initcap <TEXT_INPUT_1> => First letter to uppercase, the rest to lowercase."
+}
+
+initcap() {
+  text="$1"
+  text="$(tr '[:upper:]' '[:lower:]' <<< "${text}")"
+  echo "$(tr '[:lower:]' '[:upper:]' <<< "${text:0:1}")${text:1}"
 }
 
 extract-missing-lines() {

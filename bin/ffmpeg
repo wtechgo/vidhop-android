@@ -97,6 +97,17 @@ to-480p() {
   echo "result file is at '$output_file'"
 }
 
+to-480p-sharp() {
+  [ -z "$1" ] && echo "Usage: to-480p-sharp <INPUT_VIDEO_FILE>"
+  input_file="$1"
+  output_file="$(prefix_extension "$input_file" 480p-sharp)"
+  end_time="$(ffprobe -v error -show_entries format=duration \
+    -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
+
+  echo "applying upscaling to 480p and sharpening..."
+  ffmpeg -i "$input_file" -filter_complex scale=854x480,unsharp=3:3:2 "$output_file"
+}
+
 to-720p() {
   input_file="$1"
   output_file="$(strip_extension "$input_file")_720p.$(get_extension "$input_file")"

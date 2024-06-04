@@ -69,8 +69,8 @@ dlvilist="$import_list_dir/dlvi.list"
 dlvpllist="$import_list_dir/dlvpl.list"
 dlvplilist="$import_list_dir/dlvpli.list"
 
-
-filename_char_count=70
+#filename_char_count=70
+filename_char_count=180
 termux_screen_char_count=53
 # VidHop app dirs -- end
 

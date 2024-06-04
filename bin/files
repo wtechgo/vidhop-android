@@ -374,15 +374,23 @@ rmlast() {
   [ "$function" = dlt ] && echo "found '$json_file'" # TODO
 
   # ask confirmation to rename
-  echo -n "delete these files? Y/n: " && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ "$answer" = "n" ] && return
+  if [ -z "$answeryes" ]; then
+    echo -n "delete these files? Y/n: " && read -r answer
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    [ "$answer" = "n" ] && return
+  fi
+  unset answeryes
 
   [ -d "$entry_meta_dir" ] && rm -rf "$entry_meta_dir" && echo "deleted '$entry_meta_dir (metadata directory)'"
   [ -f "$media_file_sub" ] && rm -rf "$media_file_sub" && echo "deleted '$media_file_sub'"
   [ -f "$media_file" ] && rm -rf "$media_file" && echo "deleted '$media_file'"
   [ "$function" = dlt ] && rm "$json_file" # TODO
   echo "files deleted for $old_name"
+}
+
+rmlasty(){
+  answeryes=true
+  rmlast
 }
 
 find_archive_file_from_audio_channel_name() {

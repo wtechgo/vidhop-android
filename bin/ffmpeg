@@ -51,6 +51,10 @@ to-x264() {
   #ffmpeg -i input.avi -c:v libx264 -crf 21 -preset faster -pix_fmt yuv420p -maxrate 5000K -bufsize 5000K -vf 'scale=if(gte(iw\,ih)\,min(1920\,iw)\,-2):if(lt(iw\,ih)\,min(1920\,ih)\,-2)' -movflags +faststart -c:a aac -b:a 160k output.mp4
 }
 
+to-mp4() {
+  to-x264 "$@"
+}
+
 to-x265() {
   [ -z "$1" ] &&
     echo "Usage: to-x265 <INPUT_VIDEO_FILE> [<OUTPUT_FILE>]" &&

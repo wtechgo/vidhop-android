@@ -261,7 +261,8 @@ linkvideos4project() {
   search_text="$1"
   project_dir="$projects_dir/$2"
   [ ! -d "$project_dir" ] && echo "project directory '$project_dir' does not exist, abort" && return
-  dest_dir="$project_dir/vid/$search_text"
+
+  if [ "$(basename "$project_dir")" = "$search_text" ]; then dest_dir="$project_dir/vid"; else dest_dir="$project_dir/vid/$search_text"; fi
 
   unset result
   found_something="false"
@@ -418,6 +419,8 @@ writeproject() {
 }
 
 lsprojects() {
+  [ "$1" = -h ] && echo "Usage: lsprojects [<SEARCH_TEXT>]" && return
+  [ -n "$1" ] && find "$projects_dir" -maxdepth 1 -type d -iname "*$1*" -exec basename {} \; | sort && return
   find "$projects_dir" -maxdepth 1 -type d -exec basename {} \; | sort
 }
 

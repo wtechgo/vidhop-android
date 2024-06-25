@@ -393,6 +393,12 @@ rmlasty(){
   rmlast
 }
 
+rmex(){
+  [ "$1" = -h ] && echo "Info: Remove last download and exit terminal." && return
+  rmlasty
+  exit
+}
+
 find_archive_file_from_audio_channel_name() {
   name="$1"
   found_json=$(find "$music_meta_dir" -type f -iwholename "*$name**metadata.json")

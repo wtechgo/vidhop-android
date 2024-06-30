@@ -13,11 +13,6 @@
 ## Overwrites loader.bin_dir before the loader loads in all other binaries.
 #bin_dir=""
 
-## User dirs.
-## ----------
-#music_dir_ws=""
-#music_dir_phone=""
-
 ## SSH settings.
 ### PHONE.
 ### ------
@@ -34,6 +29,17 @@
 #VIDHOP_DIR_WS=""
 #VIDHOP_APP_DIR_WS=""
 #BROWSER=""
+
+## User dirs.
+#music_dir_ws=""
+#music_dir_phone=""
+#screenshots_dir=""
+
+## Telegram
+#tgdocs_ws=""
+#tgvids_ws=""
+#tgimgs_ws=""
+#tgaudio_ws=""
 
 ## Platform logins
 ## twitter_username=""

@@ -629,8 +629,23 @@ cleanproj() {
 
 # Read PDF file.
 pdf() {
-  [ ! -f "$1" ] && echo "not a file: '$1'" && return
-  "$pdf_reader_app" "$1" &
+  [ -z "$1" ] &&
+    echo " Usage: pdf <PDF_FILE>" &&
+    echo "        pdf <SEARCH_TEXT>" &&
+    echo "  Info: Read a PDF file with the default PDF reader app defined in config.ini." &&
+    echo "        When <SEARCH_TEXT> is provided, pdf() will look in \$projects_dir for a match and open it." && return
+
+  search_text="$1"
+  [ -f "$1" ] && "$pdf_reader_app" "$1" &
+
+  files="$(find "$projects_dir" -iname "*$1*pdf")"
+  count=$(wc -l <<<"$files")
+  [ "$files" = "" ] && count=0
+  [ "$count" -eq 0 ] && echo "found nothing for '$search_text'" && unset files && return
+  [ "$count" -gt 1 ] &&
+    echo -e "pdf requires 1 file to read, but found $count\n$files\nyou can specify your search term further" &&
+    unset files && return
+  "$pdf_reader_app" "$files"
 }
 
 wlink() {

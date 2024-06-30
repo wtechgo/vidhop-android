@@ -47,7 +47,7 @@ play() {
 
     [ "$count" -eq 0 ] && echo "found nothing for '$search_text'" && unset files && return
     [ "$count" -gt 1 ] &&
-      echo -e "play requires 1 file but found $count\n$files\nyou can specifiy your search term further" &&
+      echo -e "play requires 1 file but found $count\n$files\nyou can specify your search term further" &&
       unset files && return
     media_file="$files" && unset files
   fi

@@ -371,6 +371,6 @@ rp() {
 alias rpp="realpath"
 
 reloadshell () {
-  shellzoid="${SHELL//\/data\/data\/com.termux\/files\/usr\/bin\/}" # remove all from path except shell name
+  shellzoid="${SHELL//\/data\/data\/com.termux\/files\/usr\/bin\/}"
   . "$HOME/.${shellzoid}rc"
 }

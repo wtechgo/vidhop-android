@@ -656,8 +656,12 @@ wlink() {
   wlink_url="$1"
   wlink_url="$(echo "$wlink_url" | sed 's/\\//g')" # remove backslashes
   sanitized_url="$(url_to_filename "$wlink_url")"
+  # Remove https://www
   sanitized_url="${sanitized_url#https_--www_}"
   sanitized_url="${sanitized_url#https_--}"
+  # Remove http://www
+  sanitized_url="${sanitized_url#http_--www_}"
+  sanitized_url="${sanitized_url#http_--}"
 
   wlink_dir="$(pwd)"
   wlink_name="${sanitized_url}"

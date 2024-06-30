@@ -428,4 +428,4 @@ Special thanks to the incredibly awesome projects [YT-DLP](https://github.com/yt
 <a href="https://github.com/wtechgo/vidhop-android/blob/master/img/qr_monero_wtechgo.png?raw=true">
 <img src="https://github.com/wtechgo/vidhop-android/blob/master/img/qr_monero_wtechgo.png?raw=true" alt="Monero" width="100" />
 </a>
-<pre>8BNDojnvwYkacFwztY3XsjefCr28zTDraTgzdFLH8JiL5W4eMjTuHCu57LkCy9UHKHZfGzWDo6ErDYDP4jBK814aG2T8z8c</pre>
+<pre>82VmqH7HPAaDMHvGQhS9jze2Gorjkd5xAdnvpsEGyAJu8oGcxRHqErpgZobCFGT4F5CUmEcwCm79zMdXH7FTinpbVi7bTcn</pre>

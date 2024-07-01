@@ -105,6 +105,19 @@ updateytdlp() {
   pip install -U yt-dlp
 }
 
+updateytdlp-nightly() {
+  echo "> Updating YT-DLP..." && sleep 1
+  pip install --break-system-packages -U --pre "yt-dlp[default]"
+}
+
+updateytdlp-nightly-revert() {
+  echo "> This command will remove YT-DLP and then install the default YT-DLP..." && sleep 3
+  echo "> Removing YT-DLP..." && sleep 1
+  pip uninstall -y --break-system-packages yt-dlp
+  echo "> Installing YT-DLP..." && sleep 1
+  pip install --break-system-packages yt-dlp
+}
+
 updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   updatesystem

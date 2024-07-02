@@ -208,16 +208,60 @@ find-images() {
     -o -iname "*$search_text*.gif" 2>/dev/null
 }
 
+get_last_screenshot_path() {
+  echo "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)"
+}
+
 cpscreenshot() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: mvscreenshot [<NAME>] [<DEST_DIR>]" && return
   dest_dir="$PWD"
-  [ -n "$1" ] && dest_dir"$1"
-  !  [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
-  cp "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)" .
+  if [ $# = 1 ]; then
+    [ -d "$1" ] && dest_dir="$1"
+    ! [ -d "$1" ] && name_screenshot="$1"
+  elif [ $# = 2 ]; then
+    name_screenshot="$1"
+    dest_dir="$2"
+  fi
+  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+
+  last_screenshot_path="$(get_last_screenshot_path)"
+  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  [ "$name_screenshot" ] &&
+    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
+    last_screenshot_path="$(get_last_screenshot_path)" &&
+    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  mv "$last_screenshot_path" "$new_screenshot_path"
+
+  echo -e "moved:\n$last_screenshot_path"
+  echo -e "to:\n$new_screenshot_path"
+  unset name_screenshot
 }
 
 mvscreenshot() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: mvscreenshot [<NAME>] [<DEST_DIR>]" && return
   dest_dir="$PWD"
-  [ -n "$1" ] && dest_dir"$1"
-  !  [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
-  mv "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)" .
+  if [ $# = 1 ]; then
+    [ -d "$1" ] && dest_dir="$1"
+    ! [ -d "$1" ] && name_screenshot="$1"
+  elif [ $# = 2 ]; then
+    name_screenshot="$1"
+    dest_dir="$2"
+  fi
+  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+
+  last_screenshot_path="$(get_last_screenshot_path)"
+  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  [ "$name_screenshot" ] &&
+    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
+    last_screenshot_path="$(get_last_screenshot_path)" &&
+    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  mv "$last_screenshot_path" "$new_screenshot_path"
+
+  echo -e "moved:\n$last_screenshot_path"
+  echo -e "to:\n$new_screenshot_path"
+  unset name_screenshot
 }

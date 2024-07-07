@@ -124,8 +124,8 @@ renvid() { # TODO: rewrite
   new_name="$2"
 
   old_meta_file=$(find "$vids_meta_dir" -type f -iwholename "*$old_name_search_text*/metadata.json")
-  [ "$(echo "$old_meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return
-  [ -z "$old_meta_file" ] && echo "no metadata file found for '$1', abort" && return
+  [ "$(echo "$old_meta_file" | wc -l)" -gt 1 ] && echo "found more than 1 metadata file, abort" && return 1
+  [ -z "$old_meta_file" ] && echo "no metadata file found for '$1', abort" && return 1
 
   old_meta_dir=$(dirname "$old_meta_file")
   old_name=$(basename "$old_meta_dir" .json)

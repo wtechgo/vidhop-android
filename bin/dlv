@@ -187,12 +187,21 @@ fetch_subs() {
     english="$subs_dir/${name}.en.srt"
     english_auto="$auto_subs_dir/${name}.en.srt"
     default_subs_en="$media_dir_dest/$platform/$name.en.srt"
-    [ -f "$english" ] && /bin/cp "$english" "$default_subs_en"
-    ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$default_subs_en"
+#    [ -f "$english" ] && /bin/cp "$english" "$default_subs_en"
+#    ! [ -f "$english" ] && [ -f "$english_auto" ] && /bin/cp "$english_auto" "$default_subs_en"
   fi
 
   [ "$(is_dir_empty "$auto_subs_dir")" = true ] && rm -rf "$auto_subs_dir"
   [ "$(is_dir_empty "$subs_dir")" = true ] && rm -rf "$subs_dir"
+}
+
+getsubs() {
+  [ -f "$english" ] && /bin/cp "$english" "$default_subs_en" && return
+  [ -f "$english_auto" ] && /bin/cp "$english_auto" "$default_subs_en"
+}
+
+subs() {
+  getsubs
 }
 
 print_metadata() {
@@ -328,6 +337,10 @@ dlv2160p() {
   res=2160
   dlv "$@"
   unset res
+}
+
+dlblob() {
+  "$browser_app" "https://stackoverflow.com/a/49835269"
 }
 
 # CHANNELS

@@ -133,7 +133,7 @@ fetch_sanitized_title() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '-' \
     --replace-in-metadata "title" '\`' "'" \
@@ -483,7 +483,7 @@ dlci() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -546,7 +546,7 @@ dlc() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -675,7 +675,7 @@ dlvpli() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -720,7 +720,7 @@ dlvpl() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\?' '' \    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -947,7 +947,7 @@ dlaci() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\?' '' \    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -992,6 +992,7 @@ dlac() {
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
     --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -1075,6 +1076,7 @@ dlapli() {
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
     --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -1120,6 +1122,7 @@ dlapl() {
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
     --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -1331,12 +1334,12 @@ dlcensored() {
   echo "download finished"
 }
 
-insert_cookies_param () {
-  if [ -n "$BROWSER" ]; then
-    echo -n "--cookies-from-browser $BROWSER "
-  elif [ -f "$config_dir/cookies.txt" ]; then
-    echo -n "--cookies $config_dir/cookies.txt "
-  fi
+insert_cookies_param() {
+  [ "$cookies" = "no" ] && return
+  # prefer cookies.txt (faster)
+  if [ -s "$config_dir/cookies.txt" ]; then echo -n "--cookies $config_dir/cookies.txt " && return; fi
+  if [ -n "$BROWSER" ]; then echo -n "--cookies-from-browser $BROWSER "; fi
+
   #  # prefer cookies from browser
   #  if [ -n "$BROWSER" ]; then
   #    echo -n "--cookies-from-browser $BROWSER "

@@ -72,13 +72,15 @@ fi
 chmod +x "$vidhop_app_dir/install.sh"
 chmod +x "$loader"
 
+# backup up current bash.bashrc
+cp "$PREFIX/etc/bash.bashrc" "$PREFIX/etc/bash.bashrc.backup"
+
 # Enabling the '. vidhop' command.
 echo '#!/bin/bash' >"$loader_bin"
 echo >>"$loader_bin"
 echo ". $loader" >>"$loader_bin"
 chmod +x "$loader_bin"
 echo -e "\n. vidhop" >>"$PREFIX/etc/bash.bashrc"
-
 
 echo "Configuring Termux for a streamlined VidHop experience..." && sleep 1
 echo "Removing Termux welcome message as it interferes with rsync (VidHop Sync)..." && sleep 1

@@ -79,6 +79,7 @@ sanitize_filename() { # echo '"*/<>?\|_: ..ok`' | sanitize_filename
     tr -d '<' |
     tr -d '>' |
     tr -d '\?' |
+    tr -d '\!' |
     tr -d '\\' |
     tr '"' "'" |
     tr '\|' '-' |

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+wp-href(){
+  wp_href="$1"
+  wp_text="$2"
+  echo '<a href="'"$wp_href"'">'"$wp_text"'</a>'
+}
+
+wp-list-item() {
+  wp_item="$1"
+  echo
+  echo '  <!-- wp:list-item -->'
+  echo '    <li>'"$wp_item"'</li>'
+  echo '  <!-- /wp:list-item -->'
+}
+
+wp-list() {
+  wp_items="$( echo "$1" | grep "\S")" # grep removes blank lines added by wp-list-item
+  echo '<!-- wp:list -->'
+  echo '<ul class="wp-block-list">'
+  echo "$wp_items"
+  echo '</ul>'
+  echo '<!-- /wp:list -->'
+}

@@ -22,6 +22,7 @@ config_ini="$PREFIX/opt/vidhop/config/config.ini"
 . "$bin_dir/image"
 . "$bin_dir/sync"
 . "$bin_dir/project"
+. "$bin_dir/wp"
 . "$bin_dir/fix"
 . "$bin_dir/debug"
 . "$bin_dir/text"
@@ -159,6 +160,14 @@ uninstallvidhop() {
   [ "$answer" = "n" ] || [ -z "$answer" ] && echo "uninstall stopped" && return
   [ "$answer" = "y" ] && rm -rf "$shared/VidHop" && echo "VidHop media and metadata directory deleted" && sleep 2
   echo "VidHop uninstall completed"
+}
+
+clearvidhopdata() {
+  echo -n "Remove all VidHop downloaded data? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "n" ] && return
+  [ "$answer" = "y" ] &&
+    rm -rf "$vidhop_dir"
 }
 
 loader_help() {

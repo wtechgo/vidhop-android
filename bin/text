@@ -40,12 +40,12 @@ urlargs-remove(){
   urlparams-remove "$@"
 }
 
-odysee-embed-urls() {
-  urls="$1"
-  while read -r url; do
-    url="$(echo "$url" | tr -d '\')" 2>/dev/null
-    embed="$(echo "$url" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g')"
-    echo '<!-- wp:html --><figure><div class="fluid-width-video-wrapper" style="padding-top: 56.25%;"><iframe id="odysee-iframe" style="width:100%; aspect-ratio:16 / 9;" src="'"$embed"'" allowfullscreen></iframe></div><figcaption></figcaption></figure><!-- /wp:html -->'
-    echo
-  done <<<"$urls"
+urldecode(){
+  echo -e "$(sed 's/+/ /g;s/%\(..\)/\\x\1/g;')"
+}
+
+vlc-playlist2paths() {
+  [ -z "$1" ] && echo " Usage: vlc-playlist2paths <VLC_PLAYLIST_XSPF>" && return
+  playlist="$1"
+  grep file "$playlist" | sed -E 's;[[:space:]]*<location>file://;;' | sed 's;</location>;;' | urldecode
 }

@@ -22,3 +22,13 @@ wp-list() {
   echo '</ul>'
   echo '<!-- /wp:list -->'
 }
+
+odysee-embed-urls() {
+  urls="$1"
+  while read -r url; do
+    url="$(echo "$url" | tr -d '\')" 2>/dev/null
+    embed="$(echo "$url" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g')"
+    echo '<!-- wp:html --><figure><div class="fluid-width-video-wrapper" style="padding-top: 56.25%;"><iframe id="odysee-iframe" style="width:100%; aspect-ratio:16 / 9;" src="'"$embed"'" allowfullscreen></iframe></div><figcaption></figcaption></figure><!-- /wp:html -->'
+    echo
+  done <<<"$urls"
+}

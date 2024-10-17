@@ -48,6 +48,10 @@ remove_all_url_params() {
   url="${url%%\?*}" # removes question mark and all that follows from a non-escaped URL
 }
 
+bitchute_timeout() {
+  [ "$platform" = bitchute.com ] && sleep 10
+}
+
 # Fetch video metadata (yt-dlp), select relevant fields and pretty print (jq).
 # Populates global variable $json.
 fetch_video_metadata() {
@@ -281,6 +285,7 @@ dlv() {
   mkdir "$vids_dir/$platform" 2>/dev/null
 
   dlvi "$url"
+  bitchute_timeout
   yt-dlp $(insert_cookies_param) \
     --no-mtime -P "$vids_dir/$platform" -o "$name.%(ext)s" \
     $([ -n "$res" ] && echo " -S res:$res") \

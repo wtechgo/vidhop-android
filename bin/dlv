@@ -137,6 +137,7 @@ fetch_sanitized_title() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
     --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '-' \
@@ -155,6 +156,7 @@ fetch_song_filename() {
     --replace-in-metadata "artist,title" '<' '' \
     --replace-in-metadata "artist,title" '>' '' \
     --replace-in-metadata "artist,title" '\?' '' \
+    --replace-in-metadata "artist,title" '\!' '' \
     --replace-in-metadata "artist,title" '\\' '' \
     --replace-in-metadata "artist,title" '\|' '-' \
     --replace-in-metadata "artist,title" '\`' "'" \
@@ -488,6 +490,7 @@ dlci() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
     --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
@@ -551,6 +554,7 @@ dlc() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
     --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
@@ -680,6 +684,7 @@ dlvpli() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
+    --replace-in-metadata "title" '\?' '' \
     --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
@@ -725,7 +730,8 @@ dlvpl() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \    --replace-in-metadata "title" '\!' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \
@@ -952,7 +958,8 @@ dlaci() {
     --replace-in-metadata "title" '#' '[ht]' \
     --replace-in-metadata "title" '<' '' \
     --replace-in-metadata "title" '>' '' \
-    --replace-in-metadata "title" '\?' '' \    --replace-in-metadata "title" '\!' '' \
+    --replace-in-metadata "title" '\?' '' \
+    --replace-in-metadata "title" '\!' '' \
     --replace-in-metadata "title" '\\' '' \
     --replace-in-metadata "title" '\|' '_' \
     --replace-in-metadata "title" '\`' "'" \

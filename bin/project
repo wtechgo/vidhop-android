@@ -392,47 +392,12 @@ videos2links-wp() {
 #    unset title url channel_name item
   done < <(find -L "$links_dir" -maxdepth 1 -type f ! -name '*.txt' ! -name '*.md' -exec realpath {} \;)
 
+  echo -e "$(wp-list "$items")"
+  [ -n "$errors" ] && echo -e "\n\nErrors:\n$errors"
+  # Write to files.
   echo -e "$(wp-list "$items")" >"$links_dir/links-wp.txt"
-  echo -e "\n\nErrors:\n$errors" >>"$links_dir/links-wp.txt"
+  [ -n "$errors" ] && echo -e "\n\nErrors:\n$errors" >>"$links_dir/links-wp.txt"
 }
-
-#videos2links() {
-#  links_dir="$PWD"
-#  [ -d "$1" ] && links_dir="$1"
-##  if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory" && echo; fi
-#  [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
-#
-#  unset summary_txt summary_md
-#  while read -r media_file; do
-#    json_file="$(media_file2metadata_path "$media_file")" || continue
-#    if [ -f "$json_file" ]; then
-#      json="$(jq . "$json_file")"
-#      # gather metadata
-#      title="$(jq .title <<<"$json" | remove_leading_trailing_double_quotes)"
-#      url="$(jq .webpage_url <<<"$json" | remove_leading_trailing_double_quotes)"
-#      channel_name="$(channel_name_from_obj)"
-#      # item: create, print, append to txt and md file
-#      item="$(channel_title_url_item_terminal)"
-#      if [ -n "$item" ]; then
-#        echo -e "$item\n"
-#        # append item to txt
-#        item="$(channel_title_url_item_txt)"
-#        summary_txt+="$item\n\n"
-#        # append item to markdown
-#        summary_md+="$(channel_title_url_item_md)\n"
-#      fi
-#    else
-#      logInfo "not a valid metadata file '$json_file'"
-#    fi
-#    unset title url channel_name item
-#  done < <(find -L "$links_dir" -type f ! -name '*.txt' ! -name '*.md' -exec realpath {} \;)
-#  echo -e "$summary_txt" >"$links_dir/links.txt"
-#  echo -e "$summary_md" >"$links_dir/links.md"
-#
-##  echo "output above was written to a .txt file and a .md file at:"
-##  echo "$links_dir/links.txt"
-##  echo "$links_dir/links.md"
-#}
 
 channel_title_url_item_md() {
   if [ -n "$channel_name" ]; then

@@ -23,12 +23,24 @@ wp-list() {
   echo '<!-- /wp:list -->'
 }
 
-odysee-embed-urls() {
+odysee-embed-wp() {
+  [ -z "$1" ] &&
+    echo "Usage: odysee-embed-wp <URLS>" &&
+    echo "Usage: odysee-embed-wp <URL> <FIGCAPTION>" && return
   urls="$1"
+  figcaption="$2"
   while read -r url; do
     url="$(echo "$url" | tr -d '\')" 2>/dev/null
     embed="$(echo "$url" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g')"
-    echo '<!-- wp:html --><figure><div class="fluid-width-video-wrapper" style="padding-top: 56.25%;"><iframe id="odysee-iframe" style="width:100%; aspect-ratio:16 / 9;" src="'"$embed"'" allowfullscreen></iframe></div><figcaption></figcaption></figure><!-- /wp:html -->'
+    echo '<!-- wp:html -->'
+    echo '  <figure>'
+    echo '    <div class="fluid-width-video-wrapper" style="padding-top: 56.25%;">'
+    echo '      <iframe id="odysee-iframe" style="width:100%; aspect-ratio:16/9;" src="'"$embed"'" allowfullscreen></iframe>'
+    echo '    </div>'
+    [ -n "$figcaption" ] &&
+      echo '    <figcaption>'"$figcaption"'</figcaption>'
+    echo '  </figure>'
+    echo '<!-- /wp:html -->'
     echo
   done <<<"$urls"
 }

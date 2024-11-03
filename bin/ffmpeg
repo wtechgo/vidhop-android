@@ -128,7 +128,7 @@ to-720p-sharp() {
     -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
 
   echo "applying upscaling to 720p and sharpening..."
-  ffmpeg -i "$input_file" -filter_complex scale=1280x720,unsharp=3:3:2.3 "$output_file"
+  ffmpeg -i "$input_file" -filter_complex scale=1280x720,unsharp=3:3:1.5 "$output_file"
 }
 
 to-1080p() {
@@ -147,7 +147,7 @@ to-1080p-sharp() {
     -of default=noprint_wrappers=1:nokey=1 -sexagesimal "$input_file" | sed 's/\..*//g')"
 
   echo "applying upscaling to 1080p and sharpening..."
-  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:2.3 "$output_file"
+  ffmpeg -i "$input_file" -filter_complex scale=1920x1080,unsharp=3:3:1.5 "$output_file"
 }
 
 to-cfr() {

@@ -26,7 +26,7 @@ wp-list() {
 odysee-embed-wp() {
   [ -z "$1" ] &&
     echo "Usage: odysee-embed-wp <URLS>" &&
-    echo "Usage: odysee-embed-wp <URL> <FIGCAPTION>" && return
+    echo "       odysee-embed-wp <URL> <FIGCAPTION>" && return
   urls="$1"
   figcaption="$2"
   while read -r url; do

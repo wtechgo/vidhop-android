@@ -1,27 +1,38 @@
 #!/bin/bash
 
-install_odysee_workaround() {
-  sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
-    "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py" \
-    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
-
-  cat "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp" \
-    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py"
-
-  rm "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
-  echo "Odysee 405 HTTP error fixed"
+get_python_version() {
+  python_version="$(python --version)"
+  python_version=${python_version:7:4}
+  [ -z "$python_version" ] && python_version=3.12
+  echo "$python_version"
 }
 
-restore_odysee_workaround() {
+odysee-alternative-backend() {
+  python_version="$(get_python_version)"
+
+  sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
+    "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py" \
+    >"/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp"
+
+  cat "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    >"/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py"
+
+  rm "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "switched odysee to alternative backend"
+}
+
+odysee-original-backend() {
+  python_version="$(get_python_version)"
+
   sed 's;https://api.na-backend.odysee.com/api/v1/proxy;https://api.lbry.tv/api/v1/proxy;' \
-    "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py" \
-    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
+    "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py" \
+    >"/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp"
 
-  cat "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp" \
-    >"/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py"
+  cat "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp" \
+    >"/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py"
 
-  rm "/home/$USER/.local/lib/python3.10/site-packages/yt_dlp/extractor/lbry.py.temp"
-  echo "Odysee 405 HTTP error fix reverted"
+  rm "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp"
+  echo "switched odysee back to original backend"
 }
 
 # Only the most common platforms are being processed.

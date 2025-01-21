@@ -48,7 +48,13 @@ is_url() {
   [[ "$1" == *http* ]] && echo true || echo false
 }
 
-is_platform_facebook() {
+is_youtube() {
+  [ -n "$1" ] && platform="$1"
+  [ "$platform" = youtube.com ] || [ "$platform" = m.youtube.com ] || [ "$platform" = youtu.be ] && echo true && return
+  echo false
+}
+
+is_facebook() {
   [ "$platform" = facebook.com ] || [ "$platform" = m.facebook.com ] || [ "$platform" = fb.watch ] && echo true && return
   echo false
 }

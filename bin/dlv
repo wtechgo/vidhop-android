@@ -250,7 +250,7 @@ dlvi() {
   fetch_video_metadata "$url" # populates $json, calls yt-dlp 2 times
   name="$(fetch_sanitized_title)"
   channel_name="$(channel_name_from_obj)"
-  [ "$(is_platform_facebook)" = true ] && name="$(shorten_text "$name")_$(timestamp)"
+  [ "$(is_facebook)" = true ] && name="$(shorten_text "$name")_$(timestamp)"
 
   entry_meta_dir="$vids_meta_dir/$platform/$name"
   mkdir -p "$entry_meta_dir"

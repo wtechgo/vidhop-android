@@ -1,26 +1,41 @@
 #!/bin/bash
 
+# 1. Append list items like
+#     item 1 -> `wp-append-item <TEXT> <HREF>
+#     item 2 -> `wp-append-item <TEXT> <HREF>
+#     ...
+# 2. wp-list
+# 3. copy output from the terminal, done
+
 wp-href(){
-  wp_href="$1"
-  wp_text="$2"
+  wp_text="$1"
+  wp_href="$2"
   echo '<a href="'"$wp_href"'">'"$wp_text"'</a>'
 }
 
-wp-list-item() {
-  wp_item="$1"
-  echo
-  echo '  <!-- wp:list-item -->'
-  echo '    <li>'"$wp_item"'</li>'
+wp-append-item() {
+  wp_href="$(wp-href "$1" "$2")"
+
+  wp_item="$(echo '  <!-- wp:list-item -->'
+  echo '    <li>'"$wp_href"'</li>'
   echo '  <!-- /wp:list-item -->'
+  echo)"
+
+  wp_items+="$wp_item"
+}
+
+wp-clear-items(){
+  unset wp_items
 }
 
 wp-list() {
-  wp_items="$( echo "$1" | grep "\S")" # grep removes blank lines added by wp-list-item
   echo '<!-- wp:list -->'
   echo '<ul class="wp-block-list">'
   echo "$wp_items"
   echo '</ul>'
   echo '<!-- /wp:list -->'
+
+  wp-clear-items  # clear previous list for a potential 2nd list
 }
 
 odysee-embed-wp() {

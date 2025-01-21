@@ -50,7 +50,7 @@ is_url() {
 
 is_youtube() {
   [ -n "$1" ] && platform="$1"
-  [ "$platform" = youtube.com ] || [ "$platform" = m.youtube.com ] || [ "$platform" = youtu.be ] && echo true && return
+  [[ "$platform" = *youtube.com* ]] || [[ "$platform" = *m.youtube.com* ]] || [[ "$platform" = *youtu.be* ]] && echo true && return
   echo false
 }
 

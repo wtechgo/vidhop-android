@@ -747,6 +747,9 @@ dlvpl() {
 fetch_music_metadata() {
   echo "[vidhop] fetching metadata"
   url="$1"
+
+  [ "$(is_youtube "$url")" = "true" ] && echo "detected youtube, fetching cookies first" && fetchcookies
+
   name="$(fetch_song_filename | sed 's/NA - //')"
   json=$(
     yt-dlp $(insert_cookies_param) \

@@ -5,11 +5,11 @@ image_help() {
   echo " Description: Image processors."
   echo " Commands:"
   echo "    install_image_module => Install packages for image processing."
-  echo "    extract_imgs_from_dir <DIR> => Creates <DIR>/img and copies images into it"
-  echo "    resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>"
+  echo "    imagesdir-extract-to-dir <DIR> => Creates <DIR>/img and copies images into it"
+  echo "    imagesdir-to-xypixels <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>"
   echo "      => Copy and resize each image inside <IMAGES_DIR>, and put them in a child dir of <IMAGES_DIR>."
-  echo "    resize_images_dir_1080p <IMAGES_DIR> => Convenience method for resize_images_dir_x_y <IMAGES_DIR> 1920 1080."
-  echo "    convert-webp2jpg-dir <DIR> => Convert all webp images to jpg in <DIR>."
+  echo "    imagesdir-to-1080p <IMAGES_DIR> => Convenience method for imagesdir-to-xypixels <IMAGES_DIR> 1920 1080."
+  echo "    imagesdir-webp-to-jpg <DIR> => Convert all webp images to jpg in <DIR>."
   echo "    ocr <IMG_FILE> [<OUTPUT_TXT_FILE>] => Write text from <IMG_FILE> into the terminal."
   echo "    ocrtxt <IMG_FILE> [<OUTPUT_DIR>] => Saves a TXT file next to the image file, unless <OUTPUT_DIR> is given, then there."
   echo "    ocrdir <IMGS_DIR> [<OUTPUT_DIR>] => Saves a TXT file in <IMGS_DIR>/ocr, unless <OUTPUT_DIR> is given, then there."
@@ -36,8 +36,35 @@ is_image() {
   echo false
 }
 
-extract_imgs_from_dir() {
-  [ -z "$1" ] && echo "Usage: extract_imgs_from_dir <DIR>" &&
+image-resize() {
+  [ -z "$1" ] || [ "$1" = -h ] && echo "Usage: image-resize <INPUT_FILE> <X_PIXELS> <Y_PIXELS> <OUTPUT_FILE>" && return
+  if [ -n "$1" ]; then img="$1"; else echo "missing arguments, check usage with image-resize -h, abort"; return; fi
+  if [ -n "$2" ]; then x_pixels="$2"; else echo "missing arguments, check usage with image-resize -h, abort"; return; fi
+  if [ -n "$3" ]; then y_pixels="$3"; else echo "missing arguments, check usage with image-resize -h, abort"; return; fi
+  if [ -n "$4" ]; then img_resized="$4"; else echo "missing arguments, check usage with image-resize -h, abort"; return; fi
+  magick "$img" -resize "${x_pixels}"x"${y_pixels}"\> "$img_resized"
+}
+
+image-resize-half() {
+  [ -z "$1" ] || [ "$1" = -h ] && echo "Usage: image-resize-half <IMAGE_FILE>" && return
+  img="$1"
+  ext="$(get_extension "$img")"
+  if [ -n "$2" ]; then img_resized="$2"; else img_resized="$(strip_extension "$img")_s.${ext}"; fi
+  magick "$img" -resize 50% "$img_resized"
+  echo "resized '$img' to '$img_resized'"
+}
+
+images-resize-half() {
+  [ -z "$1" ] || [ "$1" = -h ] && echo "Usage: images-resize-half <IMAGE_FILES>" && return
+  imgs="$1"
+  while read -r item; do
+    image-resize-half "$item"
+  done <<<"$imgs"
+  echo "all images halved in size!"
+}
+
+imagesdir-extract-to-dir() {
+  [ -z "$1" ] && echo "Usage: imagesdir-extract-to-dir <DIR>" &&
     echo " Info: Creates <DIR>/img and copies images into it" && return
   [ ! -d "$1" ] && echo "not a directory: ${1}, abort" && return
 
@@ -54,8 +81,8 @@ extract_imgs_from_dir() {
   echo "copied images to $target_dir"
 }
 
-resize_images_dir_x_y() {
-  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] && echo "Usage: resize_images_dir_x_y <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>" && return
+imagesdir-to-xypixels() {
+  [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] && echo "Usage: imagesdir-to-xypixels <IMAGES_DIR> <X_WIDTH_PIXELS> <Y_HEIGHT_PIXELS>" && return
   [ ! -d "$1" ] && echo "not a directory: $1" && return
   [ ! "$(command -v magick)" ] && echo "image magick is not installed, abort" && return
 
@@ -69,20 +96,20 @@ resize_images_dir_x_y() {
     if [ "$(is_image "$img")" = true ]; then
       echo "$img"
       img_resized="$target_dir/$(basename "$img")"
-      convert "$img" -resize "${x_pixels}"x"${y_pixels}"\> "$img_resized"
+      image-resize "$img" "$x_pixels" "$y_pixels" "$img_resized"
     fi
   done < <(find "$imgs_dir" -maxdepth 1 -type f)
 
   echo "images converted to ${x_pixels}x${y_pixels} at \"${target_dir}\""
 }
 
-resize_images_dir_1080p() {
-  [ -z "$1" ] && echo "Usage: resize_images_dir_1080p <IMAGES_DIR>" && return
-  resize_images_dir_x_y "$1" 1920 1080
+imagesdir-to-1080p() {
+  [ -z "$1" ] && echo "Usage: imagesdir-to-1080p <IMAGES_DIR>" && return
+  imagesdir-to-xypixels "$1" 1920 1080
 }
 
-convert-webp2jpg-dir() {
-  [ -h "$1" ] && echo "Usage: convert-webp2jpg-dir <DIRECTORY>" && return
+imagesdir-webp-to-jpg() {
+  [ -h "$1" ] && echo "Usage: imagesdir-webp-to-jpg <DIRECTORY>" && return
   dir="$(realpath "$1")" 2>/dev/null
   [ -z "$1" ] && dir="$(realpath "$PWD")"
   [ ! -d "$dir" ] && echo "not a directory '$dir'" && return
@@ -95,6 +122,78 @@ convert-webp2jpg-dir() {
   done < <(find "$dir" -iname "*.webp" -o -iname "*.WEBP")
   echo "done" && sleep 1
   ls -l
+}
+
+images-find() {
+  ! [ -d "$1" ] || [ -z "$2" ] && echo "Usage: images-find <DIRECTORY> <SEARCH_TEXT>" && return
+  search_dir="$1"
+  search_text="$2"
+  find "$search_dir" \
+    -iname "*$search_text*.jpg" \
+    -o -iname "*$search_text*.jpeg" \
+    -o -iname "*$search_text*.webp" \
+    -o -iname "*$search_text*.png" \
+    -o -iname "*$search_text*.bmp" \
+    -o -iname "*$search_text*.tiff" \
+    -o -iname "*$search_text*.gif" 2>/dev/null
+}
+
+get_last_screenshot_path() {
+  echo "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)"
+}
+
+screenshot-cp() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: screenshot-mv [<NAME>] [<DEST_DIR>]" && return
+  dest_dir="$PWD"
+  if [ $# = 1 ]; then
+    [ -d "$1" ] && dest_dir="$1"
+    ! [ -d "$1" ] && name_screenshot="$1"
+  elif [ $# = 2 ]; then
+    name_screenshot="$1"
+    dest_dir="$2"
+  fi
+  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+
+  last_screenshot_path="$(get_last_screenshot_path)"
+  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  [ "$name_screenshot" ] &&
+    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
+    last_screenshot_path="$(get_last_screenshot_path)" &&
+    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  cp "$last_screenshot_path" "$new_screenshot_path"
+
+  echo -e "moved:\n$last_screenshot_path"
+  echo -e "to:\n$new_screenshot_path"
+  unset name_screenshot
+}
+
+screenshot-mv() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: screenshot-mv [<NAME>] [<DEST_DIR>]" && return
+  dest_dir="$PWD"
+  if [ $# = 1 ]; then
+    [ -d "$1" ] && dest_dir="$1"
+    ! [ -d "$1" ] && name_screenshot="$1"
+  elif [ $# = 2 ]; then
+    name_screenshot="$1"
+    dest_dir="$2"
+  fi
+  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
+
+  last_screenshot_path="$(get_last_screenshot_path)"
+  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  [ "$name_screenshot" ] &&
+    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
+    last_screenshot_path="$(get_last_screenshot_path)" &&
+    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
+
+  mv "$last_screenshot_path" "$new_screenshot_path"
+
+  echo -e "moved:\n$last_screenshot_path"
+  echo -e "to:\n$new_screenshot_path"
+  unset name_screenshot
 }
 
 ocr() {
@@ -192,76 +291,4 @@ ocrdir-macfilter() {
 extract_mac_addresses() {
   [ -n "$1" ] && grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})' "$1" && return
   grep -Eio '((([0-9a-fA-F]{2})[ :-]){5}[0-9a-fA-F]{2})|(([0-9a-fA-F]){6}[:-]([0-9a-fA-F]){6})|([0-9a-fA-F]{12})'
-}
-
-find-images() {
-  ! [ -d "$1" ] || [ -z "$2" ] && echo "Usage: find-images <DIRECTORY> <SEARCH_TEXT>" && return
-  search_dir="$1"
-  search_text="$2"
-  find "$search_dir" \
-    -iname "*$search_text*.jpg" \
-    -o -iname "*$search_text*.jpeg" \
-    -o -iname "*$search_text*.webp" \
-    -o -iname "*$search_text*.png" \
-    -o -iname "*$search_text*.bmp" \
-    -o -iname "*$search_text*.tiff" \
-    -o -iname "*$search_text*.gif" 2>/dev/null
-}
-
-get_last_screenshot_path() {
-  echo "$screenshots_dir/$(ls -lhtr --time-style=long-iso "$screenshots_dir" | tr -s ' ' | cut -d ' ' -f 8- | grep '\S' | tail -n 1)"
-}
-
-cpscreenshot() {
-  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: mvscreenshot [<NAME>] [<DEST_DIR>]" && return
-  dest_dir="$PWD"
-  if [ $# = 1 ]; then
-    [ -d "$1" ] && dest_dir="$1"
-    ! [ -d "$1" ] && name_screenshot="$1"
-  elif [ $# = 2 ]; then
-    name_screenshot="$1"
-    dest_dir="$2"
-  fi
-  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
-
-  last_screenshot_path="$(get_last_screenshot_path)"
-  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
-
-  [ "$name_screenshot" ] &&
-    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
-    last_screenshot_path="$(get_last_screenshot_path)" &&
-    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
-
-  mv "$last_screenshot_path" "$new_screenshot_path"
-
-  echo -e "moved:\n$last_screenshot_path"
-  echo -e "to:\n$new_screenshot_path"
-  unset name_screenshot
-}
-
-mvscreenshot() {
-  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: mvscreenshot [<NAME>] [<DEST_DIR>]" && return
-  dest_dir="$PWD"
-  if [ $# = 1 ]; then
-    [ -d "$1" ] && dest_dir="$1"
-    ! [ -d "$1" ] && name_screenshot="$1"
-  elif [ $# = 2 ]; then
-    name_screenshot="$1"
-    dest_dir="$2"
-  fi
-  ! [ -d "$dest_dir" ] && echo "not a dir '$dest_dir', abort" && return
-
-  last_screenshot_path="$(get_last_screenshot_path)"
-  new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
-
-  [ "$name_screenshot" ] &&
-    rename-file "$last_screenshot_path" "$name_screenshot" && echo ------ &&
-    last_screenshot_path="$(get_last_screenshot_path)" &&
-    new_screenshot_path="$dest_dir/$(basename "$last_screenshot_path")"
-
-  mv "$last_screenshot_path" "$new_screenshot_path"
-
-  echo -e "moved:\n$last_screenshot_path"
-  echo -e "to:\n$new_screenshot_path"
-  unset name_screenshot
 }

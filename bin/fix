@@ -7,7 +7,7 @@ get_python_version() {
   echo "$python_version"
 }
 
-odysee-alternative-backend() {
+odysee-backend-alternative() {
   python_version="$(get_python_version)"
 
   sed 's;https://api.lbry.tv/api/v1/proxy;https://api.na-backend.odysee.com/api/v1/proxy;' \
@@ -21,7 +21,7 @@ odysee-alternative-backend() {
   echo "switched odysee to alternative backend"
 }
 
-odysee-original-backend() {
+odysee-backend-original() {
   python_version="$(get_python_version)"
 
   sed 's;https://api.na-backend.odysee.com/api/v1/proxy;https://api.lbry.tv/api/v1/proxy;' \
@@ -33,6 +33,16 @@ odysee-original-backend() {
 
   rm "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py.temp"
   echo "switched odysee back to original backend"
+}
+
+odysee-backend-is-alternative() {
+  python_version="$(get_python_version)"
+  grep "https://api.na-backend.odysee.com/api/v1/proxy" "/home/$USER/.local/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py" 1>/dev/null
+  if [ $? = 0 ]; then echo true; else echo false; fi
+}
+
+odysee-backend-show() {
+  if [ "$(odysee-backend-is-alternative)" = true ]; then echo "alternative backend is in use"; else echo "original backend is in use"; fi
 }
 
 # Only the most common platforms are being processed.

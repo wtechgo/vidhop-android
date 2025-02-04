@@ -38,6 +38,14 @@ wp-list() {
   wp-clear-items  # clear previous list for a potential 2nd list
 }
 
+odysee-embed-url() {
+  [ -z "$1" ] &&
+    echo "Usage: odysee-embed-url <URL>" &&
+    echo " Info: Convert <URL> to an embedable URL" && return
+
+  echo "$1" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g' 2>/dev/null
+}
+
 odysee-embed-wp() {
   [ -z "$1" ] &&
     echo "Usage: odysee-embed-wp <URLS>" &&
@@ -45,7 +53,7 @@ odysee-embed-wp() {
   urls="$1"
   figcaption="$2"
   while read -r url; do
-    url="$(echo "$url" | tr -d '\')" 2>/dev/null
+    url="$(odysee-embed-url "$url")"
     embed="$(echo "$url" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g')"
     echo '<!-- wp:html -->'
     echo '  <figure>'

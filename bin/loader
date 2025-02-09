@@ -83,12 +83,16 @@ clean-python-packages() {
 
 updatepythonpackages() {
   echo "> Updating Python packages..." && sleep 1
-  pkg install python
+
+  is_odysee_backend_alternative="$(odysee-backend-is-alternative)"
+
   pip install -U pip
   pip install -U wheel
   pip install -U yt-dlp
   pip install -U facebook-scraper
   pip install -U snscrape
+
+  [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
 }
 
 fetch_github() {
@@ -103,29 +107,45 @@ fetch_github() {
 
 updateytdlp() {
   echo "> Updating YT-DLP..." && sleep 1
+  is_odysee_backend_alternative="$(odysee-backend-is-alternative)"
+
   pip install -U yt-dlp
+
+  [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
 }
 
 updateytdlp-nightly() {
   echo "> Updating YT-DLP..." && sleep 1
+  is_odysee_backend_alternative="$(odysee-backend-is-alternative)"
+
   pip install --break-system-packages -U --pre "yt-dlp[default]"
+
+  [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
 }
 
 updateytdlp-nightly-revert() {
   echo "> This command will remove YT-DLP and then install the default YT-DLP..." && sleep 3
   echo "> Removing YT-DLP..." && sleep 1
+
+  is_odysee_backend_alternative="$(odysee-backend-is-alternative)"
   pip uninstall -y --break-system-packages yt-dlp
   echo "> Installing YT-DLP..." && sleep 1
   pip install --break-system-packages yt-dlp
+
+  [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
 }
 
 updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
+  is_odysee_backend_alternative="$(odysee-backend-is-alternative)"
+
   updatesystem
   clean-python-packages
   updatepythonpackages
   fetch_github
   install_loader
+  [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
+
   echo -e "\n${GREEN}VidHop updated ! ${NC}\n\nReload VidHop by choosing one of these two options:"
   echo -e "  1. Close Termux and reopen Termux.\n  2. Execute '. vidhop'"
   cd "$pwd"

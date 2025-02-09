@@ -37,7 +37,7 @@ odysee-backend-original() {
 
 odysee-backend-is-alternative() {
   python_version="$(get_python_version)"
-  grep "https://api.na-backend.odysee.com/api/v1/proxy" "/home/$USER/.local/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py" 1>/dev/null
+  grep "https://api.na-backend.odysee.com/api/v1/proxy" "/data/data/com.termux/files/usr/lib/python${python_version}/site-packages/yt_dlp/extractor/lbry.py" 1>/dev/null
   if [ $? = 0 ]; then echo true; else echo false; fi
 }
 

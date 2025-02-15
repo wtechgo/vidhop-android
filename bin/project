@@ -294,14 +294,14 @@ linkvideos4project() {
       # create link
       ln -s "$file" "$(basename "$file")" 2>/dev/null
       # write title & link to file
-      metadata="$(media_file2metadata_path "$file")"
-      if [ -f "$metadata" ]; then
-        title="$(jq '.title' "$metadata" | remove_leading_trailing_double_quotes)"
-        url="$(jq '.webpage_url' "$metadata" | remove_leading_trailing_double_quotes)"
-        channel_name="$(channel_name_from_json_file "$metadata" | remove_leading_trailing_double_quotes)"
-        channel_title_url_item_md >>"$list_md"
-        title_url_txt >>"$list_txt"
-      fi
+#      metadata="$(media_file2metadata_path "$file")"
+#      if [ -f "$metadata" ]; then
+#        title="$(jq '.title' "$metadata" | remove_leading_trailing_double_quotes)"
+#        url="$(jq '.webpage_url' "$metadata" | remove_leading_trailing_double_quotes)"
+#        channel_name="$(channel_name_from_json_file "$metadata" | remove_leading_trailing_double_quotes)"
+#        channel_title_url_item_md >>"$list_md"
+#        title_url_txt >>"$list_txt"
+#      fi
     else
       echo "file error for '$file'"
     fi
@@ -345,7 +345,7 @@ videos2links() {
   [ -d "$1" ] && links_dir="$1"
 #  if [ -d "$1" ]; then links_dir="$1"; else echo "no directory provided, using current working directory" && echo; fi
   [ ! -d "$links_dir" ] && echo "path '$links_dir' is not a directory" && return
-  unset summary_txt errors
+  unset summary_txt errors items
 
   while read -r media_file; do
     title="$(strip_extension "$(basename "$media_file")")"
@@ -358,6 +358,7 @@ videos2links() {
       url="$(jq .webpage_url <<<"$json" | remove_leading_trailing_double_quotes)"
       item="$(echo -e "${title}\n${url}\n${channel_name}, ${upload_date}\n")"
       summary_txt+="$item\n\n"
+      items+="$item\n\n"
     else
       errors+="$(echo -e "\n${media_file}")"
     fi
@@ -365,8 +366,11 @@ videos2links() {
 #    unset title url channel_name item
   done < <(find -L "$links_dir" -maxdepth 1 -type f ! -name '*.txt' ! -name '*.md' -exec realpath {} \;)
 
+  echo -e "$items"
+  [ -n "$errors" ] && echo -e "Errors:\n$errors"
+
   echo -e "$summary_txt" >"$links_dir/links.txt"
-  echo -e "Errors:\n$errors" >>"$links_dir/links.txt"
+  [ -n "$errors" ] && echo -e "Errors:\n$errors" >>"$links_dir/links.txt"
 }
 
 videos2links-wp() {

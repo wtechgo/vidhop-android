@@ -13,6 +13,14 @@ wp-href(){
   echo '<a href="'"$wp_href"'">'"$wp_text"'</a>'
 }
 
+wp-list-item() {
+  wp_item="$1"
+  echo
+  echo '  <!-- wp:list-item -->'
+  echo '    <li>'"$wp_item"'</li>'
+  echo '  <!-- /wp:list-item -->'
+}
+
 wp-append-item() {
   wp_href="$(wp-href "$1" "$2")"
 
@@ -29,6 +37,8 @@ wp-clear-items(){
 }
 
 wp-list() {
+  [ -n "$1" ] && wp_items="$1"
+
   echo '<!-- wp:list -->'
   echo '<ul class="wp-block-list">'
   echo "$wp_items"

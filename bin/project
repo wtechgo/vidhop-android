@@ -451,8 +451,18 @@ writeproject() {
 
 lsprojects() {
   [ "$1" = -h ] && echo "Usage: lsprojects [<SEARCH_TEXT>]" && return
-  [ -n "$1" ] && find "$projects_dir" -maxdepth 1 -type d -iname "*$1*" -exec basename {} \; | sort && return
-  find "$projects_dir" -maxdepth 1 -type d -exec basename {} \; | sort
+
+  [ -n "$1" ] && find "$projects_dir" -maxdepth 3 -type d -iname "*$1*" \
+      -not -path "*/doc*" \
+      -not -path "*/site*"  \
+      -not -path "*/vid*" \
+      -not -path "*/img*" | sort | sed 's;'"$projects_dir"'/;;g' && return
+
+    find "$projects_dir" -maxdepth 3 -type d \
+      -not -path "*/doc*" \
+      -not -path "*/site*"  \
+      -not -path "*/vid*" \
+      -not -path "*/img*" | sort | sed 's;'"$projects_dir"'/;;g'
 }
 
 fproj() {

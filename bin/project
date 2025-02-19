@@ -450,18 +450,21 @@ writeproject() {
 }
 
 lsprojects() {
-  [ "$1" = -h ] && echo "Usage: lsprojects [<SEARCH_TEXT>]" && return
+  [ "$1" = -h ]  || [ "$1" = --help ]&& echo "Usage: lsprojects [<SEARCH_TEXT>]" && return
 
-  [ -n "$1" ] && find "$projects_dir" -maxdepth 3 -type d -iname "*$1*" \
+  [ -n "$1" ] && search_term="$1"
+  [ -n "$1" ] && find "$projects_dir" -maxdepth 3 -type d -iname "*$search_term*" \
       -not -path "*/doc*" \
       -not -path "*/site*"  \
       -not -path "*/vid*" \
+      -not -path "*/audio*" \
       -not -path "*/img*" | sort | sed 's;'"$projects_dir"'/;;g' && return
 
     find "$projects_dir" -maxdepth 3 -type d \
       -not -path "*/doc*" \
       -not -path "*/site*"  \
       -not -path "*/vid*" \
+      -not -path "*/audio*" \
       -not -path "*/img*" | sort | sed 's;'"$projects_dir"'/;;g'
 }
 

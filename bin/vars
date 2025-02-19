@@ -76,7 +76,7 @@ termux_screen_char_count=53
 
 # Project module: uncomment defaults or set values in config/config.ini
 [ -z "$name_projects_root_dir" ] && name_projects_root_dir="Projects"
-[ -z "$projects_dir" ] && projects_dir="$shared/$name_projects_root_dir"
+[ -z "$projects_dir" ] && projects_dir="$shared/$name_projects_root_dir" && pd="$projects_dir"
 [ -z "$projects_videos_dir" ] && projects_videos_dir="$shared/Movies/$name_projects_root_dir"
 [ -z "$projects_images_dir" ] && projects_images_dir="$shared/Pictures/$name_projects_root_dir"
 [ -z "$projects_documents_dir" ] && projects_documents_dir="$shared/Documents/$name_projects_root_dir"

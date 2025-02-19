@@ -77,3 +77,15 @@ odysee-embed-wp() {
     echo
   done <<<"$urls"
 }
+
+md-list-to-wp(){
+  md_list_items="$1"
+
+  while read -r md_list_item; do
+    title="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\1/')"
+    url="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\2/')"
+    wp-append-item "$title" "$url"
+  done <<<"$md_list_items"
+
+  wp-list "$wp_items"
+}

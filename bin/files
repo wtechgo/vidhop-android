@@ -299,6 +299,14 @@ append-text() {
   renlast "${title}${text_input}" -y
 }
 
+append-channel() {
+  renlast "${title} (${channel_name})" -y
+}
+
+append-channel-platform() {
+  renlast "${title} (${channel_name}@${platform})" -y
+}
+
 rmpod() {
   [ -z "$1" ] && echo "Usage: rmvid <PARTIAL_VIDEO_NAME>" && return 1
   unset search_text answer results

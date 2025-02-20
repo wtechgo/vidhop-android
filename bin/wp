@@ -13,23 +13,14 @@ wp-href(){
   echo '<a href="'"$wp_href"'">'"$wp_text"'</a>'
 }
 
-wp-list-item() {
-  wp_item="$1"
-  echo
-  echo '  <!-- wp:list-item -->'
-  echo '    <li>'"$wp_item"'</li>'
-  echo '  <!-- /wp:list-item -->'
-}
-
 wp-append-item() {
   wp_href="$(wp-href "$1" "$2")"
 
   wp_item="$(echo '  <!-- wp:list-item -->'
   echo '    <li>'"$wp_href"'</li>'
-  echo '  <!-- /wp:list-item -->'
-  echo)"
+  echo '  <!-- /wp:list-item -->')"
 
-  wp_items+="$wp_item"
+  wp_items+="$wp_item\n"
 }
 
 wp-clear-items(){
@@ -41,12 +32,33 @@ wp-list() {
 
   echo '<!-- wp:list -->'
   echo '<ul class="wp-block-list">'
-  echo "$wp_items"
+  echo "$wp_items" | sed '/^[[:space:]]*$/d'
   echo '</ul>'
   echo '<!-- /wp:list -->'
 
   wp-clear-items  # clear previous list for a potential 2nd list
 }
+
+md-list-to-wp(){
+  md_list_items="$1"
+
+  while read -r md_list_item; do
+    title="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\1/')"
+    url="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\2/')"
+    wp-append-item "$title" "$url"
+  done <<<"$md_list_items"
+
+  wp-list "$wp_items"
+}
+
+md-listitem-to-wp(){
+  md_list_item="$1"
+  title="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\1/')"
+  url="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\2/')"
+  wp-append-item "$title" "$url"
+  echo "$wp_items"
+  wp-clear-items
+ }
 
 odysee-embed-url() {
   [ -z "$1" ] &&
@@ -76,16 +88,4 @@ odysee-embed-wp() {
     echo '<!-- /wp:html -->'
     echo
   done <<<"$urls"
-}
-
-md-list-to-wp(){
-  md_list_items="$1"
-
-  while read -r md_list_item; do
-    title="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\1/')"
-    url="$(echo "$md_list_item" | sed -E 's/.*\[(.*)\]\((.*)\)/\2/')"
-    wp-append-item "$title" "$url"
-  done <<<"$md_list_items"
-
-  wp-list "$wp_items"
 }

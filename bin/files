@@ -660,7 +660,7 @@ setdate-modified-created(){
 filename-replace-dots-with-spaces() {
   unset answer
   file="$1"
-  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]' | tr -d '-')"
   ! [ -f "$file" ] && echo "$file is not a file, abort" && return
 
   ext="$(get_extension "$file")"
@@ -670,16 +670,18 @@ filename-replace-dots-with-spaces() {
   new_file="$dir/$filename.$ext"
   echo "$new_file"
 
+  [ -n "$answer" ] && [ "$answer" = y ] && mv "$file" "$new_file" && return
+
   echo -n "rename '$file' to '$new_file? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "-n" ] && return
-  [ "$answer" = "-y" ] && mv "$file" "$new_file"
+  [ "$answer" = "y" ] && mv "$file" "$new_file"
 }
 
 filename-replace-hypens-with-spaces() {
   unset answer
   file="$1"
-  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]' | tr -d '-')"
   ! [ -f "$file" ] && echo "$file is not a file, abort" && return
 
   ext="$(get_extension "$file")"
@@ -689,18 +691,18 @@ filename-replace-hypens-with-spaces() {
   new_file="$dir/$filename.$ext"
   echo "$new_file"
 
-  [ -n "$answer" ] && [ "$answer" = -y ] && mv "$file" "$new_file" && return
+  [ -n "$answer" ] && [ "$answer" = y ] && mv "$file" "$new_file" && return
 
   echo -n "rename '$file' to '$new_file? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "-n" ] && return
-  [ "$answer" = "-y" ] && mv "$file" "$new_file"
+  [ "$answer" = "y" ] && mv "$file" "$new_file"
 }
 
 filename-replace-underscores-with-spaces() {
   unset answer
   file="$1"
-  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]' | tr -d '-')"
   ! [ -f "$file" ] && echo "$file is not a file, abort" && return
 
   ext="$(get_extension "$file")"
@@ -710,10 +712,10 @@ filename-replace-underscores-with-spaces() {
   new_file="$dir/$filename.$ext"
   echo "$new_file"
 
-  [ -n "$answer" ] && [ "$answer" = -y ] && mv "$file" "$new_file" && return
+  [ -n "$answer" ] && [ "$answer" = y ] && mv "$file" "$new_file" && return
 
   echo -n "rename '$file' to '$new_file? N/y: " && read -r answer
   answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
   [ -z "$answer" ] || [ "$answer" = "-n" ] && return
-  [ "$answer" = "-y" ] && mv "$file" "$new_file"
+  [ "$answer" = "y" ] && mv "$file" "$new_file"
 }

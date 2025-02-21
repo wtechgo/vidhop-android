@@ -63,6 +63,18 @@ images-resize-half() {
   echo "all images halved in size!"
 }
 
+imagesdir-to-half() {
+  dir="$PWD"
+  [ -n "$1" ] && ! [ -d "$1" ] && echo "$1 is not a directory, abort" && return
+  [ -n "$1" ] && dir="$1"
+
+  while read -r img; do
+    if [ "$(is_image "$img")" = true ]; then
+      image-resize-half "$img"
+    fi
+  done < <(ls "$dir")
+}
+
 imagesdir-extract-to-dir() {
   [ -z "$1" ] && echo "Usage: imagesdir-extract-to-dir <DIR>" &&
     echo " Info: Creates <DIR>/img and copies images into it" && return

@@ -283,6 +283,46 @@ prepend-channelname() {
   renlast "${channel_name} - ${title}" -y
 }
 
+filename-replace-dots-with-spaces() {
+  unset answer
+  file="$1"
+  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  ! [ -f "$file" ] && echo "$file is not a file, abort" && return
+
+  ext="$(get_extension "$file")"
+  dir="$(dirname "$file")"
+  filename="$(get_name "$file" | tr '.' ' ')"
+
+  new_file="$dir/$filename.$ext"
+  echo "$new_file"
+
+  echo -n "rename '$file' to '$new_file? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "-n" ] && return
+  [ "$answer" = "-y" ] && mv "$file" "$new_file"
+}
+
+filename-replace-hypens-with-spaces() {
+  unset answer
+  file="$1"
+  answer="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+  ! [ -f "$file" ] && echo "$file is not a file, abort" && return
+
+  ext="$(get_extension "$file")"
+  dir="$(dirname "$file")"
+  filename="$(get_name "$file" | tr '-' ' ')"
+
+  new_file="$dir/$filename.$ext"
+  echo "$new_file"
+
+  [ -n "$answer" ] && [ "$answer" = -y ] && mv "$file" "$new_file" && return
+
+  echo -n "rename '$file' to '$new_file? N/y: " && read -r answer
+  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+  [ -z "$answer" ] || [ "$answer" = "-n" ] && return
+  [ "$answer" = "-y" ] && mv "$file" "$new_file"
+}
+
 prepend-text() {
   [ -z "$1" ] &&
     echo "Usage: prepend-text <TEXT>" &&

@@ -49,20 +49,3 @@ vlc-playlist2paths() {
   playlist="$1"
   grep file "$playlist" | sed -E 's;[[:space:]]*<location>file://;;' | sed 's;</location>;;' | urldecode
 }
-
-filename-replace-dots-with-spaces() {
-  file="$1"
-  ! [ -f "$file" ] && echo "$file is not a file, abort" && return
-
-  ext="$(get_extension "$file")"
-  dir="$(dirname "$file")"
-  filename="$(get_name "$file" | tr '.' ' ')"
-
-  new_file="$dir/$filename.$ext"
-  echo "$new_file"
-
-  echo -n "rename old filename to new filename? N/y: " && read -r answer
-  answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-  [ -z "$answer" ] || [ "$answer" = "n" ] && return
-  [ "$answer" = "y" ] && mv "$file" "$new_file"
-}

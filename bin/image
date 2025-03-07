@@ -54,6 +54,10 @@ image-resize-half() {
   echo "resized '$img' to '$img_resized'"
 }
 
+irh() {
+  image-resize-half "$@"
+}
+
 images-resize-half() {
   [ -z "$1" ] || [ "$1" = -h ] && echo "Usage: images-resize-half <IMAGE_FILES>" && return
   imgs="$1"

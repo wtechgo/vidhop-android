@@ -46,14 +46,14 @@ echo "Installing python packages..."  # python packages at /data/data/com.termux
 pip install -U pip
 pip install -U wheel
 pip install -U yt-dlp
-pip install -U requests
-pip install -U selenium
-pip install -U beautifulsoup4
-pip install -U image
-pip install -U pillow
-pip install -U facebook-scraper
-pip install -U snscrape
-pip install -U pywebcopy
+#pip install -U requests
+#pip install -U image
+#pip install -U pillow
+#pip install -U selenium
+#pip install -U beautifulsoup4
+#pip install -U facebook-scraper
+#pip install -U snscrape
+#pip install -U pywebcopy
 
 echo "Installing VidHop..."
 vidhop_app_dir="$PREFIX/opt/vidhop" # $PREFIX points to /data/data/com.termux/files/usr

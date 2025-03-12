@@ -13,6 +13,13 @@
 ## Overwrites loader.bin_dir before the loader loads in all other binaries.
 #bin_dir=""
 
+## Default video download resolution.
+## Options: 144p, 240p, 360p, 480p,
+##   720p, 1080p, 1440p, 2160p.
+##   (Note, the p is dropped below.)
+## ----------------------------------
+#res=1080
+
 ## SSH settings.
 ### PHONE.
 ### ------

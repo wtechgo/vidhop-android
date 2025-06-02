@@ -212,6 +212,17 @@ screenshot-mv() {
   unset name_screenshot
 }
 
+screenshot-rm() {
+  [ "$1" = "-h" ] || [ "$1" = "--help" ] && echo "Usage: screenshot-rm" && return
+  last_screenshot_path="$(get_last_screenshot_path)"
+  rm "$last_screenshot_path"
+  echo -e "removed:\n$last_screenshot_path"
+}
+
+image-metadata-remove() {
+  exiftool -all= "$1"
+}
+
 ocr() {
   [ ! "$(command -v tesseract)" ] && echo "OCR relies on the package called 'Tesseract', but it's not installed." &&
     echo "Consider installing the package via your package manager." && return

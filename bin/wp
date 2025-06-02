@@ -75,8 +75,7 @@ odysee-embed-wp() {
   urls="$1"
   figcaption="$2"
   while read -r url; do
-    url="$(odysee-embed-url "$url")"
-    embed="$(echo "$url" | sed 's;https://odysee.com/;https://odysee.com/$/embed/;g')"
+    embed="$(odysee-embed-url "$url")"
     echo '<!-- wp:html -->'
     echo '  <figure>'
     echo '    <div class="fluid-width-video-wrapper" style="padding-top: 56.25%;">'

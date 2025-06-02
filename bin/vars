@@ -118,6 +118,8 @@ alias cdpods='cd $podcasts_dir'
 alias cduploads='cd $uploads_dir'
 alias cddownloaded='cd $downloaded_dir'
 alias cdlogs='cd $log_dir'
+alias cdcamera='cd $shared/DCIM/Camera'
+alias cdxrecorder='cd $shared/Movies/XRecorder0'
 # telegram
 alias cdtgvid='cd $shared/Movies/Telegram'
 alias cdtgimg='cd $shared/Pictures/Telegram'

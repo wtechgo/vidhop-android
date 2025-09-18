@@ -120,7 +120,7 @@ fetch_video_metadata() {
                   asr: .asr
             }'
   )
-  ext="$(yt-dlp --print ext "$url")"
+  ext="$(yt-dlp $(insert_cookies_param) --get-filename -o "%(ext)s" "$url")"
 }
 
 # SINGLE VIDEO
@@ -293,8 +293,17 @@ dlv() {
     $([ -n "$res" ] && echo " -S res:$res") \
     "$url"
 
-  print_metadata
   cd "$vids_dir/$platform" || return
+  mediafile="$(realpath "$title"*)"
+  if ! [ "$(realpath "$media_file")" = "$(realpath "$mediafile")" ]; then
+    echo "[vidhop] fetched media file path:" && realpath "$media_file"
+    echo "[vidhop] does not match downloaded media file path:" && realpath "$mediafile"
+    echo "[vidhop] updating media file path..."
+    set_metadata_field_json_obj "vh_media_file" "$(realpath "$media_file")"
+    jq <<<"$json" >"$json_file"
+  fi
+
+  print_metadata
   unset dl_comments function
 }
 

@@ -135,6 +135,27 @@ updateytdlp-nightly-revert() {
   [ "$is_odysee_backend_alternative" = true ] && odysee-backend-alternative
 }
 
+auto-update-ytdlp(){
+  # doty = day of the year
+  prev_doty_file="$config_dir/day-of-the-year.txt"
+  prev_doty="$(cat "$prev_doty_file" 2>/dev/null)"
+  doty="$(date +%j)"
+
+  [ -z "$prev_doty" ] && echo "$doty" > "$prev_doty_file" && updateytdlp-nightly && return
+
+  if [ "$doty" = 1 ] && [ "$prev_doty" = 365 ]; then
+    updateytdlp-nightly
+    echo "$doty" > "$prev_doty_file"
+    return
+  fi
+
+  if [ "$doty" -gt "$prev_doty" ]; then
+    updateytdlp-nightly
+    echo "$doty" > "$prev_doty_file"
+    return
+  fi
+}
+
 updatevidhop() {
   pwd=$(pwd) && cd "$vidhop_app_dir"
   is_odysee_backend_alternative="$(odysee-backend-is-alternative)"

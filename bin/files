@@ -404,7 +404,6 @@ rmlasty(){
 rmex(){
   [ "$1" = -h ] && echo "Info: Remove last download and exit terminal." && return
   rmlasty
-  sleep 2
   exit
 }
 

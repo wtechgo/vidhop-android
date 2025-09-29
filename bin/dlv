@@ -279,6 +279,7 @@ dlv() {
   [ "$#" = 1 ] && url="$1"
   standalone=false
   function=dlv
+  auto-update-ytdlp
 
   [ "$(is_url "$url")" = false ] && echo "not a URL" && return 1
   remove_url_tracking_params

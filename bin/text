@@ -13,6 +13,8 @@ initcap() {
   text="$1"
   text="$(tr '[:upper:]' '[:lower:]' <<< "${text}")"
   echo "$(tr '[:lower:]' '[:upper:]' <<< "${text:0:1}")${text:1}"
+  lc="$text"
+  ic="$text"
 }
 
 extract-missing-lines() {
@@ -28,7 +30,6 @@ extract-missing-lines() {
     grep -vxF "$2" <<<"$1"
   fi
 }
-
 
 urlparams-remove() {
  url="$(echo "$1" | tr -d '\')" 2>/dev/null

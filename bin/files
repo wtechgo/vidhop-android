@@ -277,6 +277,15 @@ renlasty() {
   renlast "$1" -y
 }
 
+rnly(){
+  renlasty "$1" -y
+}
+
+lc(){
+  lc="$(initcap "$title")"
+  echo "$lc"
+}
+
 prepend-channelname() {
   [ -n "$1" ] && channel_name="$1"
   [ -z "$channel_name" ] && echo "no value in \$channel_name, cannot prepend"
@@ -405,6 +414,10 @@ rmex(){
   [ "$1" = -h ] && echo "Info: Remove last download and exit terminal." && return
   rmlasty
   exit
+}
+
+rmx(){
+  rmex "$@"
 }
 
 find_archive_file_from_audio_channel_name() {

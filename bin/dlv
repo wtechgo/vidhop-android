@@ -276,6 +276,7 @@ dlv() {
   clear_vars_dlv
   [ "$1" = "--help" ] || [ "$1" = "-h" ] && dlv_help && return 0
   [ "$1" = "--comments" ] || [ "$1" = "-c" ] && dl_comments=true && url="$2"
+  [ "$1" = "-r" ] && url="$2" && new_title="$3"
   [ "$#" = 1 ] && url="$1"
   standalone=false
   function=dlv
@@ -304,8 +305,10 @@ dlv() {
     jq <<<"$json" >"$json_file"
   fi
 
+  [ -n "$new_title" ] && renlasty "$new_title" && title="$new_title"
+
   print_metadata
-  unset dl_comments function
+  unset dl_comments function new_title
 }
 
 dlv144p() {

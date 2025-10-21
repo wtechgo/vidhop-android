@@ -305,7 +305,7 @@ dlv() {
     jq <<<"$json" >"$json_file"
   fi
 
-  [ -n "$new_title" ] && renlasty "$new_title" && title="$new_title"
+  [ -n "$new_title" ] && renlasty "$new_title" && title="$new_title" && unset new_title
 
   print_metadata
   unset dl_comments function new_title
@@ -834,9 +834,8 @@ dla() {
   fetch_music_metadata "$url" # populates json
   # download media
   yt-dlp $(insert_cookies_param) \
-    -f ba --recode m4a --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
-    -P "$music_dir" -o "$name.%(ext)s" "$url"
-  # download thumbnail
+    -x --audio-format best --no-keep-video --embed-thumbnail --no-mtime --add-metadata --force-overwrites \
+    -P "$music_dir" -o "$name.%(ext)s" "$url"  # download thumbnail
   yt-dlp $(insert_cookies_param) \
     --write-thumbnail --convert-thumbnails jpg --no-download \
     -P "$music_meta_dir" -o "$name.%(ext)s" "$url"

@@ -143,7 +143,7 @@ auto-update-ytdlp(){
 
   [ -z "$prev_doty" ] && echo "$doty" > "$prev_doty_file" && updateytdlp-nightly && return
 
-  if [ "$doty" = 1 ] && [ "$prev_doty" = 365 ]; then
+  if [ "$doty" = 001 ] && [ "$prev_doty" = 365 ]; then
     updateytdlp-nightly
     echo "$doty" > "$prev_doty_file"
     return
